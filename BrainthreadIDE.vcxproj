@@ -1,0 +1,219 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{7E67D79F-5481-486D-ACB6-3963558D83EB}</ProjectGuid>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <Keyword>ManagedCProj</Keyword>
+    <RootNamespace>BrainthreadIDE</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CLRSupport>Pure</CLRSupport>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CLRSupport>Pure</CLRSupport>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfMfc>false</UseOfMfc>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+      <SubSystem>Windows</SubSystem>
+      <EntryPointSymbol>main</EntryPointSymbol>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+      <SubSystem>Windows</SubSystem>
+      <EntryPointSymbol>main</EntryPointSymbol>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <Reference Include="*EditorTextBox, Version=1.0.6213.40561, Culture=neutral, PublicKeyToken=null" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.ico" />
+    <None Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="AssemblyInfo.cpp" />
+    <ClCompile Include="BrainthreadIDE.cpp" />
+    <ClCompile Include="debugger\unmanaged\Breakpoint.cpp" />
+    <ClCompile Include="debugger\unmanaged\btheaders\DebugTimeException.cpp" />
+    <ClCompile Include="debugger\unmanaged\DebuggerLoop.cpp" />
+    <ClCompile Include="FormProtip.cpp" />
+    <ClCompile Include="helpers\BtConstantsCreator.cpp" />
+    <ClCompile Include="launchers\CodeAnalysisProcess.cpp" />
+    <ClCompile Include="launchers\CodeParseProcess.cpp" />
+    <ClCompile Include="launchers\DebugCodeProcess.cpp" />
+    <ClCompile Include="debugger\Debugger.cpp" />
+    <ClCompile Include="launchers\InterpreterProcess.cpp" />
+    <ClCompile Include="launchers\RunCodeRedirectionProcess.cpp" />
+    <ClCompile Include="launchers\RunCodeProcess.cpp" />
+    <ClCompile Include="launchers\RunCodeSeparateProcess.cpp" />
+    <ClCompile Include="options\OptiomField.cpp" />
+    <ClCompile Include="options\PageSettings.cpp" />
+    <ClCompile Include="options\GlobalOptions.cpp" />
+    <ClCompile Include="OutputLister.cpp" />
+    <ClCompile Include="WorkContexts.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="SyntaxHighLighter.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="debugger\DebugTreeViewExpander.h" />
+    <ClInclude Include="debugger\ThreadResourceState.h" />
+    <ClInclude Include="debugger\TreeViewExpander.h" />
+    <ClInclude Include="debugger\unmanaged\Breakpoint.h" />
+    <ClInclude Include="debugger\unmanaged\btheaders\BTProcessEntry.h" />
+    <ClInclude Include="debugger\unmanaged\btheaders\BTProcessMemoryInfo.h" />
+    <ClInclude Include="debugger\unmanaged\btheaders\DebugTimeException.h" />
+    <ClInclude Include="debugger\unmanaged\DebuggerLoop.h" />
+    <ClInclude Include="debugger\unmanaged\MemoryReader.h" />
+    <ClInclude Include="debugger\unmanaged\StackReader.h" />
+    <ClInclude Include="debugger\unmanaged\Thread.h" />
+    <ClInclude Include="debugger\unmanaged\ThreadInfoReader.h" />
+    <ClInclude Include="factories\FileContextFactory.h" />
+    <ClInclude Include="factories\RunProcessFactory.h" />
+    <ClInclude Include="factories\SyntaxHighlighterFactory.h" />
+    <ClInclude Include="file_io\CodeFileContext.h" />
+    <ClInclude Include="file_io\FileContext.h" />
+    <ClInclude Include="file_io\ProjectSettingsFileContext.h" />
+    <ClInclude Include="file_io\XMLFileContext.h" />
+    <ClInclude Include="FormInsert.h">
+      <FileType>CppForm</FileType>
+    </ClInclude>
+    <ClInclude Include="FormMain.h">
+      <FileType>CppForm</FileType>
+    </ClInclude>
+    <ClInclude Include="FormOptions.h">
+      <FileType>CppForm</FileType>
+    </ClInclude>
+    <ClInclude Include="FormProtip.h">
+      <FileType>CppForm</FileType>
+    </ClInclude>
+    <ClInclude Include="helpers\BtConstantsCreator.h" />
+    <ClInclude Include="helpers\CodeContextConverter.h" />
+    <ClInclude Include="helpers\CodeLoopBinder.h" />
+    <ClInclude Include="helpers\FileSizeConverter.h" />
+    <ClInclude Include="helpers\InputCharFormatter.h" />
+    <ClInclude Include="debugger\MemoryCellPrinter.h" />
+    <ClInclude Include="helpers\ui\uiMenuRadioButtonGenerator.h" />
+    <ClInclude Include="helpers\ui\uiTooltip.h" />
+    <ClInclude Include="options\Language.h" />
+    <ClInclude Include="options\OptionFieldInterpreter.h" />
+    <ClInclude Include="options\OptionFieldPlugins.h" />
+    <ClInclude Include="plugins\PragmaResolver.h" />
+    <ClInclude Include="helpers\ui\uiBevel.h" />
+    <ClInclude Include="launchers\CodeAnalysisProcess.h" />
+    <ClInclude Include="launchers\CodeParseProcess.h" />
+    <ClInclude Include="launchers\DebugCodeProcess.h" />
+    <ClInclude Include="debugger\Debugger.h" />
+    <ClInclude Include="launchers\InterpreterProcess.h" />
+    <ClInclude Include="launchers\RunCodeRedirectionProcess.h" />
+    <ClInclude Include="launchers\RunCodeProcess.h" />
+    <ClInclude Include="launchers\RunCodeSeparateProcess.h" />
+    <ClInclude Include="options\OptionField.h" />
+    <ClInclude Include="options\OptionFieldEditor.h" />
+    <ClInclude Include="options\PageSettings.h" />
+    <ClInclude Include="OutputLister.h" />
+    <ClInclude Include="file_io\ProjectFileContext.h" />
+    <ClInclude Include="plugins\Plugin.h" />
+    <ClInclude Include="plugins\PluginInterface.h" />
+    <ClInclude Include="plugins\PluginManager.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="options\GlobalOptions.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="SyntaxHighLighter.h" />
+    <ClInclude Include="helpers\ui\uiMenuButtonGenerator.h" />
+    <ClInclude Include="WorkContexts.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="app.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="FormInsert.resx">
+      <DependentUpon>FormInsert.h</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormMain.resX">
+      <DependentUpon>FormMain.h</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormOptions.resx">
+      <DependentUpon>FormOptions.h</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormProtip.resx">
+      <DependentUpon>FormProtip.h</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EditorTextBox\EditorTextBox\EditorTextBox\EditorTextBox.vcxproj">
+      <Project>{31b58d24-f552-4379-b078-5b1d8e107cb1}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\TextBoxPlaceholder\TextBoxPlaceholder\TextBoxPlaceholder.vcxproj">
+      <Project>{ac4541dc-e904-4652-837f-a64662f1219f}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties RESOURCE_FILE="app.rc" />
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>

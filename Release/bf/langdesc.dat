@@ -1,0 +1,39 @@
+Brainfuck is an esoteric programming language created in 1993 by Urban Muller, and notable for its extreme minimalism.
+The brainfuck language uses a simple machine model consisting of the program and instruction pointer, as well as an array of at least 30,000 byte cells initialized to zero, a movable data pointer (initialized to point to the leftmost byte of the array) and two streams of bytes for input and output.
+The language consists of only eight commands. A brainfuck program is a sequence of these commands, possibly interspersed with other characters (which are ignored).
+The commands are executed sequentially, with some exceptions. An instruction pointer begins at the first command, and each command it points to is executed, after which it normally moves forward to the next command.
+The program terminates when the instruction pointer moves past the last command. While it is fully Turing-complete, it is not intended for practical use, but to challenge and amuse programmers.
+
+Classic Brainfuck instructions are:
+> increment the data pointer (to point to the next cell to the right). 
+< decrement the data pointer (to point to the next cell to the left). 
++ increment (increase by one) the cell at the data pointer. 
+- decrement (decrease by one) the cell at the data pointer. 
+. output the cell at the data pointer. 
+, accept one byte of input, storing its value in the cell at the data pointer. 
+[ if the cell at the data pointer is zero, then jump it forward to the command after the matching ] command. 
+] if the cell at the data pointer is nonzero, then jump it back to the command after the matching [ command.
+
+Brainthread is a derivative of Brainfuck, introduces functions (from pBrain), threads (like Brainfork) and heaps. 
+All Brainthread programs are also valid Brainfuck programs, although they may (of course) behave very differently.
+Each thread has it's own and separate memory and heap. Threads can use and communicate each other by one global shared heap.
+
+{ the current thread forks and child continues to execute from this point. 
+} the current thread waits for all it's children threads.
+! terminate the current thread. If this is the main thread, terminate the program itself. 
+A thread forks with the cell at the data pointer being zeroed and the memory being copied. In the child the data pointer being moved one to the right and that cell set to 1. Heaps aren't copied.
+
+( begin of procedure definition
+) end of procedure definition
+* call the procedure of which the identifier is equal to the current cell value.
+A procedure is delimited by the ( and ) instructions. It's assigned a numeric identifier equal to the contents of the active cell at the time the ( is encountered. Threads spawned from the procedure terminates with it's end.
+
+& push the current cell value to the heap
+^ pop the first element of the heap to the current cell. If the heap is empty, 0 is assigned.
+% swap two first elements of the heap. If the heap contains less than 2 values, nothing happens.
+~ the next heap command refers to shared heap. (from the perspective of the code, not of the flow) 
+use the swap command p.ex to check if the heap is either empty or it's elements are zero
+
+: output the cell at the data pointer as integer
+; accept one integer of input, storing its value in the cell at the data pointer. 
+An easy way to read and write numbers.
