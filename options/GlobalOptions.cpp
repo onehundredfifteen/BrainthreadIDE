@@ -62,8 +62,8 @@ namespace BrainthreadIDE
 		const int interpreter_op_len = 20;
 		const int editor_index = 24;
 		const int editor_op_len = 5;
-		const int plugin_cnt_index = 34;
-		const int min_valid_ops_cnt = 36;
+		const int plugin_cnt_index = 36;
+		const int min_valid_ops_cnt = 38;
 
 		Int32 read_plugin_cnt, read_recent_cnt;
 		int recent_cnt_index = 0;
@@ -90,11 +90,14 @@ namespace BrainthreadIDE
 
 		safe_cast<OptionFieldEditor ^>(field_list[FieldId::fiEditor])->SetValueFromStringArray(options_editor); //5 items -> 6 to 10
 
-		safe_cast<OptionField<int> ^>(field_list[FieldId::fiSyntaxStyle])->SetValueFromString(options[ editor_index + editor_op_len + 0]); 
+		safe_cast<OptionField<int>  ^>(field_list[FieldId::fiSyntaxStyle])->SetValueFromString(options[ editor_index + editor_op_len + 0]); 
 		safe_cast<OptionField<bool> ^>(field_list[FieldId::fiTraceNewThread])->SetValueFromString( options[ editor_index + editor_op_len + 1]); 
 		safe_cast<OptionField<bool> ^>(field_list[FieldId::fiMemViewOnThreadCaptionClick])->SetValueFromString( options[ editor_index + editor_op_len + 2]); 
-		safe_cast<OptionField<int> ^>(field_list[FieldId::fiDebugeeWindowStyle])->SetValueFromString( options[ editor_index + editor_op_len + 3]); 
-		safe_cast<OptionField<int> ^>(field_list[FieldId::fiDebugeeWindowPosition])->SetValueFromString( options[ editor_index + editor_op_len + 4]);
+		safe_cast<OptionField<int>  ^>(field_list[FieldId::fiThreadNames])->SetValueFromString( options[ editor_index + editor_op_len + 3]); 
+		safe_cast<OptionField<bool> ^>(field_list[FieldId::fiStepSelect])->SetValueFromString( options[ editor_index + editor_op_len + 4]);
+		safe_cast<OptionField<int>  ^>(field_list[FieldId::fiDebugeeWindowStyle])->SetValueFromString( options[ editor_index + editor_op_len + 5]); 
+		safe_cast<OptionField<int>  ^>(field_list[FieldId::fiDebugeeWindowPosition])->SetValueFromString( options[ editor_index + editor_op_len + 6]);
+
 
 		//read plugins
 		if(read_plugin_cnt > 0)
@@ -161,6 +164,10 @@ namespace BrainthreadIDE
 		sb->Append(this->TraceNewThread);
 		sb->Append("\n");
 		sb->Append(this->MemViewOnThreadCaptionClick);
+		sb->Append("\n");
+		sb->Append(this->ThreadNaming);
+		sb->Append("\n");
+		sb->Append(this->DebugStepSelect);
 		sb->Append("\n");
 		sb->Append(this->DebugeeWindowStyle);
 		sb->Append("\n");

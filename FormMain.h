@@ -1,8 +1,10 @@
 #pragma once
 
 #include "FormOptions.h"
+
 #include "FormInsert.h"
 #include "FormProtip.h"
+#include "FormTrap.h"
 
 #include "launchers/RunCodeProcess.h"
 #include "launchers/RunCodeSeparateProcess.h"
@@ -20,6 +22,7 @@
 #include "helpers/ui/uiMenuRadioButtonGenerator.h"
 #include "helpers/ui/uiTooltip.h"
 #include "helpers/ui/uiBevel.h"
+#include "helpers/ui/uiBlinker.h"
 
 #include "debugger/DebugTreeViewExpander.h"
 #include "plugins/PragmaResolver.h"
@@ -88,7 +91,8 @@ namespace BrainthreadIDE {
 			uiMenuRadioButtonGenerator ^ dbgMemRepGenerator = gcnew uiMenuRadioButtonGenerator(this->contextMenuButtonMemoryRepresentation, 
 												gcnew array<String^>{cButtonMemoryReprDecCaption,
 																	 cButtonMemoryReprCharCaption,
-																	 cButtonMemoryReprHexCaption
+																	 cButtonMemoryReprHexCaption,
+																	 cButtonMemoryReprMixCaption
 																	}, 
 												gcnew EventHandler(this, &FormMain::contextMenuButtonMemoryRepresentation_Click),
 												0);
@@ -106,6 +110,7 @@ namespace BrainthreadIDE {
 			uiTooltip::Set( this->buttonDebugStep, cTooltipDebugStepCaption );
 			uiTooltip::Set( this->buttonDebugStepOver, cTooltipDebugStepOverCaption );
 			uiTooltip::Set( this->buttonDebugRunToCursor, cTooltipDebugRunToCursorCaption );
+			uiTooltip::Set( this->buttonDebugRunToTrap, cTooltipDebugRunToTrapCaption );
 			uiTooltip::Set( this->buttonDebugPlaceCursor, cTooltipDebugPlaceCursorCaption );
 			uiTooltip::Set( this->buttonDebugStop, cTooltipDebugStopCaption );
 		
@@ -115,8 +120,9 @@ namespace BrainthreadIDE {
 
 
 			//apply
-			this->mainForm_ToggleInterface(this->interpreterProcess, true);
 			this->mainForm_UpdateUI();
+			this->mainForm_ToggleInterface(this->interpreterProcess, true);
+			
 		}
 
 	protected:
@@ -145,12 +151,14 @@ namespace BrainthreadIDE {
 		literal String ^ cButtonMemoryReprDecCaption = "Number";
 		literal String ^ cButtonMemoryReprCharCaption = "Character";
 		literal String ^ cButtonMemoryReprHexCaption = "Hexadecimal";
+		literal String ^ cButtonMemoryReprMixCaption = "Mixed";
 		literal String ^ cButtonMemoryTabColsAutoCaption = "Fit to width";
 
 		literal String ^ cTooltipDebugStepCaption = "Step one instruction";
 		literal String ^ cTooltipDebugCodeCaption = "Run debugger (step by step execution)";
 		literal String ^ cTooltipDebugStepOverCaption = "Step over next instruction";
 		literal String ^ cTooltipDebugRunToCursorCaption = "Run to instruction at cursor";
+		literal String ^ cTooltipDebugRunToTrapCaption = "Run to instruction at picked memory value";
 		literal String ^ cTooltipDebugPlaceCursorCaption = "Place cursor at current instruction";
 		literal String ^ cTooltipDebugStopCaption = "Terminate all";
 
@@ -319,6 +327,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  aboutBTMainMenuItem;
 private: System::Windows::Forms::ToolStripSeparator^  toolStripMenuItem7;
 private: System::Windows::Forms::ToolStripMenuItem^  protipMainMenuItem;
 private: System::Windows::Forms::ToolStripStatusLabel^  statusStripStatusLabel6;
+private: System::Windows::Forms::Button^  buttonDebugRunToTrap;
 
 
 		private: System::Windows::Forms::ToolStripMenuItem^  contextMenuButtonColumnNumber;
@@ -448,6 +457,7 @@ private: System::Windows::Forms::ToolStripStatusLabel^  statusStripStatusLabel6;
 			this->labelOptionsMemorySize = (gcnew System::Windows::Forms::Label());
 			this->tabPageDebug = (gcnew System::Windows::Forms::TabPage());
 			this->panelDebug = (gcnew System::Windows::Forms::Panel());
+			this->buttonDebugRunToTrap = (gcnew System::Windows::Forms::Button());
 			this->buttonDebugStop = (gcnew System::Windows::Forms::Button());
 			this->labelDebugStatus = (gcnew System::Windows::Forms::Label());
 			this->buttonDebugPlaceCursor = (gcnew System::Windows::Forms::Button());
@@ -1555,6 +1565,7 @@ private: System::Windows::Forms::ToolStripStatusLabel^  statusStripStatusLabel6;
 			// panelDebug
 			// 
 			this->panelDebug->BorderStyle = System::Windows::Forms::BorderStyle::FixedSingle;
+			this->panelDebug->Controls->Add(this->buttonDebugRunToTrap);
 			this->panelDebug->Controls->Add(this->buttonDebugStop);
 			this->panelDebug->Controls->Add(this->labelDebugStatus);
 			this->panelDebug->Controls->Add(this->buttonDebugPlaceCursor);
@@ -1565,6 +1576,17 @@ private: System::Windows::Forms::ToolStripStatusLabel^  statusStripStatusLabel6;
 			this->panelDebug->Name = L"panelDebug";
 			this->panelDebug->Size = System::Drawing::Size(338, 100);
 			this->panelDebug->TabIndex = 7;
+			// 
+			// buttonDebugRunToTrap
+			// 
+			this->buttonDebugRunToTrap->BackgroundImage = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"buttonDebugRunToTrap.BackgroundImage")));
+			this->buttonDebugRunToTrap->BackgroundImageLayout = System::Windows::Forms::ImageLayout::Zoom;
+			this->buttonDebugRunToTrap->Location = System::Drawing::Point(154, 17);
+			this->buttonDebugRunToTrap->Name = L"buttonDebugRunToTrap";
+			this->buttonDebugRunToTrap->Size = System::Drawing::Size(38, 32);
+			this->buttonDebugRunToTrap->TabIndex = 9;
+			this->buttonDebugRunToTrap->UseVisualStyleBackColor = true;
+			this->buttonDebugRunToTrap->Click += gcnew System::EventHandler(this, &FormMain::buttonDebugRunToTrap_Click);
 			// 
 			// buttonDebugStop
 			// 
@@ -1748,7 +1770,7 @@ private: System::Windows::Forms::ToolStripStatusLabel^  statusStripStatusLabel6;
 			this->dataGridViewDebugMemory->ShowCellToolTips = false;
 			this->dataGridViewDebugMemory->ShowEditingIcon = false;
 			this->dataGridViewDebugMemory->ShowRowErrors = false;
-			this->dataGridViewDebugMemory->Size = System::Drawing::Size(338, 267);
+			this->dataGridViewDebugMemory->Size = System::Drawing::Size(338, 261);
 			this->dataGridViewDebugMemory->TabIndex = 2;
 			this->dataGridViewDebugMemory->Scroll += gcnew System::Windows::Forms::ScrollEventHandler(this, &FormMain::dataGridViewDebugMemory_Scroll);
 			// 
@@ -1910,6 +1932,7 @@ private: void mainForm_ChangeContext(TabPage ^ selectedPage) {
 					 //ui
 					 mainForm_UpdateUI();
 					 mainForm_SetStatusBarInfo(newWorkContext);
+					 mainForm_ToggleInterface(this->interpreterProcess, false == mainForm_IsDebugTask());
 				 }
 		}
 private: void mainForm_SetStatusBarInfo(WorkContext ^ workContext) {
@@ -1996,7 +2019,7 @@ private: void mainForm_RunTask() {
 					interpreterProcess->Launch();
 				}
 		 }
-private: void mainForm_RunDebugTask() {
+private: void mainForm_AfterDebugTask() {
 			 //work todo after step, step over, run to cursor etc
 				DebugCodeProcess ^ debugProcess = cli::safe_cast<DebugCodeProcess^ >(this->interpreterProcess);
 				int n_frow, frow = dataGridViewDebugMemory->FirstDisplayedScrollingRowIndex; //save old first displayed row index
@@ -2035,12 +2058,15 @@ private: void mainForm_UpdateUI() {
 			     bool genuineInterpreter = false;
 				 bool noInterpreter = false;
 				 bool noDebuggingPage = false;
+				 bool isAProject = false;
 
 				 WorkContext ^ workContext = WorkContextBroker::Instance->GetCurrentContext();
 				 
 				 //enable if workcontext is valid and NOT while debugging
 				 if(workContext && (false == mainForm_IsDebugTask() || workContext != interpreterProcess->ProcessWorkContext )) 
 				 {
+					 isAProject = (workContext->fileContext->GetType() == ProjectFileContext::typeid);
+
 					 //undos
 					 this->editorUndoMenuItem->Enabled = workContext->editorTextBox->CanUndo();
 					 this->editorRedoMenuItem->Enabled = workContext->editorTextBox->CanRedo();
@@ -2048,7 +2074,8 @@ private: void mainForm_UpdateUI() {
 					 this->toolBarButtonRedo->Enabled = workContext->editorTextBox->CanRedo();
 					 
 					 //proj
-					 this->editorRestoreMenuItem->Enabled = (workContext->fileContext->GetType() == ProjectFileContext::typeid);
+					 this->editorRestoreMenuItem->Enabled = isAProject;
+					 this->saveAllMainMenuItem->Enabled = (false == isAProject); 
 
 					 //clipboard
 					 this->editorCutMenuItem->Enabled = true;	
@@ -2094,9 +2121,9 @@ private: void mainForm_UpdateUI() {
 					 this->groupBoxOptions->Enabled = genuineInterpreter;
 				
 					 //debugger
-					 this->toolBarButtonDebugStep->Enabled = genuineInterpreter;
-					 this->toolBarButtonStepOver->Enabled = genuineInterpreter;
-					 this->toolBarButtonRunToCursor->Enabled = genuineInterpreter;
+					 //this->toolBarButtonDebugStep->Enabled = genuineInterpreter;
+					 ///this->toolBarButtonStepOver->Enabled = genuineInterpreter;
+					 //this->toolBarButtonRunToCursor->Enabled = genuineInterpreter;
 				 }
 
 				 //debug panel label
@@ -2134,6 +2161,7 @@ public: void mainForm_ToggleInterface(InterpreterProcess ^sender, bool normal_st
 				this->buttonDebugStep->Enabled = debugger_running || normal_state;
 				this->buttonDebugStepOver->Enabled = debugger_running;
 				this->buttonDebugRunToCursor->Enabled = debugger_running;
+				this->buttonDebugRunToTrap->Enabled = debugger_running;
 				this->buttonDebugPlaceCursor->Enabled = debugger_running;
 				
 				if(debugger_running)
@@ -2365,7 +2393,7 @@ private: void debugProcess_Complete(System::Object^  sender, System::EventArgs^ 
 
 				treeViewDebugThreadList->Nodes->Clear();
 
-				if(e == nullptr)
+				if(e == EventArgs::Empty)
 					treeViewDebugThreadList->Nodes->Add(String::Format("Program exited with code {0}", 
 														cli::safe_cast<DebugCodeProcess^ >(sender)->DebuggerInstance->DebugeeExitCode));
 
@@ -2407,17 +2435,20 @@ private: void debugMainMenuItem_Click(System::Object^  sender, System::EventArgs
 				this->mainForm_RunTask();
 
 				this->tabControlRight->SelectedTab = this->tabPageDebug;
+				this->dataGridViewDebugMemory->DataSource = gcnew DataTable;
 			    
 		 }
 private: void newfileMainMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
 
 				WorkContextBroker::Instance->AddPage();
 				mainForm_UpdateUI();
+				//mainForm_SetStatusBarInfo(WorkContextBroker::Instance->GetCurrentContext());
 		 }
 private: void openfileMainMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
 
 				WorkContextBroker::Instance->OpenPage();
 				mainForm_UpdateUI();
+				//mainForm_SetStatusBarInfo(WorkContextBroker::Instance->GetCurrentContext());
 		 }
 private: void savefileMainMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
 				////
@@ -2426,6 +2457,7 @@ private: void savefileMainMenuItem_Click(System::Object^  sender, System::EventA
 private: void saveAsMainMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
 
 				WorkContextBroker::Instance->SavePageAs();
+				mainForm_SetStatusBarInfo(WorkContextBroker::Instance->GetCurrentContext());
 		 }
 private: System::Void saveAllMainMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
 
@@ -2575,7 +2607,7 @@ private: System::Void buttonDebugStep_Click(System::Object^  sender, System::Eve
 				 cli::safe_cast<DebugCodeProcess^ >(interpreterProcess)->Step();
 				 this->UseWaitCursor = false;
 				 
-				 mainForm_RunDebugTask();
+				 mainForm_AfterDebugTask();
 			 }
 			 else
 				 debugMainMenuItem_Click(sender, e);
@@ -2589,7 +2621,7 @@ private: System::Void buttonDebugRunToCursor_Click(System::Object^  sender, Syst
 				 cli::safe_cast<DebugCodeProcess^ >(interpreterProcess)->RunToCursor();
 				 this->UseWaitCursor = false;
 
-				 mainForm_RunDebugTask();
+				 mainForm_AfterDebugTask();
 			 }
 
 		 }
@@ -2601,15 +2633,44 @@ private: System::Void buttonDebugStepOver_Click(System::Object^  sender, System:
 				 cli::safe_cast<DebugCodeProcess^ >(interpreterProcess)->StepOver();
 				 this->UseWaitCursor = false;
 
-				 mainForm_RunDebugTask();
+				 mainForm_AfterDebugTask();
+			 }
+		 }
+private: System::Void buttonDebugRunToTrap_Click(System::Object^  sender, System::EventArgs^  e) {
+			 //memory trap click
+			 if(mainForm_IsDebugTask() && interpreterProcess->Working())
+			 {
+				 int cell_index = 1;
+
+				 if(dataGridViewDebugMemory->CurrentCell)
+				 {
+					 cell_index = dataGridViewDebugMemory->CurrentCell->RowIndex * dataGridViewDebugMemory->Columns->Count 
+								+ dataGridViewDebugMemory->CurrentCell->ColumnIndex + 1;
+				 }
+
+				 FormTrap ^ trapWindow = gcnew FormTrap( cell_index, dataGridViewDebugMemory->CurrentCell->Value->ToString() );
+				 if(trapWindow->ShowDialog() == System::Windows::Forms::DialogResult::OK )
+				 {
+					 this->UseWaitCursor = true;
+					 cli::safe_cast<DebugCodeProcess^ >(interpreterProcess)->MemoryTrap(trapWindow->Index, trapWindow->Value, trapWindow->Option);
+					 this->UseWaitCursor = false;
+
+					 mainForm_AfterDebugTask();
+
+					 uiBlinker ^ selectionBlinker = gcnew uiBlinker(dataGridViewDebugMemory, Color::Red);
+					 selectionBlinker->Blink(2400);
+				 }
 			 }
 		 }
 private: System::Void buttonDebugPlaceCursor_Click(System::Object^  sender, System::EventArgs^  e) {
 			 //place cursor click
-			 
+			 DebugCodeProcess ^ debugProcess;
 			 if(mainForm_IsDebugTask() && interpreterProcess->Working())
 			 {
-				 debugForm_MemoryScrollToPosition( cli::safe_cast<DebugCodeProcess^ >(interpreterProcess)->DebuggerInstance->MemoryPosition );
+				 debugProcess = cli::safe_cast<DebugCodeProcess^ >(interpreterProcess);
+				 CodeContextConverter ^ ccc = gcnew CodeContextConverter(debugProcess->ProcessWorkContext);
+
+				 debugProcess->MoveCarretToPosition( ccc->ToCursor( debugProcess->DebuggerInstance->CodePosition ));
 			 }
 		 }
 private: System::Void contextMenuButtonScrollToMemPos_Click(System::Object^  sender, System::EventArgs^  e) {
@@ -2634,28 +2695,38 @@ private: void contextMenuButtonMemoryRepresentation_Click(System::Object^  sende
 
 			 if(mainForm_IsDebugTask())		
 			 {
+				 int sel_threadId = Convert::ToInt32(comboBoxThreadMemSelect->SelectedValue);
 				 debugProcess = cli::safe_cast<DebugCodeProcess^ >(interpreterProcess);
 				 
 				 if(sender_menu->Text == cButtonMemoryReprCharCaption)
 					debugProcess->DebuggerInstance->LoadMemoryImageToView(dataGridViewDebugMemory, gcnew CharacterCellPrinter());
 				 else if(sender_menu->Text == cButtonMemoryReprHexCaption)
 					debugProcess->DebuggerInstance->LoadMemoryImageToView(dataGridViewDebugMemory, gcnew HexCellPrinter());
+				 else if(sender_menu->Text == cButtonMemoryReprMixCaption)
+					debugProcess->DebuggerInstance->LoadMemoryImageToView(dataGridViewDebugMemory, gcnew MixedCellPrinter());
 				 else
 					debugProcess->DebuggerInstance->LoadMemoryImageToView(dataGridViewDebugMemory, gcnew MemoryCellPrinter());
+
+				 debugForm_MemoryScrollToPosition(debugProcess->DebuggerInstance->MemoryPosition[sel_threadId]);
 			 }
 		 }
 
 private: void contextMenuButtonChangeMemTabColumnNumber_Click(System::Object^  sender, System::EventArgs^  e) {
 			//custom event, change debug memory table columns number
 			 ToolStripMenuItem ^ sender_menu = cli::safe_cast<ToolStripMenuItem ^>(sender);
+			 DebugCodeProcess ^ debugProcess = cli::safe_cast<DebugCodeProcess^ >(interpreterProcess);
 
 			 if(mainForm_IsDebugTask())
 			 {   //captions passed as int, other text = 0 
+				 int sel_threadId = Convert::ToInt32(comboBoxThreadMemSelect->SelectedValue);
+				 
 				 if(sender_menu->Text == cButtonMemoryTabColsAutoCaption) {
-					 cli::safe_cast<DebugCodeProcess^ >(interpreterProcess)->DebuggerInstance->LoadMemoryImageToView(dataGridViewDebugMemory, Int16(0));
+					 debugProcess->DebuggerInstance->LoadMemoryImageToView(dataGridViewDebugMemory, Int16(0));
 				 }
 				 else
-					 cli::safe_cast<DebugCodeProcess^ >(interpreterProcess)->DebuggerInstance->LoadMemoryImageToView(dataGridViewDebugMemory, Convert::ToInt16(sender_menu->Text));
+					 debugProcess->DebuggerInstance->LoadMemoryImageToView(dataGridViewDebugMemory, Convert::ToInt16(sender_menu->Text));
+			 
+				debugForm_MemoryScrollToPosition(debugProcess->DebuggerInstance->MemoryPosition[sel_threadId]);
 			 }
 		 }
 
@@ -2866,6 +2937,7 @@ private: System::Void FormMain_FormClosing(System::Object^  sender, System::Wind
 		  //form closing
 			 GlobalOptions::Instance->SaveToFile();
 		 }
+
 };
 }
 

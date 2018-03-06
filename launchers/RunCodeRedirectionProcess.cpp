@@ -69,6 +69,8 @@ namespace BrainthreadIDE
 				}
 				break;
 			}
+
+			worker->ReportProgress(0);
 			Thread::Sleep(115);   
 		}
 		
@@ -93,13 +95,16 @@ namespace BrainthreadIDE
 		}
 
 		processWorkContext->outputLister->AddIDEOutput(this->GetProcessStatistics());
-		this->OnComplete(this, nullptr);
+		this->OnComplete(this, EventArgs::Empty);
 	}
 
 	void RunCodeRedirectionProcess::worker_ProgressChanged( Object^ sender, ProgressChangedEventArgs^ e )
 	{
-		processWorkContext->outputLister->AddOutput(outputStrings);
-		outputStrings->Clear();
+		if(outputStrings->Count > 0)
+		{
+			processWorkContext->outputLister->AddOutput(outputStrings);
+			outputStrings->Clear();
+		}
 	}
 
 	void RunCodeRedirectionProcess::OutputHandler(System::Object^ sendingProcess,  DataReceivedEventArgs^ outLine )

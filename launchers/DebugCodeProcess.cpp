@@ -16,7 +16,7 @@ namespace BrainthreadIDE
 		if(this->Working())
 			return false;
 
-		this->OnStart(this, nullptr);
+		this->OnStart(this, EventArgs::Empty);
 
 		parseProcess = gcnew CodeParseProcess(this->processWorkContext, false);
 
@@ -28,7 +28,7 @@ namespace BrainthreadIDE
 			processWorkContext->outputLister->AddOutputWithTimestamp("Cannot parse the code.");
 			MessageBox::Show("Cannot parse the code.", "Cannot launch parser", MessageBoxButtons::OK, MessageBoxIcon::Error);
 			
-			this->OnComplete(this, nullptr);
+			this->OnComplete(this, EventArgs::Empty);
 			return false;
 		}
 	 
@@ -47,7 +47,7 @@ namespace BrainthreadIDE
 			return;
 		}
 
-		processWorkContext->outputLister->AddIDEOutput(gcnew String('-', 35)); //chained with parser process
+		processWorkContext->outputLister->AddOutput(gcnew String('-', 35)); //chained with parser process
 		processWorkContext->outputLister->AddOutputWithTimestamp(String::Format("Debugging with args: {0}", startInfo->Arguments));
 		
 		try
@@ -58,7 +58,7 @@ namespace BrainthreadIDE
 			process = Process::GetProcessById( debugger->DebugeeProcessId );
 		
 			//positioning debugee window
-			MoveDebugeeWindow();
+			this->moveDebugeeWindow();
 		}
 		catch(ArgumentException ^ ex)
 		{
@@ -81,9 +81,9 @@ namespace BrainthreadIDE
 		worker->CancelAsync();
 		debugger->Finish();	
 
-		delete debugger;
+		//delete debugger;
 
-		this->OnComplete(this, nullptr);
+		this->OnComplete(this, EventArgs::Empty);
 	}
 
 	void DebugCodeProcess::Detach()
@@ -91,9 +91,9 @@ namespace BrainthreadIDE
 		worker->CancelAsync();
 		debugger->DetachDebugee(); 
 		
-		delete debugger;
+		//delete debugger;
 
-		this->OnComplete(this, nullptr);
+		this->OnComplete(this, EventArgs::Empty);
 	}
 
 	void DebugCodeProcess::AttachWorkerEvents()
@@ -127,10 +127,10 @@ namespace BrainthreadIDE
 		{
 			processWorkContext->outputLister->AddOutputWithTimestamp(String::Format("Program exited with code {0}", debugger->DebugeeExitCode));
 			processWorkContext->outputLister->AddIDEOutput("Debugging completed");
-			delete debugger;
+			//delete debugger;
 		}
 
-		this->OnComplete(this, nullptr);
+		this->OnComplete(this, EventArgs::Empty);
 	}
 
 	//special debugger methods
@@ -186,7 +186,41 @@ namespace BrainthreadIDE
 		this->MoveCarretToPosition( ccc->ToCursor( this->debugger->CodePosition ));
 	}
 
-	void DebugCodeProcess::MoveDebugeeWindow()
+	void DebugCodeProcess::MemoryTrap(int index, int value, Debugger::CompareType compare)
+	{
+		try
+		{
+			this->debugger->RunToMemoryTrap(index - 1, value, compare);
+		}
+		catch(Exception ^ ex)
+		{
+			processWorkContext->outputLister->AddOutputWithTimestamp(ex->Message);
+			MessageBox::Show(ex->Message, "Memory Trap exception", MessageBoxButtons::OK, MessageBoxIcon::Error);
+		}
+
+		CodeContextConverter ^ ccc = gcnew CodeContextConverter(processWorkContext);
+		this->MoveCarretToPosition( ccc->ToCursor( this->debugger->CodePosition ));
+	}
+
+	void DebugCodeProcess::MoveCarretToPosition(int new_pos)
+	{	
+		RichTextBox ^ richTextBox = processWorkContext->editorTextBox->richTextBox;
+		int cur_pos = richTextBox->SelectionStart;
+
+		richTextBox->SelectionStart = new_pos;
+
+		if(GlobalOptions::Instance->DebugStepSelect)
+			richTextBox->SelectionLength = 1;
+		
+		if(richTextBox->GetLineFromCharIndex(cur_pos) != richTextBox->GetLineFromCharIndex(new_pos))
+		{ //prevent blinking
+			richTextBox->ScrollToCaret();
+		}
+		
+		richTextBox->Focus();
+	}
+
+	void DebugCodeProcess::moveDebugeeWindow()
 	{
 		int x, y;
 		int flags = SWP_NOSIZE; // Ignores size arguments. 
@@ -218,19 +252,6 @@ namespace BrainthreadIDE
 		::SetWindowPos((HWND)process->MainWindowHandle.ToPointer(), hia, x, y, 0, 0, flags); 
 	}
 
-	void DebugCodeProcess::MoveCarretToPosition(int new_pos)
-	{	
-		RichTextBox ^ richTextBox = processWorkContext->editorTextBox->richTextBox;
-		int cur_pos = richTextBox->SelectionStart;
-
-		richTextBox->SelectionStart = new_pos;
-		
-		if(richTextBox->GetLineFromCharIndex(cur_pos) != richTextBox->GetLineFromCharIndex(new_pos))
-		{ //prevent blinking
-			richTextBox->ScrollToCaret();
-		}
-		
-		richTextBox->Focus();
-	}
+	
 	
 }

@@ -17,18 +17,19 @@ namespace BrainthreadIDE
 
 	public ref class GlobalOptions
 	{
-		 enum class FieldId
+			enum class FieldId 
 			{
 				fiEditor,
 				fiSyntaxStyle,
 				fiInterpreters,
 				fiSaveCodeBeforeRun,
 				fiPauseProgramAfterRun,
-				fiNoPurgeOutputLog,
 				fiLogPath,
 				fiReadLogFlag,
 				fiTraceNewThread,
 				fiMemViewOnThreadCaptionClick,
+				fiThreadNames,
+				fiStepSelect,
 				fiDebugeeWindowStyle,
 				fiDebugeeWindowPosition,
 				fiPlugins
@@ -57,12 +58,13 @@ namespace BrainthreadIDE
 
 				field_list->Add(FieldId::fiSaveCodeBeforeRun, gcnew OptionField<bool>(true));
 				field_list->Add(FieldId::fiPauseProgramAfterRun, gcnew OptionField<bool>(false));
-				field_list->Add(FieldId::fiNoPurgeOutputLog, gcnew OptionField<bool>(true));
 				field_list->Add(FieldId::fiLogPath, gcnew OptionField<String ^>( FileContext::BaseDirectory() + "\\bf\\log.txt"));
 				field_list->Add(FieldId::fiReadLogFlag, gcnew OptionField<bool>(false));
 				
 				field_list->Add(FieldId::fiTraceNewThread, gcnew OptionField<bool>(true));
 				field_list->Add(FieldId::fiMemViewOnThreadCaptionClick, gcnew OptionField<bool>(true));
+				field_list->Add(FieldId::fiThreadNames, gcnew OptionField<int>(0));
+				field_list->Add(FieldId::fiStepSelect, gcnew OptionField<bool>(true));
 				field_list->Add(FieldId::fiDebugeeWindowStyle, gcnew OptionField<int>(0));
 				field_list->Add(FieldId::fiDebugeeWindowPosition, gcnew OptionField<int>(0));
 
@@ -161,12 +163,7 @@ namespace BrainthreadIDE
 					return safe_cast<OptionField<bool> ^>(field_list[FieldId::fiPauseProgramAfterRun])->Value; 
 				}
 			}
-			property bool PurgeOutputLog //tmp not used
-			{
-				bool get() { 
-					return false; //!safe_cast<OptionField<bool> ^>(field_list[FieldId::fiNoPurgeOutputLog])->Value; //negation
-				}
-			}
+			
 			//visual tab properties
 			property System::Drawing::Font ^ EditorFont
 			{
@@ -215,6 +212,18 @@ namespace BrainthreadIDE
 			{
 				bool get() { 
 					return safe_cast<OptionField<bool> ^>(field_list[FieldId::fiMemViewOnThreadCaptionClick])->Value; 
+				}
+			}
+			property int ThreadNaming
+			{
+				int get() { 
+					return safe_cast<OptionField<int> ^>(field_list[FieldId::fiThreadNames])->Value;
+				}
+			}
+			property bool DebugStepSelect
+			{
+				bool get() { 
+					return safe_cast<OptionField<bool> ^>(field_list[FieldId::fiStepSelect])->Value; 
 				}
 			}
 			property int DebugeeWindowStyle

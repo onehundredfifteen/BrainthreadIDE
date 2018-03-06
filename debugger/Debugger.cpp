@@ -84,6 +84,57 @@ namespace BrainthreadIDE
 		}
 	}
 
+	void Debugger::RunToMemoryTrap(int memory_index, int value, CompareType compare)
+	{ //mem index zero-based
+		try
+		{
+			bool trapped = false;
+			array<int> ^ memory;
+
+			do
+			{
+				debuggerLoop->Step(0);	
+				debuggerLoop->GetProcessProperties(ProcessProperties);	
+
+				if(memory_index >= 0) //single value
+				{
+					memory = this->getMemoryImage(memory_index + 1);
+					trapped = compareValues(memory[memory_index], value, compare);
+				}
+				else //all cells
+				{
+					int lnz_cell = ProcessProperties.meminfo.last_nonzero_cell;
+					memory = this->getMemoryImage(lnz_cell + 1);
+
+					for(int i = 0; i <= lnz_cell; ++i)
+					{
+						trapped = compareValues(memory[i], value, compare);
+
+						if(trapped)
+							break;
+					}
+				}
+			}
+			while(false == trapped && debuggerLoop->IsDebugeeRunning());
+
+			//saving data
+			LoadMemoryByThread();
+
+			if(false == trapped)
+			{
+				MessageBox::Show("Program ended before falling into a memory trap", "Conditions not met", MessageBoxButtons::OK, MessageBoxIcon::Information);
+			}
+		}
+		catch(DebugTimeException &de)
+		{
+			throw gcnew Exception(gcnew String(de.what())); 
+		}
+		catch(...)
+		{
+			throw gcnew Exception("Unknown exception was raised while 'run-to-trap' command"); 
+		}
+	}
+
 	void Debugger::Finish()
 	{
 		debuggerLoop->Terminate();	
@@ -105,7 +156,8 @@ namespace BrainthreadIDE
 																						this->getMemoryImage(this->memoryForImage),
 																						ProcessProperties.code_pointer_pos,
 																						ProcessProperties.meminfo.pointer_pos,
-																						ProcessProperties.meminfo.last_nonzero_cell
+																						ProcessProperties.meminfo.last_nonzero_cell,
+																						just_spawned ? 0 : this->threadResource[ ProcessProperties.thread_id ]->DeltaSteps
 																						);
 		//handle 'trace new thrad' option -> not working for main thread 
 		if(just_spawned == true && GlobalOptions::Instance->TraceNewThread == false && this->threadResource->Count > 1)
@@ -138,7 +190,7 @@ namespace BrainthreadIDE
 
 			first_row_width = (dataGridView->Columns->Count > 0)? dataGridView->RowHeadersWidth : 80;
 
-			tab_cols = ((dgvSize->Width - first_row_width ) / 30) ;
+			tab_cols = ((dgvSize->Width - first_row_width ) / 30);
 		}
 		
 		this->memoryTableCols = tab_cols;
@@ -229,10 +281,10 @@ namespace BrainthreadIDE
 			if(etor.Current.Key == getCurrentThreadId())
 			{
 				current_thread_index = i;
-				dtThreads->Rows->Add(String::Format("Thread {0} (Current)", etor.Current.Key), etor.Current.Key);
+				dtThreads->Rows->Add(String::Format("Thread {0} (Current)", getThreadName(etor.Current.Key)), etor.Current.Key);
 			}
 			else 
-				dtThreads->Rows->Add(String::Format("Thread {0}", etor.Current.Key), etor.Current.Key);
+				dtThreads->Rows->Add(String::Format("Thread {0}", getThreadName(etor.Current.Key)), etor.Current.Key);
 			++i;
 		}
 
@@ -245,11 +297,27 @@ namespace BrainthreadIDE
 
 	void Debugger::LoadStatus(Label ^ label)
 	{
-		if(threadResource->Count == 1)
-			label->Text = String::Format("Main thread on instruction {0}, executed: {1}", ProcessProperties.code_pointer_pos,  ProcessProperties.steps_executed);
+		String ^ thread_name;
+		int cur_id = getCurrentThreadId();
+		int steps_ex = ProcessProperties.steps_executed;
+		int delta_steps = steps_ex - this->threadResource[cur_id]->DeltaSteps;
+			
+		if(threadResource->Count == 1) 
+			thread_name = "Main thread";
+		else 
+			thread_name = "Thread " + getThreadName(cur_id); 
+
+		this->threadResource[cur_id]->DeltaSteps = steps_ex;
+		
+		if(delta_steps > 1)
+			label->Text = String::Format("{0} on instruction {1}, executed: {2} (+{3})", 
+										thread_name, 
+										ProcessProperties.code_pointer_pos, 
+										ProcessProperties.steps_executed,
+										delta_steps);
 		else
-			label->Text = String::Format("Thread {0} on instruction {1}, executed: {2}", 
-										getCurrentThreadId(), 
+			label->Text = String::Format("{0} on instruction {1}, executed: {2}", 
+										thread_name, 
 										ProcessProperties.code_pointer_pos, 
 										ProcessProperties.steps_executed);
 
@@ -286,9 +354,9 @@ namespace BrainthreadIDE
 
 		array<MemoryCellPrinter^> ^ memPrinters = gcnew array<MemoryCellPrinter^>{gcnew MemoryCellPrinter(), gcnew CharacterCellPrinter(), gcnew HexCellPrinter()};
 		
-		mainNode = gcnew TreeNode( String::Format("Thread {0}: instruction: {1} steps: {2}", ProcessProperties.thread_id , 
+		mainNode = gcnew TreeNode( String::Format("Thread {0}: instruction: {1} steps: {2}", getThreadName(ProcessProperties.thread_id) , 
 																							 ProcessProperties.code_pointer_pos, 
-																							 ProcessProperties.steps_executed));
+																							 debuggerLoop->GetThreadSteps(ProcessProperties.thread_id)));
 		//memory
 		memoryNode = gcnew TreeNode( String::Format("Memory position {0}", ProcessProperties.meminfo.pointer_pos+1 ));
 
@@ -327,7 +395,7 @@ namespace BrainthreadIDE
 	TreeNode ^ Debugger::getDetachedThreadInfoTreeNode(int threadId)
 	{
 		TreeNode ^ mainNode = gcnew TreeNode( String::Format("Thread {0}: steps: {1} DETACHED", 
-															 threadId, 
+															 getThreadName(threadId), 
 															 debuggerLoop->GetThreadSteps(threadId)));
 		
 		mainNode->Tag = static_cast<int>(threadId);
@@ -336,7 +404,7 @@ namespace BrainthreadIDE
 
 	TreeNode ^ Debugger::getExitedThreadInfoTreeNode(int threadId)
 	{
-		TreeNode ^ mainNode = gcnew TreeNode( String::Format("Thread {0} EXITED", threadId) );
+		TreeNode ^ mainNode = gcnew TreeNode( String::Format("Thread {0} EXITED", getThreadName(threadId)) );
 		
 		mainNode->Tag = static_cast<int>(threadId);
 		return mainNode;
@@ -374,6 +442,46 @@ namespace BrainthreadIDE
 		{
 			debuggerLoop->TraceThread(etor.Current.Key, etor.Current.Value->Trace);
 		}								
+	}
+
+	String ^ Debugger::getThreadName(int threadId)
+	{
+		if(GlobalOptions::Instance->ThreadNaming == 0) //sys thread id
+			return threadId.ToString();
+		else //by order
+		{
+			int t = 0; //order cnt
+			Dictionary<int, ThreadResourceState ^>::Enumerator etor = threadResource->GetEnumerator();
+
+			while(etor.MoveNext())
+			{
+				if(etor.Current.Key == threadId)
+					break;
+
+				++t;
+			}
+
+			if(GlobalOptions::Instance->ThreadNaming == 2)
+				t += 1;
+			
+			return t.ToString();
+		}
+	}
+
+	bool Debugger::compareValues(int a, int b, Debugger::CompareType compare)
+	{
+		switch(compare)
+		{
+			case CompareType::NotEqual:
+					return a != b;
+			case CompareType::Smaller:
+					return a < b;
+			case CompareType::Bigger:
+					return a > b;
+			case CompareType::Equal:
+			default:
+				return a == b;
+		}
 	}
 	/*
 	int Debugger::getCodePos()

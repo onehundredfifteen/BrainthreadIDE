@@ -8,7 +8,7 @@ namespace BrainthreadIDE
 		if(worker->IsBusy)
 			return false;
 
-		this->OnStart(this, nullptr);
+		this->OnStart(this, EventArgs::Empty);
 
 		processWorkContext->outputLister->AddOutputWithTimestamp(String::Format("Running {0} with args: {1}", Path::GetFileName(startInfo->FileName),  
 																											  startInfo->Arguments));
@@ -22,7 +22,7 @@ namespace BrainthreadIDE
 	{
 		worker->CancelAsync();
 
-		this->OnComplete(this, nullptr);
+		this->OnComplete(this, EventArgs::Empty);
 	}
 
 	void RunCodeProcess::AttachWorkerEvents()
@@ -99,7 +99,7 @@ namespace BrainthreadIDE
 
 		process->Close();
 
-		this->OnComplete(this, nullptr);
+		this->OnComplete(this, EventArgs::Empty);
 	}
 
 	

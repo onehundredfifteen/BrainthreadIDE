@@ -114,6 +114,9 @@ namespace BrainthreadIDE {
 	private: System::Windows::Forms::DataGridViewButtonColumn^  Column4;
 	private: System::Windows::Forms::Button^  buttonSortPluginList;
 	private: System::Windows::Forms::CheckBox^  checkBoxApplyTheme;
+	private: System::Windows::Forms::Label^  labelThreadName;
+	private: System::Windows::Forms::CheckBox^  checkBoxDebugSelection;
+	private: System::Windows::Forms::ComboBox^  comboBoxThreadNames;
 
 
 
@@ -149,6 +152,7 @@ namespace BrainthreadIDE {
 			this->tabControlOptions = (gcnew System::Windows::Forms::TabControl());
 			this->tabPageVisualOptions = (gcnew System::Windows::Forms::TabPage());
 			this->groupBoxVisual = (gcnew System::Windows::Forms::GroupBox());
+			this->checkBoxApplyTheme = (gcnew System::Windows::Forms::CheckBox());
 			this->labelSyntaxStyle = (gcnew System::Windows::Forms::Label());
 			this->comboBoxSyntaxHighlightStyle = (gcnew System::Windows::Forms::ComboBox());
 			this->buttonSetFont = (gcnew System::Windows::Forms::Button());
@@ -179,7 +183,10 @@ namespace BrainthreadIDE {
 			this->labelDebugeePos = (gcnew System::Windows::Forms::Label());
 			this->comboBoxDebugeeWindowPos = (gcnew System::Windows::Forms::ComboBox());
 			this->groupBoxDebugger = (gcnew System::Windows::Forms::GroupBox());
+			this->labelThreadName = (gcnew System::Windows::Forms::Label());
+			this->checkBoxDebugSelection = (gcnew System::Windows::Forms::CheckBox());
 			this->checkBoxThrdMemOnClick = (gcnew System::Windows::Forms::CheckBox());
+			this->comboBoxThreadNames = (gcnew System::Windows::Forms::ComboBox());
 			this->checkBoxTraceEachTread = (gcnew System::Windows::Forms::CheckBox());
 			this->tabPagePliginsOptions = (gcnew System::Windows::Forms::TabPage());
 			this->groupBoxPlugins = (gcnew System::Windows::Forms::GroupBox());
@@ -192,7 +199,6 @@ namespace BrainthreadIDE {
 			this->buttonSaveOptions = (gcnew System::Windows::Forms::Button());
 			this->buttonCancelOptions = (gcnew System::Windows::Forms::Button());
 			this->buttonDefault = (gcnew System::Windows::Forms::Button());
-			this->checkBoxApplyTheme = (gcnew System::Windows::Forms::CheckBox());
 			this->tabControlOptions->SuspendLayout();
 			this->tabPageVisualOptions->SuspendLayout();
 			this->groupBoxVisual->SuspendLayout();
@@ -251,6 +257,18 @@ namespace BrainthreadIDE {
 			this->groupBoxVisual->TabIndex = 0;
 			this->groupBoxVisual->TabStop = false;
 			this->groupBoxVisual->Text = L"Visual";
+			// 
+			// checkBoxApplyTheme
+			// 
+			this->checkBoxApplyTheme->AutoSize = true;
+			this->checkBoxApplyTheme->Checked = true;
+			this->checkBoxApplyTheme->CheckState = System::Windows::Forms::CheckState::Checked;
+			this->checkBoxApplyTheme->Location = System::Drawing::Point(25, 89);
+			this->checkBoxApplyTheme->Name = L"checkBoxApplyTheme";
+			this->checkBoxApplyTheme->Size = System::Drawing::Size(119, 17);
+			this->checkBoxApplyTheme->TabIndex = 8;
+			this->checkBoxApplyTheme->Text = L"Apply color theme";
+			this->checkBoxApplyTheme->UseVisualStyleBackColor = true;
 			// 
 			// labelSyntaxStyle
 			// 
@@ -574,7 +592,10 @@ namespace BrainthreadIDE {
 			// 
 			// groupBoxDebugger
 			// 
+			this->groupBoxDebugger->Controls->Add(this->labelThreadName);
+			this->groupBoxDebugger->Controls->Add(this->checkBoxDebugSelection);
 			this->groupBoxDebugger->Controls->Add(this->checkBoxThrdMemOnClick);
+			this->groupBoxDebugger->Controls->Add(this->comboBoxThreadNames);
 			this->groupBoxDebugger->Controls->Add(this->checkBoxTraceEachTread);
 			this->groupBoxDebugger->Location = System::Drawing::Point(20, 21);
 			this->groupBoxDebugger->Name = L"groupBoxDebugger";
@@ -582,6 +603,25 @@ namespace BrainthreadIDE {
 			this->groupBoxDebugger->TabIndex = 0;
 			this->groupBoxDebugger->TabStop = false;
 			this->groupBoxDebugger->Text = L"Threading";
+			// 
+			// labelThreadName
+			// 
+			this->labelThreadName->AutoSize = true;
+			this->labelThreadName->Location = System::Drawing::Point(365, 35);
+			this->labelThreadName->Name = L"labelThreadName";
+			this->labelThreadName->Size = System::Drawing::Size(81, 13);
+			this->labelThreadName->TabIndex = 8;
+			this->labelThreadName->Text = L"Thread names:";
+			// 
+			// checkBoxDebugSelection
+			// 
+			this->checkBoxDebugSelection->AutoSize = true;
+			this->checkBoxDebugSelection->Location = System::Drawing::Point(368, 66);
+			this->checkBoxDebugSelection->Name = L"checkBoxDebugSelection";
+			this->checkBoxDebugSelection->Size = System::Drawing::Size(174, 17);
+			this->checkBoxDebugSelection->TabIndex = 7;
+			this->checkBoxDebugSelection->Text = L"Highlight current instruction";
+			this->checkBoxDebugSelection->UseVisualStyleBackColor = true;
 			// 
 			// checkBoxThrdMemOnClick
 			// 
@@ -592,6 +632,17 @@ namespace BrainthreadIDE {
 			this->checkBoxThrdMemOnClick->TabIndex = 1;
 			this->checkBoxThrdMemOnClick->Text = L"Click on thread tree to view memory";
 			this->checkBoxThrdMemOnClick->UseVisualStyleBackColor = true;
+			// 
+			// comboBoxThreadNames
+			// 
+			this->comboBoxThreadNames->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
+			this->comboBoxThreadNames->FormattingEnabled = true;
+			this->comboBoxThreadNames->Items->AddRange(gcnew cli::array< System::Object^  >(3) {L"System thread ID", L"Zero-based order", 
+				L"1-based order"});
+			this->comboBoxThreadNames->Location = System::Drawing::Point(473, 32);
+			this->comboBoxThreadNames->Name = L"comboBoxThreadNames";
+			this->comboBoxThreadNames->Size = System::Drawing::Size(172, 21);
+			this->comboBoxThreadNames->TabIndex = 6;
 			// 
 			// checkBoxTraceEachTread
 			// 
@@ -729,16 +780,6 @@ namespace BrainthreadIDE {
 			this->buttonDefault->Text = L"Default";
 			this->buttonDefault->UseVisualStyleBackColor = true;
 			this->buttonDefault->Click += gcnew System::EventHandler(this, &FormOptions::buttonDefault_Click);
-			// 
-			// checkBoxApplyTheme
-			// 
-			this->checkBoxApplyTheme->AutoSize = true;
-			this->checkBoxApplyTheme->Location = System::Drawing::Point(25, 89);
-			this->checkBoxApplyTheme->Name = L"checkBoxApplyTheme";
-			this->checkBoxApplyTheme->Size = System::Drawing::Size(119, 17);
-			this->checkBoxApplyTheme->TabIndex = 8;
-			this->checkBoxApplyTheme->Text = L"Apply color theme";
-			this->checkBoxApplyTheme->UseVisualStyleBackColor = true;
 			// 
 			// FormOptions
 			// 
@@ -908,17 +949,18 @@ private: void comboBoxSyntaxHighlightStyle_SelectedIndexChanged(System::Object^ 
 
 private: void FormOptions_Shown(System::Object^  sender, System::EventArgs^  e) {
 			 
-			 GlobalOptions::Instance->PairControls(gcnew array<System::Windows::Forms::Control ^>(13) {
+			 GlobalOptions::Instance->PairControls(gcnew array<System::Windows::Forms::Control ^>(14) {
 																						editorTextBoxTest, 
 																						comboBoxSyntaxHighlightStyle, 
 																						dataGridViewInterpreter,
 																						checkBoxSaveBeforeRun,
 																						checkBoxPauseAfterRun,
-																						checkBoxNotPurgeOutputLog, //not used
 																						textBoxLogPath,
 																						checkBoxReadLog,
 																						checkBoxTraceEachTread,
 																						checkBoxThrdMemOnClick,
+																						comboBoxThreadNames,
+																						checkBoxDebugSelection,
 																						comboBoxDebugeeWindowStyle,
 																						comboBoxDebugeeWindowPos,
 																						checkedListBoxPlugins
@@ -990,7 +1032,11 @@ private: void buttonGetLogPath_Click(System::Object^  sender, System::EventArgs^
 
 private: System::Void checkedListBoxPlugins_Click(System::Object^  sender, System::EventArgs^  e) {
 			  //show plugins description
-			 textBoxPluginDesc->Text = GlobalOptions::Instance->Plugins->PluginDescription( checkedListBoxPlugins->Text );
+			 if(checkedListBoxPlugins->Items->Count < 1){
+				 textBoxPluginDesc->Text = "No plugin available. Place a .dll file with a plugin to /plugins folder then restart IDE.";
+			 }
+			 else
+				 textBoxPluginDesc->Text = GlobalOptions::Instance->Plugins->PluginDescription( checkedListBoxPlugins->Text );
 		 }
 private: System::Void checkBoxPluginAutoinstall_CheckedChanged(System::Object^  sender, System::EventArgs^  e) {
 			 //check all plugins

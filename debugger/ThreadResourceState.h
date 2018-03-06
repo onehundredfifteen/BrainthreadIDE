@@ -11,7 +11,7 @@ namespace BrainthreadIDE
 	public ref class ThreadResourceState
 	{
 	public:	
-		ThreadResourceState(TreeNode ^ node, array<int> ^ mem_image, int code_pos, int mem_pos, int lnz_pos) : trace(true)
+		ThreadResourceState(TreeNode ^ node, array<int> ^ mem_image, int code_pos, int mem_pos, int lnz_pos, int del_st) : trace(true)
 		{
 			this->memoryImage = mem_image;
 			this->memoryInfoNode = node;
@@ -19,6 +19,7 @@ namespace BrainthreadIDE
 			this->CodePosition = code_pos;
 			this->MemoryPosition = mem_pos;
 			this->MemoryLNZPos = lnz_pos;
+			this->DeltaSteps = del_st;
 		}
 
 		ThreadResourceState() : trace(true)
@@ -29,6 +30,7 @@ namespace BrainthreadIDE
 			this->CodePosition = 0;
 			this->MemoryPosition = 0;
 			this->MemoryLNZPos = 0;
+			this->DeltaSteps = 0;
 		}
 
 	private:	
@@ -41,6 +43,7 @@ namespace BrainthreadIDE
 		int CodePosition;
 		int MemoryPosition;
 		int MemoryLNZPos;
+		int DeltaSteps;
 
 		property bool Trace
 		{

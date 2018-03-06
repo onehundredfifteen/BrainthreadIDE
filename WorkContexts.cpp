@@ -11,7 +11,10 @@ namespace BrainthreadIDE
 	{	//WorkContext save to recent files
 		if(this->fileContext && this->fileContext->HasPhysicalFile())
 		{
-			GlobalOptions::Instance->RecentFilesListAdd(this->fileContext->FilePath);
+			if(this->fileContext->GetType() == ProjectFileContext::typeid)
+				GlobalOptions::Instance->RecentFilesListAdd(cli::safe_cast<ProjectFileContext^ >(this->fileContext)->ProjectPath);
+			else
+				GlobalOptions::Instance->RecentFilesListAdd(this->fileContext->FilePath);
 		}
 	}
 	

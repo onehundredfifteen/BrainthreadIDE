@@ -33,6 +33,7 @@ namespace BrainthreadIDE//::Debug
 
 		int GetProcessId();
 		int GetProcessExitCode();
+		bool IsDebugeeRunning();
 
 	private:
 		HANDLE debugeeProcessHandle;
@@ -51,7 +52,7 @@ namespace BrainthreadIDE//::Debug
 
 		BTProcessProperties process_properties;
 		
-		Condition debugeeRunning;
+		Condition debugeeStarted;
 		Condition readyToStepping;
 		Condition useEcx;
 

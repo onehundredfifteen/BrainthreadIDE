@@ -21,14 +21,14 @@ namespace BrainthreadIDE
 							// | IDLE_PRIORITY_CLASS, 
 							 0, 0, &startupInfo, &procinfo))
 		{
-			debugeeRunning = false;
+			debugeeStarted = false;
 
 			throw DebugTimeException( "Can't create process", GetLastError());
 		}
 		
 		SetThreadPriority(procinfo.hThread, THREAD_PRIORITY_IDLE);
 
-		debugeeRunning = true;
+		debugeeStarted = true;
 		readyToStepping = false;
 		useEcx = false;
 
@@ -112,7 +112,7 @@ namespace BrainthreadIDE
 
 		ContinueDebugEvent(debug_event.dwProcessId, debug_event.dwThreadId, contv);
 
-		while(readyToStepping && debugeeRunning)
+		while(readyToStepping && debugeeStarted)
 		{
 			debug_event.dwDebugEventCode = -1;
 			WaitForDebugEvent(&debug_event, INFINITE);
@@ -156,7 +156,7 @@ namespace BrainthreadIDE
 	{
 		int contv = DBG_CONTINUE;
 
-		while(readyToStepping == false && debugeeRunning)
+		while(readyToStepping == false && debugeeStarted)
 		{
 			debug_event.dwDebugEventCode = -1;
 			WaitForDebugEvent(&debug_event, INFINITE);
@@ -211,7 +211,7 @@ namespace BrainthreadIDE
 		BTMemoryTapeEntry mte;
 		BTStackEntry se, shse;
 
-		if(debugeeRunning == false || readyToStepping == false)
+		if(debugeeStarted == false || readyToStepping == false)
 			return;
 
 		curThread = thlist.get_thread(debug_event.dwThreadId);
@@ -387,7 +387,7 @@ namespace BrainthreadIDE
 			case EXIT_PROCESS_DEBUG_EVENT:
 			case RIP_EVENT:
 
-	           debugeeRunning = false;
+	           debugeeStarted = false;//to kill loop
 			   break;
 		}
 
@@ -425,7 +425,7 @@ namespace BrainthreadIDE
 
 	void DebuggerLoop::Detach()
 	{
-		if(debugeeRunning)	
+		if(IsDebugeeRunning())	
 		{
 			ContinueDebugEvent(debug_event.dwProcessId, debug_event.dwThreadId, DBG_CONTINUE);
 			DebugActiveProcessStop(procinfo.dwProcessId);
@@ -440,10 +440,19 @@ namespace BrainthreadIDE
 	int DebuggerLoop::GetProcessExitCode()
 	{
 		DWORD exit_code;
-		if(GetExitCodeProcess(debugeeProcessHandle, &exit_code))
+		if(false == IsDebugeeRunning() && GetExitCodeProcess(debugeeProcessHandle, &exit_code))
 		{
 			return exit_code;
 		}
 		return -1;
+	}
+
+	bool DebuggerLoop::IsDebugeeRunning()
+	{
+		HANDLE process = OpenProcess(SYNCHRONIZE, FALSE, procinfo.dwProcessId);
+		DWORD ret = WaitForSingleObject(process, 0);
+		CloseHandle(process);
+
+		return ret == WAIT_TIMEOUT;
 	}
 }

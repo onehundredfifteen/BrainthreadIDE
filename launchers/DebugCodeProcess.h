@@ -33,6 +33,9 @@ namespace BrainthreadIDE
 		void Step();
 		void StepOver();
 		void RunToCursor();
+		void MemoryTrap(int index, int value, Debugger::CompareType compare);
+
+		void MoveCarretToPosition(int new_pos);
 
 	protected:
 		virtual void AttachWorkerEvents() override; 
@@ -42,8 +45,7 @@ namespace BrainthreadIDE
 		void worker_RunWorkerCompleted(System::Object^ sender, System::ComponentModel::RunWorkerCompletedEventArgs^ e);
 
 		void LaunchDebugger(System::Object^ sender, System::EventArgs^ e);
-		void MoveDebugeeWindow();
-		void MoveCarretToPosition(int new_pos);
+		void moveDebugeeWindow();
 
 	private:	
 		Debugger ^ debugger;

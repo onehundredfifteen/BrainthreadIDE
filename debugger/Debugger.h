@@ -19,8 +19,17 @@ namespace BrainthreadIDE
 		Debugger(String ^ exe_path, String ^ args);
 		~Debugger();
 
+	public:
+		enum class CompareType {
+				Equal,
+				NotEqual,
+				Bigger,
+				Smaller
+			};
+
 		void RunStep();
 		void RunToInstruction(int instruction_pos);
+		void RunToMemoryTrap(int memory_index, int value, CompareType compare);
 
 		void Finish();
 		void DetachDebugee();
@@ -139,6 +148,8 @@ namespace BrainthreadIDE
 
 		void customizeView(DataGridView ^ dataGridView);
 		void updateTracing();
+		bool compareValues(int a, int b, CompareType compare);
+		String ^ getThreadName(int threadId);
 
 		int getMemoryLen();
 		int getCurrentThreadId(); 

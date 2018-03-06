@@ -45,12 +45,16 @@ namespace BrainthreadIDE
 			}
 	};
 
-	public ref class BulkPrinter : public MemoryCellPrinter
-	{//not used
-	public: virtual String ^ Print(String ^ cell) override
+	public ref class MixedCellPrinter : public CharacterCellPrinter
+	{
+	public: virtual String ^ Print(int cell) override
 			{
-				int c = Convert::ToInt32(cell);
-				return String::Format("x{0}", c.ToString("X"));
+				wchar_t ch = cell;
+
+				if(Char::IsControl(ch))
+					return MemoryCellPrinter::Print(cell);
+				else
+					return CharacterCellPrinter::Print(cell);
 			}
 	
 	};

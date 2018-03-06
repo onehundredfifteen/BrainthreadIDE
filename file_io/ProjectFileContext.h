@@ -28,7 +28,13 @@ namespace BrainthreadIDE
 
 		virtual property String ^ Title {
 			String ^ get() override {
-				return String::Format("Project \"{0}\"", fileName);
+				return String::Format("Project \"{0}\"", Path::GetFileNameWithoutExtension(fileName));
+			}
+		}
+
+		property String ^ ProjectPath {
+			String ^ get() {
+				return optionsFile->FilePath;
 			}
 		}
 
@@ -54,7 +60,7 @@ namespace BrainthreadIDE
 
 		virtual bool Save() override
 		{
-			  if(this->HasPhysicalFile() == false)
+			  if(this->HasPhysicalFile() == false && Path::IsPathRooted(this->filePath) == false)
 				  return this->SaveAs();  
 
 			  optionsFile->LinkedFilePath = this->filePath;
