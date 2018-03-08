@@ -25,11 +25,13 @@ namespace BrainthreadIDE {
 			//TODO: Add the constructor code here
 			//
 			this->random = gcnew Random();
+			this->protip_index = 0;
 
-			FileContext ^ protipFileContext = gcnew FileContext(FileContext::BaseDirectory() + "\\bf\\protips.dat");
+			FileContext ^ protipFileContext = gcnew FileContext(FileContext::BaseDirectory() + "\\res\\protips.dat");
 
 			if(protipFileContext->Open()) {
 				this->protips = protipFileContext->Content->Split(gcnew array<Char>(1){'\n'}, StringSplitOptions::RemoveEmptyEntries);
+				this->shuffleProtips();
 			}
 			else {
 				this->protips = gcnew array<String ^>(1){"Find protips.dat file :)))"};
@@ -63,6 +65,7 @@ namespace BrainthreadIDE {
 
 		Random^ random;
 		array<String ^> ^ protips;
+		int protip_index;
 
 #pragma region Windows Form Designer generated code
 		/// <summary>
@@ -132,19 +135,31 @@ namespace BrainthreadIDE {
 #pragma endregion
 	public:  void getNextProtip() {
 
-				 this->textBox->Text = this->protips[ this->random->Next(0, this->protips->Length) ];
+				 this->textBox->Text = this->protips[ protip_index++ ];
+
+				 if(protip_index >= this->protips->Length)
+					 protip_index = 0;
 			 }
 	public:  void behaveAsLangInfoForm() {
 
-				 FileContext ^ protipFileContext = gcnew FileContext(FileContext::BaseDirectory() + "\\bf\\langdesc.dat");
+				 FileContext ^ protipFileContext = gcnew FileContext(FileContext::BaseDirectory() + "\\res\\langdesc.dat");
 				 if(protipFileContext->Open()) {
 					this->textBox->Text = protipFileContext->Content;
 				 }
 
-				 this->textBox->Text += "\r\n\r\n\tlinkt to esoalng";
+				 this->textBox->Text += "\r\n\r\n\tlink to esoalng";
 				 this->Text = L"About Brainthread language";
 			 }
+	private: void shuffleProtips() {
 
+				 for (int i = 0; i < this->protips->Length; ++i)
+				 {
+					 int n = this->random->Next(0, this->protips->Length);
+					 String ^ tmp_str = this->protips[n];
+					 this->protips[n] = this->protips[i];
+					 this->protips[i] = tmp_str;
+				 }
+			 }
 	private: System::Void buttonNextProtip_Click(System::Object^  sender, System::EventArgs^  e) {
 
 				 getNextProtip();

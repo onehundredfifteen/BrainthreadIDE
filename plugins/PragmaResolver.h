@@ -66,7 +66,7 @@ namespace BrainthreadIDE
 			
 			if(String::Compare(this->code, workContext->editorTextBox->richTextBox->Text))
 			{
-				workContext->editorTextBox->richTextBox->Text = this->code;
+				workContext->editorTextBox->richTextBox->Text = this->code->Replace(cPragmaOp, String::Empty);
 				workContext->syntaxHighLighter->HighLightAll(workContext->editorTextBox->richTextBox);
 			}
 		}

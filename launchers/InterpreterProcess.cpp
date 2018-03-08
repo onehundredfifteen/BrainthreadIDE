@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "InterpreterProcess.h"
+#include "../plugins/PragmaResolver.h"
 
 namespace BrainthreadIDE 
 {
@@ -9,9 +10,9 @@ namespace BrainthreadIDE
 		worker->WorkerReportsProgress = false;
 
 		this->runSelection = runSelection;
-		processWorkContext = WorkContextBroker::Instance->GetCurrentContext();
+		this->processWorkContext = WorkContextBroker::Instance->GetCurrentContext();
 
-		startInfo = gcnew ProcessStartInfo(GlobalOptions::Instance->InterpreterPath[ processWorkContext->settings->GetLanguage() ]);
+		startInfo = gcnew ProcessStartInfo(GlobalOptions::Instance->InterpreterPath[ this->processWorkContext->settings->GetLanguage() ]);
 	}
 
 	String ^ InterpreterProcess::GetCodeLocationArgument()
@@ -19,24 +20,28 @@ namespace BrainthreadIDE
 		const int command_len_limit = 8000; 
 		BrainthreadIDE::Language curLang = processWorkContext->settings->GetLanguage();
 
-		if(processWorkContext->fileContext 
-		   && processWorkContext->fileContext->HasPhysicalFile() 
+		//try resolve pragmas
+		this->resolvePragmas();
+
+		//prepare source
+		if(this->processWorkContext->fileContext 
+		   && this->processWorkContext->fileContext->HasPhysicalFile() 
 		   && GlobalOptions::Instance->SaveCodeBeforeRun == true
 		   && runSelection == false)
-		{
+		{ //source file
 			//save code
-			processWorkContext->fileContext->Content = this->Source;
-			processWorkContext->fileContext->Save();
+			this->processWorkContext->fileContext->Content = this->Source;
+			this->processWorkContext->fileContext->Save();
 			
 			if(GlobalOptions::Instance->CustomInterpreterFlag[curLang])
 			{
-				return String::Format("\"{0}\"", processWorkContext->fileContext->FilePath);
+				return String::Format("\"{0}\"", this->processWorkContext->fileContext->FilePath);
 			}
-			return String::Format("-s \"{0}\"", processWorkContext->fileContext->FilePath);
+			return String::Format("-s \"{0}\"", this->processWorkContext->fileContext->FilePath);
 		}
-		else if(this->Source->Length + processWorkContext->settings->GetAdditionalCommandsString()->Length > command_len_limit
+		else if(this->Source->Length + this->processWorkContext->settings->GetAdditionalCommandsString()->Length > command_len_limit
 			    || GlobalOptions::Instance->CustomInterpreterFlag[curLang] == true)
-		{
+		{ // tmp source file
 			FileContext ^ tmpRunFile = gcnew FileContext(FileContext::BaseDirectory() + "\\__run.b");
 
 			//throw if error?
@@ -49,7 +54,7 @@ namespace BrainthreadIDE
 			}
 			return String::Format("-s \"{0}\"", tmpRunFile->FilePath);
 		}
-		else
+		else //raw source
 		{
 			return String::Format("-i \"{0}\"", this->Source);
 		}
@@ -68,6 +73,16 @@ namespace BrainthreadIDE
 		}
 		else
 			return "interpreter is idle";
+	}
+
+	void InterpreterProcess::resolvePragmas()
+	{
+		PragmaResolver ^ pragmaResolver = gcnew PragmaResolver(this->Source, 
+															   GlobalOptions::Instance->Plugins);
+
+		if(pragmaResolver->HasPragmas() && this->runSelection == false) {
+				pragmaResolver->Resolve(processWorkContext, this->processWorkContext->settings->GetLanguage());
+		}
 	}
 
 }

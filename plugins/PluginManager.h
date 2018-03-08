@@ -19,7 +19,7 @@ namespace BrainthreadIDE
 				this->plugins = gcnew List<Plugin ^>;
 
 				try {
-					files = Directory::GetFiles( FileContext::BaseDirectory() + "\\bf" );  
+					files = Directory::GetFiles( FileContext::BaseDirectory() + "\\" + cPluginDir );  
 				}
 				catch(...) {
 					return; //no plugin availible
@@ -68,8 +68,8 @@ namespace BrainthreadIDE
 			{
 				List<String ^> ^ plugin_names = gcnew List<String ^>;
 				
-				for each(IBtPlugin ^ plugin in plugins) {
-					if(plugin->OnInvoke("", Language::lBrainthread)) {
+				for each(Plugin ^ plugin in plugins) {
+					if(plugin->Invocable) {
 						plugin_names->Add( plugin->Name() ); 
 					}
 				}
@@ -80,8 +80,8 @@ namespace BrainthreadIDE
 			{
 				List<String ^> ^ plugin_names = gcnew List<String ^>;
 				
-				for each(IBtPlugin ^ plugin in plugins) {
-					if(plugin->OnPragma("", Language::lBrainthread)) {
+				for each(Plugin ^ plugin in plugins) {
+					if(plugin->Pragmable) {
 						plugin_names->Add( plugin->Name() ); 
 					}
 				}
@@ -90,13 +90,23 @@ namespace BrainthreadIDE
 			}
 	public: String ^ PluginDescription(String ^ name)
 			{
-				for each(Plugin ^ plugin in plugins) {
-					if(plugin->Name() == name) {
-						return String::Format("{0}\r\n\r\n{1}\r\n{3}\r\n\r\n{2}", name->ToUpper(), 
-																						plugin->Info->Substring(0)->Insert(plugin->Info->IndexOf(','), ".dll"),  
-																						plugin->Description(),
-																						gcnew String('=', 44)); 
-					} 
+				Plugin ^ plugin = this->getPlugin(name);
+
+				if(plugin) {
+
+					String ^ properties = plugin->Pragmable ? "Pragma" : "";
+					if(plugin->Invocable) {
+						if(String::IsNullOrEmpty(properties))
+							properties += ", ";
+
+						properties += "Invocable";
+					}
+
+					return String::Format("{0} ({4})\r\n\r\n{1}\r\n{3}\r\n\r\n{2}", name->ToUpper(), 
+																				    plugin->Info->Substring(0)->Insert(plugin->Info->IndexOf(','), ".dll"),  
+																					plugin->Description(),
+																					gcnew String('=', 44),
+																					properties); 
 				}
 
 				return "";
@@ -110,10 +120,24 @@ namespace BrainthreadIDE
 			}
 
 	private:
-		List<Plugin ^> ^ plugins;
+			List<Plugin ^> ^ plugins;
+
+	private:
+		    Plugin ^ getPlugin(String ^ pluginName)
+			{
+				for each(Plugin ^ plugin in plugins)
+				{
+					if(plugin->Name() == pluginName) {
+						return plugin;
+					}
+				}
+
+				return nullptr;
+			}
 
 	private: 
 		literal String ^ cPluginExt = ".dll";
+		literal String ^ cPluginDir = "plugins";
 	
 	};
 }

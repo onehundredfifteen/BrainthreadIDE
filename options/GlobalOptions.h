@@ -52,13 +52,13 @@ namespace BrainthreadIDE
 				field_list->Add(FieldId::fiEditor, gcnew OptionFieldEditor);
 				field_list->Add(FieldId::fiSyntaxStyle, gcnew OptionField<int>(0));
 
-				field_list->Add(FieldId::fiInterpreters, gcnew OptionFieldInterpreter( String::Format("{0}\\bf\\Brainthread.exe", FileContext::BaseDirectory() ), 
+				field_list->Add(FieldId::fiInterpreters, gcnew OptionFieldInterpreter( String::Format("{0}\\bin\\Brainthread.exe", FileContext::BaseDirectory() ), 
 																						gcnew List<String ^>(gcnew array<String ^>(6){"-l bt","-l b","-l pb","-l bf","",""}) )
 																					 );
 
 				field_list->Add(FieldId::fiSaveCodeBeforeRun, gcnew OptionField<bool>(true));
 				field_list->Add(FieldId::fiPauseProgramAfterRun, gcnew OptionField<bool>(false));
-				field_list->Add(FieldId::fiLogPath, gcnew OptionField<String ^>( FileContext::BaseDirectory() + "\\bf\\log.txt"));
+				field_list->Add(FieldId::fiLogPath, gcnew OptionField<String ^>( FileContext::BaseDirectory() + "\\log.txt"));
 				field_list->Add(FieldId::fiReadLogFlag, gcnew OptionField<bool>(false));
 				
 				field_list->Add(FieldId::fiTraceNewThread, gcnew OptionField<bool>(true));

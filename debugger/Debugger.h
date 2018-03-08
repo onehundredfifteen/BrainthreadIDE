@@ -141,9 +141,8 @@ namespace BrainthreadIDE
 	
 	private: 
 		TreeNode ^ getThreadInfoTreeNode();
-		TreeNode ^ getDetachedThreadInfoTreeNode(int threadId);
-		TreeNode ^ getExitedThreadInfoTreeNode(int threadId);
-
+		TreeNode ^ getDetachedThreadInfoTreeNode(int threadId, String ^ format);
+	
 		array<int> ^ getMemoryImage(int last_cell_to_load);
 
 		void customizeView(DataGridView ^ dataGridView);

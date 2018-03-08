@@ -32,7 +32,7 @@ namespace BrainthreadIDE
 
 	public: bool Valid()
 			{
-				return isValidPluginStruct;
+				return isValidPluginStruct && (Invocable || Pragmable);
 			}
 
 	public: virtual String ^ Name()
@@ -45,11 +45,27 @@ namespace BrainthreadIDE
 			}
 	public: virtual String ^ OnInvoke(String ^ code, Language language)
 			{
-				return cli::safe_cast<String ^>( this->MethodInvoke->Invoke(this->pluginObject, gcnew array<Object^>(2){code, language} ));
+				try
+				{
+					return cli::safe_cast<String ^>( this->MethodInvoke->Invoke(this->pluginObject, gcnew array<Object^>(2){code, language} ));
+				}
+				catch(Exception ^ ex)
+				{
+					MessageBox::Show( String::Format("Plugin {0} raised an error: {1}", this->Name(), ex->Message), "Invoke failed", MessageBoxButtons::OK, MessageBoxIcon::Error);
+					return nullptr;
+				}
 			}
 	public: virtual String ^ OnPragma(String ^ code, Language language)
 			{
-				return cli::safe_cast<String ^>( this->MethodPragma->Invoke(this->pluginObject, gcnew array<Object^>(2){code, language} ));
+				try
+				{
+					return cli::safe_cast<String ^>( this->MethodPragma->Invoke(this->pluginObject, gcnew array<Object^>(2){code, language} ));
+				}
+				catch(Exception ^ ex)
+				{
+					MessageBox::Show( String::Format("Plugin {0} raised an error: {1}", this->Name(), ex->Message), "Pragma failed", MessageBoxButtons::OK, MessageBoxIcon::Error);
+					return nullptr;
+				}
 			}
 
 	public: property bool Installed {		
@@ -64,6 +80,18 @@ namespace BrainthreadIDE
 			property String ^ Info {		
 				String ^ get() {
 					return assemblyInfo;
+				}
+			}
+
+			property bool Invocable {		
+				bool get() {
+					return nullptr != this->OnInvoke("", Language::lBrainthread);
+				}
+			}
+
+			property bool Pragmable {		
+				bool get() {
+					return nullptr != this->OnPragma("", Language::lBrainthread);
 				}
 			}
 		

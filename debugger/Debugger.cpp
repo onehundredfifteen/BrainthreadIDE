@@ -249,10 +249,10 @@ namespace BrainthreadIDE
 		{
 			etor.Current.Value->MemoryInfoNode->BackColor = System::Drawing::SystemColors::Window;
 
-			if(etor.Current.Value->Trace == false)
-				threadTreeView->Nodes->Add(this->getDetachedThreadInfoTreeNode(etor.Current.Key));
-			else if(debuggerLoop->IsThreadRunning(etor.Current.Key) == false)
-				threadTreeView->Nodes->Add(this->getExitedThreadInfoTreeNode(etor.Current.Key));
+			if(false == debuggerLoop->IsThreadRunning(etor.Current.Key))
+				threadTreeView->Nodes->Add(this->getDetachedThreadInfoTreeNode(etor.Current.Key, "Thread {0} EXITED"));
+			else if(false == etor.Current.Value->Trace)
+				threadTreeView->Nodes->Add(this->getDetachedThreadInfoTreeNode(etor.Current.Key, "Thread {0} DETACHED. steps: {1}"));
 			else
 				threadTreeView->Nodes->Add(etor.Current.Value->MemoryInfoNode); 
 
@@ -310,13 +310,13 @@ namespace BrainthreadIDE
 		this->threadResource[cur_id]->DeltaSteps = steps_ex;
 		
 		if(delta_steps > 1)
-			label->Text = String::Format("{0} on instruction {1}, executed: {2} (+{3})", 
+			label->Text = String::Format("{0} @ instruction {1}, executed: {2} (+{3})", 
 										thread_name, 
 										ProcessProperties.code_pointer_pos, 
 										ProcessProperties.steps_executed,
 										delta_steps);
 		else
-			label->Text = String::Format("{0} on instruction {1}, executed: {2}", 
+			label->Text = String::Format("{0} @ instruction {1}, executed: {2}", 
 										thread_name, 
 										ProcessProperties.code_pointer_pos, 
 										ProcessProperties.steps_executed);
@@ -392,19 +392,11 @@ namespace BrainthreadIDE
 		return mainNode;
 	}
 
-	TreeNode ^ Debugger::getDetachedThreadInfoTreeNode(int threadId)
+	TreeNode ^ Debugger::getDetachedThreadInfoTreeNode(int threadId, String ^ format)
 	{
-		TreeNode ^ mainNode = gcnew TreeNode( String::Format("Thread {0}: steps: {1} DETACHED", 
+		TreeNode ^ mainNode = gcnew TreeNode( String::Format(format, 
 															 getThreadName(threadId), 
 															 debuggerLoop->GetThreadSteps(threadId)));
-		
-		mainNode->Tag = static_cast<int>(threadId);
-		return mainNode;
-	}
-
-	TreeNode ^ Debugger::getExitedThreadInfoTreeNode(int threadId)
-	{
-		TreeNode ^ mainNode = gcnew TreeNode( String::Format("Thread {0} EXITED", getThreadName(threadId)) );
 		
 		mainNode->Tag = static_cast<int>(threadId);
 		return mainNode;

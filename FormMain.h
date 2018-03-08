@@ -25,7 +25,6 @@
 #include "helpers/ui/uiBlinker.h"
 
 #include "debugger/DebugTreeViewExpander.h"
-#include "plugins/PragmaResolver.h"
 
 #include "WorkContexts.h"
 
@@ -1564,6 +1563,8 @@ private: System::Windows::Forms::Button^  buttonDebugRunToTrap;
 			// 
 			// panelDebug
 			// 
+			this->panelDebug->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Left) 
+				| System::Windows::Forms::AnchorStyles::Right));
 			this->panelDebug->BorderStyle = System::Windows::Forms::BorderStyle::FixedSingle;
 			this->panelDebug->Controls->Add(this->buttonDebugRunToTrap);
 			this->panelDebug->Controls->Add(this->buttonDebugStop);
@@ -1770,7 +1771,7 @@ private: System::Windows::Forms::Button^  buttonDebugRunToTrap;
 			this->dataGridViewDebugMemory->ShowCellToolTips = false;
 			this->dataGridViewDebugMemory->ShowEditingIcon = false;
 			this->dataGridViewDebugMemory->ShowRowErrors = false;
-			this->dataGridViewDebugMemory->Size = System::Drawing::Size(338, 261);
+			this->dataGridViewDebugMemory->Size = System::Drawing::Size(338, 315);
 			this->dataGridViewDebugMemory->TabIndex = 2;
 			this->dataGridViewDebugMemory->Scroll += gcnew System::Windows::Forms::ScrollEventHandler(this, &FormMain::dataGridViewDebugMemory_Scroll);
 			// 
@@ -1997,20 +1998,12 @@ private: void mainForm_SetStatusBarInfo(WorkContext ^ workContext) {
 private: void mainForm_RunTask() {
 				//work todo after spawn a process
 				WorkContext ^ workContext;
-			    PragmaResolver ^ pragmaResolver;
 
 				if(interpreterProcess)
 				{
 					workContext = interpreterProcess->ProcessWorkContext;
-					pragmaResolver = gcnew PragmaResolver(workContext->editorTextBox->richTextBox->Text, 
-														  GlobalOptions::Instance->Plugins);
-
+				
 					workContext->outputLister->Purge();
-					
-					if(pragmaResolver->HasPragmas() && workContext->editorTextBox->richTextBox->SelectionLength == 0) {
-						pragmaResolver->Resolve(workContext, workContext->settings->GetLanguage());
-					}
-
 					workContext->settings->Save();
 
 					interpreterProcess->OnStart += gcnew System::EventHandler(this, &FormMain::interpreterProcess_Start); 
@@ -2075,7 +2068,8 @@ private: void mainForm_UpdateUI() {
 					 
 					 //proj
 					 this->editorRestoreMenuItem->Enabled = isAProject;
-					 this->saveAllMainMenuItem->Enabled = (false == isAProject); 
+					 this->saveAsProjectMainMenuItem->Enabled = (false == isAProject); 
+					 this->toolBarButtonSaveAsProject->Enabled = (false == isAProject);
 
 					 //clipboard
 					 this->editorCutMenuItem->Enabled = true;	

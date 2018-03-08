@@ -22,10 +22,8 @@ Some screenshots
 ![Screenshot](screen2.png)
 
 /*Syntax highlighting only for Brainfuck, pBrain, Brainfork, Brainthread, Brainlove and Toadskin. If you want more, contact me.
-/*/* Strings aren't available yet.
+** Strings aren't available yet./
 
-
-
-
-
-
+# how to run
+Download all files from _Release_ folder then run Brainthread.exe.
+Application does not have to be installed.

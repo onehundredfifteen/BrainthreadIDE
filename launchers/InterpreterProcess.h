@@ -44,6 +44,8 @@ namespace BrainthreadIDE
 					return processWorkContext->editorTextBox->richTextBox->SelectedText;
 			}
 		}
+	private:
+		void resolvePragmas();
 
 	public:
 		property WorkContext ^ ProcessWorkContext
