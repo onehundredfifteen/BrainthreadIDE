@@ -3,16 +3,6 @@
 
 namespace BrainthreadIDE 
 {
-    void RunCodeRedirectionProcess::AttachWorkerEvents()
-	{
-		worker->WorkerSupportsCancellation = true;
-		worker->WorkerReportsProgress = true;
-
-		worker->DoWork += gcnew System::ComponentModel::DoWorkEventHandler(this, &RunCodeRedirectionProcess::worker_DoWork);
-		worker->RunWorkerCompleted += gcnew System::ComponentModel::RunWorkerCompletedEventHandler(this, &RunCodeRedirectionProcess::worker_RunWorkerCompleted);
-		worker->ProgressChanged += gcnew System::ComponentModel::ProgressChangedEventHandler(this, &RunCodeRedirectionProcess::worker_ProgressChanged);
-	}
-	
 	void RunCodeRedirectionProcess::worker_DoWork(System::Object^ sender, System::ComponentModel::DoWorkEventArgs^ e) 
 	{
 		try
@@ -38,7 +28,7 @@ namespace BrainthreadIDE
 		}
 		catch(Exception ^ ex)
 		{
-			String ^msg = String::Format("Cannot run code. Reason: {0}", ex->Message);
+			String ^msg = String::Format("Cannot run the program. Reason: {0}", ex->Message);
 			processWorkContext->outputLister->AddOutputWithTimestamp(msg);
 			MessageBox::Show(msg, "Launch error", MessageBoxButtons::OK, MessageBoxIcon::Error);
 
@@ -63,9 +53,9 @@ namespace BrainthreadIDE
 				}
 				catch(Exception ^ ex)
 				{
-					String ^msg = String::Format("Cannot stop process. Reason: {0}", ex->Message);
+					String ^msg = String::Format("Cannot cancel the process now. Reason: {0}", ex->Message);
 					processWorkContext->outputLister->AddOutputWithTimestamp(msg);
-					MessageBox::Show(msg, "Launch error", MessageBoxButtons::OK, MessageBoxIcon::Error);
+					MessageBox::Show(msg, "Cancellation error", MessageBoxButtons::OK, MessageBoxIcon::Error);
 				}
 				break;
 			}
@@ -77,8 +67,7 @@ namespace BrainthreadIDE
 		//paranoic
 		process->WaitForExit();
 
-		e->Result = cli::safe_cast<int>( process->ExitCode );
-		process->Close(); 
+		e->Result = cli::safe_cast<int>( process->ExitCode ); 
 	}
 
 	void RunCodeRedirectionProcess::worker_RunWorkerCompleted(System::Object^ sender, System::ComponentModel::RunWorkerCompletedEventArgs^  e) 
@@ -95,6 +84,8 @@ namespace BrainthreadIDE
 		}
 
 		processWorkContext->outputLister->AddIDEOutput(this->GetProcessStatistics());
+
+		process->Close();
 		this->OnComplete(this, EventArgs::Empty);
 	}
 

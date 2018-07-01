@@ -11,15 +11,12 @@ namespace BrainthreadIDE
 	public:
 		CodeParseProcess(bool run_selection) : CodeAnalysisProcess(run_selection)
 		{
-			worker->DoWork += gcnew System::ComponentModel::DoWorkEventHandler(this, &CodeParseProcess::worker_DoWork);
 			code_is_valid = false;
 		}
 
 		CodeParseProcess(WorkContext ^ currentWorkContext, bool run_selection) : CodeAnalysisProcess(run_selection)
 		{
-			worker->DoWork += gcnew System::ComponentModel::DoWorkEventHandler(this, &CodeParseProcess::worker_DoWork);
 			code_is_valid = false;
-
 			this->processWorkContext = currentWorkContext;
 		}
 
@@ -34,6 +31,15 @@ namespace BrainthreadIDE
 		}
 
 	protected:
+		virtual void AttachWorkerEvents() override
+		{
+			worker->WorkerSupportsCancellation = false;
+			
+			worker->DoWork += gcnew System::ComponentModel::DoWorkEventHandler(this, &CodeParseProcess::worker_DoWork);
+			worker->RunWorkerCompleted += gcnew System::ComponentModel::RunWorkerCompletedEventHandler(this, &CodeAnalysisProcess::worker_RunWorkerCompleted);
+		}
+
+	private:
 		void worker_DoWork(System::Object^ sender, System::ComponentModel::DoWorkEventArgs^ e);
 	
 	private:

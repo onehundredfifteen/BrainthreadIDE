@@ -90,23 +90,23 @@ namespace BrainthreadIDE
 			}
 	public: String ^ PluginDescription(String ^ name)
 			{
-				Plugin ^ plugin = this->getPlugin(name);
+				for each(Plugin ^ plugin in plugins) {
+					if(plugin->Name() == name) 
+					{
+						String ^ properties = plugin->Pragmable ? "Pragma" : "";
+						if(plugin->Invocable) {
+							if(String::IsNullOrEmpty(properties))
+								properties += ", ";
 
-				if(plugin) {
+							properties += "Invocable";
+						}
 
-					String ^ properties = plugin->Pragmable ? "Pragma" : "";
-					if(plugin->Invocable) {
-						if(String::IsNullOrEmpty(properties))
-							properties += ", ";
-
-						properties += "Invocable";
-					}
-
-					return String::Format("{0} ({4})\r\n\r\n{1}\r\n{3}\r\n\r\n{2}", name->ToUpper(), 
-																				    plugin->Info->Substring(0)->Insert(plugin->Info->IndexOf(','), ".dll"),  
-																					plugin->Description(),
-																					gcnew String('=', 44),
-																					properties); 
+						return String::Format("{0} ({4})\r\n\r\n{1}\r\n{3}\r\n\r\n{2}", name->ToUpper(), 
+																						plugin->Info->Substring(0)->Insert(plugin->Info->IndexOf(','), ".dll"),  
+																						plugin->Description(),
+																						gcnew String('=', 44),
+																						properties); 
+					} 
 				}
 
 				return "";
@@ -121,19 +121,6 @@ namespace BrainthreadIDE
 
 	private:
 			List<Plugin ^> ^ plugins;
-
-	private:
-		    Plugin ^ getPlugin(String ^ pluginName)
-			{
-				for each(Plugin ^ plugin in plugins)
-				{
-					if(plugin->Name() == pluginName) {
-						return plugin;
-					}
-				}
-
-				return nullptr;
-			}
 
 	private: 
 		literal String ^ cPluginExt = ".dll";

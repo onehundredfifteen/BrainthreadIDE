@@ -23,8 +23,18 @@ namespace BrainthreadIDE
 			PageSettings ^ settings;
 			FileContext ^ fileContext;
 			OutputLister ^ outputLister;
-	public:
-			~WorkContext();
+
+	public: property bool IsProjectContext {		
+				bool get() {
+					return (this->fileContext->GetType() == ProjectFileContext::typeid);
+				}
+			}
+			property bool SourceNotSaved {		
+				bool get() {
+					return (this->fileContext->HasPhysicalFile() == false ? String::IsNullOrEmpty(editorTextBox->richTextBox->Text) == false : 
+						   String::Compare(this->fileContext->Content, editorTextBox->richTextBox->Text) != 0);
+				}
+			}
 	};
 
 	public ref class WorkContextBroker
@@ -71,6 +81,7 @@ namespace BrainthreadIDE
 			void OpenPage(void);
 			void OpenPage(FileContext ^ openFileContext);
 			void RemovePage(void);
+			void ClonePage(void);
 
 			void SavePage(void);
 			void SavePageAs(void);
@@ -78,8 +89,10 @@ namespace BrainthreadIDE
 
 			void RefreshTabTitle(TabPage ^ tabPage);
 			void RefreshEditor();
+			void AddFilesToHistory();
 	private:
 			void RefreshEditor(WorkContext ^ workContext);
+			void AddFileToHistory(WorkContext ^ workContext);
 
 			
 	};

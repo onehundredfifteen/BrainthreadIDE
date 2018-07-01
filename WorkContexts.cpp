@@ -7,17 +7,6 @@
 
 namespace BrainthreadIDE 
 {
-	WorkContext::~WorkContext()
-	{	//WorkContext save to recent files
-		if(this->fileContext && this->fileContext->HasPhysicalFile())
-		{
-			if(this->fileContext->GetType() == ProjectFileContext::typeid)
-				GlobalOptions::Instance->RecentFilesListAdd(cli::safe_cast<ProjectFileContext^ >(this->fileContext)->ProjectPath);
-			else
-				GlobalOptions::Instance->RecentFilesListAdd(this->fileContext->FilePath);
-		}
-	}
-	
 	void WorkContextBroker::Initialize(FormMain^ w, TabControl^ t)
 	{
 		Owner = t;
@@ -137,7 +126,7 @@ namespace BrainthreadIDE
 		newWorkContext->fileContext = openFileContext;
 		newWorkContext->editorTextBox->richTextBox->Text = openFileContext->Content;
 
-		if(openFileContext->GetType() == ProjectFileContext::typeid) //change highlither as in  pprojets options
+		if(newWorkContext->IsProjectContext) //change highlither as in  projets options
 		{
 			newWorkContext->settings = (cli::safe_cast<ProjectFileContext^ >(openFileContext))->settingsContent;
 			newWorkContext->syntaxHighLighter = SyntaxHighLighterFactory::createSyntaxHighLighter( newWorkContext->settings->GetLanguage() );
@@ -153,6 +142,8 @@ namespace BrainthreadIDE
 		TabPage ^ deletedTabPage = Owner->SelectedTab;
 		Owner->TabPages->Remove(deletedTabPage);
 
+		this->AddFileToHistory( contextPairs[deletedTabPage] );
+
 		delete contextPairs[deletedTabPage]->fileContext;
 		delete contextPairs[deletedTabPage];
 
@@ -161,6 +152,19 @@ namespace BrainthreadIDE
 		if(Owner->TabPages->Count < 1) {
 			this->AddPage();
 		}
+	}
+
+	void WorkContextBroker::ClonePage(void)
+	{
+		/*TabPage^ newTabPage = gcnew TabPage;
+		WorkContext ^ newWorkContext = gcnew WorkContext;
+
+		this->InitializeContext(newWorkContext);
+		this->AddContext(newTabPage, newWorkContext);
+
+		this->RefreshEditor(newWorkContext);*/
+
+		AddPage();
 	}
 
 	void WorkContextBroker::SavePage(void)
@@ -243,6 +247,26 @@ namespace BrainthreadIDE
 		{
 			etor.Current.Value->syntaxHighLighter = SyntaxHighLighterFactory::createSyntaxHighLighter( etor.Current.Value->settings->GetLanguage() );
 			this->RefreshEditor(etor.Current.Value);
+		}
+	}
+
+	void WorkContextBroker::AddFileToHistory(WorkContext ^ workContext)
+	{	//WorkContext save to history
+		if(workContext->fileContext && workContext->fileContext->HasPhysicalFile())
+		{
+			if(workContext->IsProjectContext)
+				GlobalOptions::Instance->RecentFilesListAdd(cli::safe_cast<ProjectFileContext^ >(workContext->fileContext)->ProjectPath);
+			else
+				GlobalOptions::Instance->RecentFilesListAdd(workContext->fileContext->FilePath);
+		}
+	}
+
+	void WorkContextBroker::AddFilesToHistory()
+	{
+		Dictionary<TabPage^, WorkContext^>::Enumerator etor = contextPairs->GetEnumerator();
+
+		while(etor.MoveNext()) {
+			this->AddFileToHistory(etor.Current.Value);
 		}
 	}
 

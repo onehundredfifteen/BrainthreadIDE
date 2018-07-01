@@ -4,16 +4,17 @@
 
 namespace BrainthreadIDE 
 {
-	InterpreterProcess::InterpreterProcess(bool runSelection)
+	/*InterpreterProcess::InterpreterProcess(bool runSelection)
 	{
-		worker = gcnew System::ComponentModel::BackgroundWorker();
-		worker->WorkerReportsProgress = false;
+		//worker = gcnew System::ComponentModel::BackgroundWorker();
+		//worker->WorkerReportsProgress = false;
+		//this->AttachWorkerEvents();
 
 		this->runSelection = runSelection;
-		this->processWorkContext = WorkContextBroker::Instance->GetCurrentContext();
+		//this->processWorkContext = WorkContextBroker::Instance->GetCurrentContext();
 
 		startInfo = gcnew ProcessStartInfo(GlobalOptions::Instance->InterpreterPath[ this->processWorkContext->settings->GetLanguage() ]);
-	}
+	}*/
 
 	String ^ InterpreterProcess::GetCodeLocationArgument()
 	{
@@ -21,7 +22,7 @@ namespace BrainthreadIDE
 		BrainthreadIDE::Language curLang = processWorkContext->settings->GetLanguage();
 
 		//try resolve pragmas
-		this->resolvePragmas();
+		this->ResolvePragmas();
 
 		//prepare source
 		if(this->processWorkContext->fileContext 
@@ -60,27 +61,11 @@ namespace BrainthreadIDE
 		}
 	}
 
-	bool InterpreterProcess::Working()
+	void InterpreterProcess::ResolvePragmas()
 	{
-		return worker->IsBusy;
-	}
+		PragmaResolver ^ pragmaResolver = gcnew PragmaResolver(this->Source, GlobalOptions::Instance->Plugins);
 
-	String ^ InterpreterProcess::GetStatusLabel()
-	{
-		if(this->Working())
-		{
-			return "interpreter is running";
-		}
-		else
-			return "interpreter is idle";
-	}
-
-	void InterpreterProcess::resolvePragmas()
-	{
-		PragmaResolver ^ pragmaResolver = gcnew PragmaResolver(this->Source, 
-															   GlobalOptions::Instance->Plugins);
-
-		if(pragmaResolver->HasPragmas() && this->runSelection == false) {
+		if(pragmaResolver->HasPragmas() /*&& this->runSelection == false*/) {
 				pragmaResolver->Resolve(processWorkContext, this->processWorkContext->settings->GetLanguage());
 		}
 	}

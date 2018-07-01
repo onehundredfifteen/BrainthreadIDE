@@ -38,10 +38,14 @@ namespace BrainthreadIDE
 		}
 	}
 
+	Debugger::!Debugger()
+	{
+		if(this->debuggerLoop)
+			delete this->debuggerLoop;
+	}
 	Debugger::~Debugger()
 	{
-		//if(this->debuggerLoop)
-			//delete this->debuggerLoop;
+		this->!Debugger();
 	}
 
 	void Debugger::RunStep()
@@ -260,7 +264,7 @@ namespace BrainthreadIDE
 				etor.Current.Value->MemoryInfoNode->BackColor = System::Drawing::Color::Yellow;
 		}
 
-		threadTreeView->Nodes->Add(String::Format("Functions call stack {0}", 0)); 
+		threadTreeView->Nodes->Add(String::Format("Functions call stack {0}", 0L)); 
 		threadTreeView->Nodes->Add(String::Format("Shared heap size: {0}", ProcessProperties.shstackinfo.list_size)); 
 		
 		treeViewExpander->Expand();
@@ -310,13 +314,13 @@ namespace BrainthreadIDE
 		this->threadResource[cur_id]->DeltaSteps = steps_ex;
 		
 		if(delta_steps > 1)
-			label->Text = String::Format("{0} @ instruction {1}, executed: {2} (+{3})", 
+			label->Text = String::Format("{0} at instruction {1}, executed: {2} (+{3})", 
 										thread_name, 
 										ProcessProperties.code_pointer_pos, 
 										ProcessProperties.steps_executed,
 										delta_steps);
 		else
-			label->Text = String::Format("{0} @ instruction {1}, executed: {2}", 
+			label->Text = String::Format("{0} at instruction {1}, executed: {2}", 
 										thread_name, 
 										ProcessProperties.code_pointer_pos, 
 										ProcessProperties.steps_executed);

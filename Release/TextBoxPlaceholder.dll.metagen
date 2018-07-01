@@ -1,0 +1,38 @@
+  TextBoxPlaceholder.TextBoxPlaceholderControl.resources - Embedded, ContainedInManifestFile, 
+ImageRuntimeVersion: v4.0.30319
+Assembly TextBoxPlaceholder, Version=1.0.*, Culture=Invariant Language (Invariant Country): 
+	hash=SHA1, flags=PublicKey
+Assembly mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
+	hash=None, flags=None
+Assembly System.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
+	hash=None, flags=None
+Assembly System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
+	hash=None, flags=None
+Assembly System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
+	hash=None, flags=None
+Assembly System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a: 
+	hash=None, flags=None
+Assembly System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
+	hash=None, flags=None
+Assembly System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
+	hash=None, flags=None
+Assembly Microsoft.VisualC, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a: 
+	hash=None, flags=None
+Class TextBoxPlaceholder.TextBoxPlaceholderControl: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+  :System.Windows.Forms.TextBox
+    Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Properties:
+    Boolean NoWhitespaceMode 'get set' : 
+    Boolean DefaultValueMode 'get set' : 
+    System.Drawing.Color PlaceHolderTextColor 'get set' : 
+    System.String PlaceHolderText 'get set' : 
+  Methods:
+    get_PlaceHolderText(): PrivateScope, Public, HideBySig, SpecialName
+    set_PlaceHolderText(String): PrivateScope, Public, HideBySig, SpecialName
+    get_PlaceHolderTextColor(): PrivateScope, Public, HideBySig, SpecialName
+    set_PlaceHolderTextColor(Color): PrivateScope, Public, HideBySig, SpecialName
+    get_DefaultValueMode(): PrivateScope, Public, HideBySig, SpecialName
+    set_DefaultValueMode(Boolean(HasFieldMarshal)): PrivateScope, Public, HideBySig, SpecialName
+    get_NoWhitespaceMode(): PrivateScope, Public, HideBySig, SpecialName
+    set_NoWhitespaceMode(Boolean(HasFieldMarshal)): PrivateScope, Public, HideBySig, SpecialName
+    isPlaceholderSet(): PrivateScope, Public, HideBySig

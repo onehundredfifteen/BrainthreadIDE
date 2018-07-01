@@ -3,6 +3,7 @@
 namespace BrainthreadIDE
 {
     using namespace System;	
+	using namespace System::Threading;
 	using namespace System::Windows::Forms;
 
 	public ref class uiBlinker

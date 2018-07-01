@@ -11,34 +11,59 @@ namespace BrainthreadIDE {
 	using namespace System::Collections;
 	using namespace System::Windows::Forms;
 	
-
+	public enum class FormProtipBehavior : int
+	{
+				Normal = 0,
+				LanguageInfo = 1
+	};
 	/// <summary>
 	/// Summary for FormProtip
 	/// </summary>
 	public ref class FormProtip : public System::Windows::Forms::Form
 	{
 	public:
-		FormProtip(void)
+		FormProtip(FormProtipBehavior formBehavior)
 		{
 			InitializeComponent();
 			//
 			//TODO: Add the constructor code here
 			//
+			this->formBehavior = formBehavior;
+
 			this->random = gcnew Random();
 			this->protip_index = 0;
 
-			FileContext ^ protipFileContext = gcnew FileContext(FileContext::BaseDirectory() + "\\res\\protips.dat");
+			FileContext ^ fileContext; 
 
-			if(protipFileContext->Open()) {
-				this->protips = protipFileContext->Content->Split(gcnew array<Char>(1){'\n'}, StringSplitOptions::RemoveEmptyEntries);
-				this->shuffleProtips();
+			if(this->formBehavior == FormProtipBehavior::Normal)
+			{
+				fileContext = gcnew FileContext(FileContext::BaseDirectory() + "\\res\\protips.dat");
+
+				if(fileContext->Open()) {
+					this->protips = fileContext->Content->Split(gcnew array<Char>(1){'\n'}, StringSplitOptions::RemoveEmptyEntries);
+					this->shuffleProtips();
+				}
+				else {
+					this->protips = gcnew array<String ^>(1){"Find protips.dat file :)))"};
+				}
 			}
-			else {
-				this->protips = gcnew array<String ^>(1){"Find protips.dat file :)))"};
+			else if(this->formBehavior == FormProtipBehavior::LanguageInfo)
+			{
+				 fileContext = gcnew FileContext(FileContext::BaseDirectory() + "\\res\\langdesc.dat");
+				 if(fileContext->Open()) {
+					this->textBox->Text = fileContext->Content;
+				 }
+
+				 this->textBox->Text += "\r\n\r\n\tlink to esoalng";
+				 this->Text = L"About Brainthread language";
+				 this->buttonNextProtip->Text = "Close";
+			}
+			else
+			{
+				this->protips = gcnew array<String ^>(1){"invalid behavior"};
 			}
 
 			this->ActiveControl = buttonNextProtip;  
-  
 		}
 
 	protected:
@@ -52,7 +77,7 @@ namespace BrainthreadIDE {
 				delete components;
 			}
 		}
-	private: System::Windows::Forms::TextBox^  textBox;
+	private: System::Windows::Forms::RichTextBox^  textBox;
 	protected: 
 	private: System::Windows::Forms::Button^  buttonNextProtip;
 	private: System::Windows::Forms::PictureBox^  pictureBox;
@@ -63,6 +88,7 @@ namespace BrainthreadIDE {
 		/// </summary>
 		System::ComponentModel::Container ^components;
 
+		FormProtipBehavior formBehavior;
 		Random^ random;
 		array<String ^> ^ protips;
 		int protip_index;
@@ -74,7 +100,7 @@ namespace BrainthreadIDE {
 		/// </summary>
 		void InitializeComponent(void)
 		{
-			this->textBox = (gcnew System::Windows::Forms::TextBox());
+			this->textBox = (gcnew System::Windows::Forms::RichTextBox());
 			this->buttonNextProtip = (gcnew System::Windows::Forms::Button());
 			this->pictureBox = (gcnew System::Windows::Forms::PictureBox());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->pictureBox))->BeginInit();
@@ -84,13 +110,13 @@ namespace BrainthreadIDE {
 			// 
 			this->textBox->BackColor = System::Drawing::SystemColors::Info;
 			this->textBox->Cursor = System::Windows::Forms::Cursors::Hand;
-			this->textBox->Font = (gcnew System::Drawing::Font(L"Lucida Console", 9.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+			this->textBox->Font = (gcnew System::Drawing::Font(L"Times New Roman", 11, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(238)));
 			this->textBox->Location = System::Drawing::Point(0, 85);
 			this->textBox->Multiline = true;
 			this->textBox->Name = L"textBox";
 			this->textBox->ReadOnly = true;
-			this->textBox->ScrollBars = System::Windows::Forms::ScrollBars::Vertical;
+			//this->textBox->ScrollBars = System::Windows::Forms::ScrollBars::Vertical;
 			this->textBox->Size = System::Drawing::Size(470, 192);
 			this->textBox->TabIndex = 0;
 			// 
@@ -140,16 +166,7 @@ namespace BrainthreadIDE {
 				 if(protip_index >= this->protips->Length)
 					 protip_index = 0;
 			 }
-	public:  void behaveAsLangInfoForm() {
 
-				 FileContext ^ protipFileContext = gcnew FileContext(FileContext::BaseDirectory() + "\\res\\langdesc.dat");
-				 if(protipFileContext->Open()) {
-					this->textBox->Text = protipFileContext->Content;
-				 }
-
-				 this->textBox->Text += "\r\n\r\n\tlink to esoalng";
-				 this->Text = L"About Brainthread language";
-			 }
 	private: void shuffleProtips() {
 
 				 for (int i = 0; i < this->protips->Length; ++i)
@@ -161,8 +178,16 @@ namespace BrainthreadIDE {
 				 }
 			 }
 	private: System::Void buttonNextProtip_Click(System::Object^  sender, System::EventArgs^  e) {
-
-				 getNextProtip();
+				//one button only xd
+				 if(this->formBehavior == FormProtipBehavior::Normal)
+				 {
+					 getNextProtip();
+				 }
+				 else if(this->formBehavior == FormProtipBehavior::LanguageInfo)
+				 {
+					 this->Close();
+				 }
+				 
 			 }
 	};
 }

@@ -14,12 +14,12 @@ namespace BrainthreadIDE
 				{
 					currentWorkContext->settings->Save();
 					
-					if(currentWorkContext->settings->GetInputString() == nullptr)
+					if(currentWorkContext->settings->GetRedirectionOption())
 					{
-						return gcnew RunCodeProcess(run_selection);
+						return gcnew RunCodeRedirectionProcess(currentWorkContext->settings->GetInputString(), run_selection);
 					}
 					else
-						return gcnew RunCodeRedirectionProcess(currentWorkContext->settings->GetInputString(), run_selection);
+						return gcnew RunCodeProcess(run_selection);
 				}
 
 				return nullptr;

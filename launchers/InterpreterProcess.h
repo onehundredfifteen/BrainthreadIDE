@@ -1,7 +1,7 @@
 #pragma once
 
+#include "BasicProcess.h"
 #include "../options/GlobalOptions.h"
-#include "../WorkContexts.h"
 
 namespace BrainthreadIDE 
 {
@@ -10,30 +10,30 @@ namespace BrainthreadIDE
 	using namespace System::Threading;
 	using namespace System::ComponentModel;
 
-	public ref class InterpreterProcess abstract
+	public ref class InterpreterProcess abstract : public BasicProcess
 	{
 	public:
-		InterpreterProcess(bool runSelection);
+		InterpreterProcess(bool runSelection) : BasicProcess()
+		{
+			this->runSelection = runSelection;
+			
+			startInfo = gcnew ProcessStartInfo(GlobalOptions::Instance->InterpreterPath[ this->processWorkContext->settings->GetLanguage() ]);
+		}
 
-		virtual bool Launch() = 0;
-		virtual void Stop() = 0;
-		bool Working();
+		virtual String ^ GetStatusLabel() = 0;
 
-		virtual String ^ GetStatusLabel();
-
-	public:
-		event System::EventHandler ^ OnStart;
-		event System::EventHandler ^ OnComplete;
+	protected:
+		String ^ GetCodeLocationArgument();
+		void ResolvePragmas();
 
 	protected:
 		Process ^ process;
 		ProcessStartInfo ^ startInfo;
-		WorkContext ^ processWorkContext;
-		System::ComponentModel::BackgroundWorker ^ worker;
-
+	
 	private:
 		bool runSelection;
 
+	private:
 		property String ^ Source
 		{
 			String ^ get()
@@ -44,8 +44,6 @@ namespace BrainthreadIDE
 					return processWorkContext->editorTextBox->richTextBox->SelectedText;
 			}
 		}
-	private:
-		void resolvePragmas();
 
 	public:
 		property WorkContext ^ ProcessWorkContext
@@ -55,8 +53,5 @@ namespace BrainthreadIDE
 				return processWorkContext;
 			}
 		}
-
-	protected:
-		String ^ GetCodeLocationArgument();
 	};
 }

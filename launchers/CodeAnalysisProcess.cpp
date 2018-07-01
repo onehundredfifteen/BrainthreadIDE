@@ -5,21 +5,16 @@ namespace BrainthreadIDE
 {
 	bool CodeAnalysisProcess::Launch()
 	{
-		if(Working())
+		if(this->Working)
 			return false;
 
 		this->OnStart(this, nullptr);
 		
 		processWorkContext->outputLister->AddOutputWithTimestamp("Task started");
 
-		worker->RunWorkerAsync();
+		this->worker->RunWorkerAsync();
 
 		return true;
-	}
-
-	void CodeAnalysisProcess::Stop()
-	{
-		return;
 	}
 
     void CodeAnalysisProcess::worker_DoWork(System::Object^ sender, System::ComponentModel::DoWorkEventArgs^ e) 
@@ -62,7 +57,7 @@ namespace BrainthreadIDE
 		
 		if(e->Error != nullptr /*|| cli::safe_cast<int>(e->Result) != 1*/)
 		{
-			processWorkContext->outputLister->AddOutputWithTimestamp("Code Analysis failed");
+			processWorkContext->outputLister->AddOutputWithTimestamp("Code parse failed");
 		}
 		else
 			processWorkContext->outputLister->AddOutputWithTimestamp("Task completed");

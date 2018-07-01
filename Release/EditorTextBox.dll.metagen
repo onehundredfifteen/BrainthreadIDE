@@ -1,0 +1,47 @@
+  EditorTextBox.EditorTextBoxControl.resources - Embedded, ContainedInManifestFile, 
+ImageRuntimeVersion: v4.0.30319
+Assembly EditorTextBox, Version=1.0.*, Culture=Invariant Language (Invariant Country): 
+	hash=SHA1, flags=PublicKey
+Assembly mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
+	hash=None, flags=None
+Assembly System.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
+	hash=None, flags=None
+Assembly System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
+	hash=None, flags=None
+Assembly System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
+	hash=None, flags=None
+Assembly System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a: 
+	hash=None, flags=None
+Assembly System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
+	hash=None, flags=None
+Assembly System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
+	hash=None, flags=None
+Assembly Microsoft.VisualC, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a: 
+	hash=None, flags=None
+Class EditorTextBox.EditorTextBoxControl: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+  :System.Windows.Forms.UserControl
+    Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Fields:
+    System.Windows.Forms.RichTextBox richTextBox : Public
+  Properties:
+    Boolean TabIndent 'get set' : 
+    UInt32 UndoLimit 'get set' : 
+    UInt32 GutterMargin 'get set' : 
+    System.Drawing.Color GutterForeColor 'get set' : 
+    System.Drawing.Color GutterBackColor 'get set' : 
+  Methods:
+    get_GutterBackColor(): PrivateScope, Public, HideBySig, SpecialName
+    set_GutterBackColor(Color): PrivateScope, Public, HideBySig, SpecialName
+    get_GutterForeColor(): PrivateScope, Public, HideBySig, SpecialName
+    set_GutterForeColor(Color): PrivateScope, Public, HideBySig, SpecialName
+    get_GutterMargin(): PrivateScope, Public, HideBySig, SpecialName
+    set_GutterMargin(UInt32): PrivateScope, Public, HideBySig, SpecialName
+    get_UndoLimit(): PrivateScope, Public, HideBySig, SpecialName
+    set_UndoLimit(UInt32): PrivateScope, Public, HideBySig, SpecialName
+    get_TabIndent(): PrivateScope, Public, HideBySig, SpecialName
+    set_TabIndent(Boolean(HasFieldMarshal)): PrivateScope, Public, HideBySig, SpecialName
+    Undo(): PrivateScope, Public, HideBySig
+    Redo(): PrivateScope, Public, HideBySig
+    CanUndo(): PrivateScope, Public, HideBySig
+    CanRedo(): PrivateScope, Public, HideBySig
+    ClearUndoHistory(): PrivateScope, Public, HideBySig

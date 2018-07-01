@@ -13,8 +13,6 @@ namespace BrainthreadIDE
 		{
 			BrainthreadIDE::Language curLang = processWorkContext->settings->GetLanguage();
 
-			this->AttachWorkerEvents();
-
 			if(GlobalOptions::Instance->CustomInterpreterFlag[ curLang ])
 			{
 				if(GlobalOptions::Instance->ReadLogFlag)
@@ -47,11 +45,15 @@ namespace BrainthreadIDE
 													 processWorkContext->settings->GetRunString());
 				}
 
-				if(false == GlobalOptions::Instance->PauseProgramAfterRun)
+				//pause only when option is set and is not a redirection
+				if(false == GlobalOptions::Instance->PauseProgramAfterRun 
+					&& false == this->ProcessWorkContext->settings->GetRedirectionOption())
 				{
 					startInfo->Arguments = startInfo->Arguments + " --nopause";
 				}	
 			}
+
+			worker->WorkerSupportsCancellation = true;
 
 			startInfo->UseShellExecute = false;
 			startInfo->CreateNoWindow = false;
@@ -69,7 +71,13 @@ namespace BrainthreadIDE
 	    virtual void Stop() override;
 
 	protected:
-		virtual void AttachWorkerEvents();
+		virtual void AttachWorkerEvents() override
+		{
+			worker->DoWork += gcnew System::ComponentModel::DoWorkEventHandler(this, &RunCodeProcess::worker_DoWork);
+			worker->RunWorkerCompleted += gcnew System::ComponentModel::RunWorkerCompletedEventHandler(this, &RunCodeProcess::worker_RunWorkerCompleted);
+		}
+
+	protected:
 		String ^ GetProcessStatistics();
 
 	private:

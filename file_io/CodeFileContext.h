@@ -43,7 +43,10 @@ namespace BrainthreadIDE
 			  saveFileDialog->RestoreDirectory = true;
 
 			  if(this->filePath)
-				saveFileDialog->InitialDirectory = Path::GetDirectoryName(this->filePath);
+			  {
+				  saveFileDialog->FileName = Path::GetFileName(this->filePath);
+				  saveFileDialog->InitialDirectory = Path::GetDirectoryName(this->filePath);
+			  }
 			  //else
 				//saveFileDialog->InitialDirectory = Environment->GetFolderPath(Environment::SpecialFolder::MyDocuments);
 

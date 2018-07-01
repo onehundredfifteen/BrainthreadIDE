@@ -10,7 +10,7 @@ namespace BrainthreadIDE
 			{
 				int i, p_cnt = 1;
 
-				if(code[pos] != '[')
+				if(pos >= code->Length || code[pos] != '[')
 					return pos;
 
 				for(i = pos + 1; p_cnt && i < code->Length; ++i)

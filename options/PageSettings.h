@@ -26,8 +26,9 @@ namespace BrainthreadIDE
 		String ^ GetCustomRunString(void);
 		String ^ GetAdditionalCommandsString(void);
 		String ^ GetInputString(void);
-
+		
 		BrainthreadIDE::Language GetLanguage(void);
+		bool GetRedirectionOption(void);
 		
 		void WriteOptions(XmlDocument^ xmldoc);
 		void ReadOptions(XmlDocument^ xmldoc);

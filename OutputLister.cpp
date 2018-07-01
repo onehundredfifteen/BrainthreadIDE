@@ -90,23 +90,33 @@ namespace BrainthreadIDE
 	{
 		OutputLister::OutputItem ^item = gcnew OutputLister::OutputItem;
 
+		int i_at = line->IndexOf(cInstructionAt);
+		int col_at = line->IndexOf(':');
+
 		if(line->StartsWith(cError))
 		{
 			item->kind = cError;
-			item->instruction = GetInstructionFromLine(line);
-			item->description = line->Substring(line->IndexOf(':') + 1, line->IndexOf(cInstructionAt) - line->IndexOf(':') - 1)->Trim();
+
+			if(i_at > 0) {
+				item->instruction = GetInstructionFromLine(line);
+				item->description = line->Substring(col_at + 1, i_at - col_at - 1)->Trim();
+			}
+			else {
+				item->instruction = 0;
+				item->description = line->Substring(col_at + 1)->Trim();
+			}
 		}
 		else if(line->StartsWith(cWarning))
 		{
 			item->kind = cWarning;
 			item->instruction = GetInstructionFromLine(line);
-			item->description = line->Substring(line->IndexOf(':') + 1, line->IndexOf(cInstructionAt) - line->IndexOf(':') - 1)->Trim();
+			item->description = line->Substring(col_at + 1, i_at - col_at - 1)->Trim();
 		}
 		else if(line->StartsWith(cMessage))
 		{
 			item->kind = cMessage;
 			item->instruction = 0;
-			item->description = line->Substring(line->IndexOf(':') + 1)->Trim();
+			item->description = line->Substring(col_at + 1)->Trim();
 
 			if(line->Contains(cCodeHas))//warnings or errors goes on top of list
 				item->important = true;
@@ -115,7 +125,7 @@ namespace BrainthreadIDE
 		{
 			item->kind = cMessage;
 			item->instruction = 0;
-			item->description = line->Substring(line->IndexOf(':') + 1)->Trim();
+			item->description = line->Substring(col_at + 1)->Trim();
 			item->important = true;
 		}
 		else if(line->Contains(cTooManyWarnings))

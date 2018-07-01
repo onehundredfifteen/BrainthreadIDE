@@ -25,14 +25,6 @@ namespace BrainthreadIDE
 		this->OnComplete(this, EventArgs::Empty);
 	}
 
-	void RunCodeProcess::AttachWorkerEvents()
-	{
-		worker->WorkerSupportsCancellation = true;
-
-		worker->DoWork += gcnew System::ComponentModel::DoWorkEventHandler(this, &RunCodeProcess::worker_DoWork);
-		worker->RunWorkerCompleted += gcnew System::ComponentModel::RunWorkerCompletedEventHandler(this, &RunCodeProcess::worker_RunWorkerCompleted);
-	}
-
     void RunCodeProcess::worker_DoWork(System::Object^ sender, System::ComponentModel::DoWorkEventArgs^ e) 
 	{
 		try
@@ -44,7 +36,7 @@ namespace BrainthreadIDE
 		}
 		catch(Exception ^ ex)
 		{
-			String ^msg = String::Format("Cannot run code. Reason: {0}", ex->Message);
+			String ^msg = String::Format("Cannot run the program. Reason: {0}", ex->Message);
 			processWorkContext->outputLister->AddOutputWithTimestamp(msg);
 			MessageBox::Show(msg, "Launch error", MessageBoxButtons::OK, MessageBoxIcon::Error);
 
@@ -67,9 +59,9 @@ namespace BrainthreadIDE
 				}
 				catch(Exception ^ ex)
 				{
-					String ^msg = String::Format("Cannot stop process. Reason: {0}", ex->Message);
+					String ^msg = String::Format("Cannot cancel the process now. Reason: {0}", ex->Message);
 					processWorkContext->outputLister->AddOutputWithTimestamp(msg);
-					MessageBox::Show(msg, "Launch error", MessageBoxButtons::OK, MessageBoxIcon::Error);
+					MessageBox::Show(msg, "Cancellation error", MessageBoxButtons::OK, MessageBoxIcon::Error);
 				}
 				break;
 			}

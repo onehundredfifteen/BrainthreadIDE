@@ -47,10 +47,23 @@ namespace BrainthreadIDE
 	//other functions
 	void GlobalOptions::RecentFilesListAdd(String ^ newFileName)
 	{				
-		if(false == recentFilesList->Contains(newFileName) && System::IO::File::Exists(newFileName))
+		if(System::IO::File::Exists(newFileName))
 		{
-			recentFilesList->Enqueue( newFileName );
+			if(true == recentFilesList->Contains(newFileName))
+			{ //recreate queue with this file at first pos
+				auto queue = gcnew System::Collections::Generic::Queue<String ^>(recentFilesList->Count);
 
+				for each(String ^ str in recentFilesList->ToArray()) {
+					if(str != newFileName) // miss existing file
+						queue->Enqueue(str);		
+				}
+
+				delete recentFilesList;
+				recentFilesList = queue;
+			}
+
+			recentFilesList->Enqueue( newFileName );
+			
 			if(recentFilesList->Count > maxrecentFilesListCount)
 				recentFilesList->Dequeue();
 		}

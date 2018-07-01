@@ -190,6 +190,11 @@ namespace BrainthreadIDE
 		return selLanguage;
 	}
 
+	bool PageSettings::GetRedirectionOption(void)
+	{
+		return selRedirectStreams;
+	}
+
 	void PageSettings::WriteOptions(XmlDocument^ xmldoc)
 	{
 		XmlElement ^ nodeRoot = xmldoc->DocumentElement;

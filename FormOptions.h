@@ -520,9 +520,9 @@ namespace BrainthreadIDE {
 			this->label1->ForeColor = System::Drawing::Color::RoyalBlue;
 			this->label1->Location = System::Drawing::Point(17, 289);
 			this->label1->Name = L"label1";
-			this->label1->Size = System::Drawing::Size(330, 13);
+			this->label1->Size = System::Drawing::Size(433, 13);
 			this->label1->TabIndex = 3;
-			this->label1->Text = L"You can change Threading options during debugging process.";
+			this->label1->Text = L"You can change options on the Threading tab any time during debugging process.";
 			// 
 			// groupBoxDebuggerWndPos
 			// 
@@ -666,9 +666,9 @@ namespace BrainthreadIDE {
 			// 
 			// buttonSortPluginList
 			// 
-			this->buttonSortPluginList->Location = System::Drawing::Point(526, 32);
+			this->buttonSortPluginList->Location = System::Drawing::Point(538, 32);
 			this->buttonSortPluginList->Name = L"buttonSortPluginList";
-			this->buttonSortPluginList->Size = System::Drawing::Size(127, 23);
+			this->buttonSortPluginList->Size = System::Drawing::Size(115, 23);
 			this->buttonSortPluginList->TabIndex = 4;
 			this->buttonSortPluginList->Text = L"Sort plugin list";
 			this->buttonSortPluginList->UseVisualStyleBackColor = true;
@@ -679,15 +679,15 @@ namespace BrainthreadIDE {
 			this->labelPluginInfo->AutoSize = true;
 			this->labelPluginInfo->Location = System::Drawing::Point(19, 37);
 			this->labelPluginInfo->Name = L"labelPluginInfo";
-			this->labelPluginInfo->Size = System::Drawing::Size(217, 13);
+			this->labelPluginInfo->Size = System::Drawing::Size(374, 13);
 			this->labelPluginInfo->TabIndex = 3;
-			this->labelPluginInfo->Text = L"Choosed plugins are allowed to execute.";
+			this->labelPluginInfo->Text = L"Choosed plugins are allowed to execute and come from trusted source.";
 			// 
 			// buttonCheckAllPlugins
 			// 
-			this->buttonCheckAllPlugins->Location = System::Drawing::Point(263, 32);
+			this->buttonCheckAllPlugins->Location = System::Drawing::Point(417, 32);
 			this->buttonCheckAllPlugins->Name = L"buttonCheckAllPlugins";
-			this->buttonCheckAllPlugins->Size = System::Drawing::Size(127, 23);
+			this->buttonCheckAllPlugins->Size = System::Drawing::Size(115, 23);
 			this->buttonCheckAllPlugins->TabIndex = 2;
 			this->buttonCheckAllPlugins->Text = L"Check all plugins";
 			this->buttonCheckAllPlugins->UseVisualStyleBackColor = true;
@@ -1060,10 +1060,11 @@ private: System::Void dataGridViewInterpreter_CellFormatting(System::Object^  se
 		 }
 private: System::Void dataGridViewInterpreter_CellContentClick(System::Object^  sender, System::Windows::Forms::DataGridViewCellEventArgs^  e) {
 			 //datagridview button click
-			 DataGridViewCell ^ path_cell = dataGridViewInterpreter->Rows[e->RowIndex]->Cells[0];
-
-			 if (e->ColumnIndex == 2)
+			 
+			 if (e->ColumnIndex == 2 && e->RowIndex >= 0) //sometimes i'm getting RowIndex = -1 ;o
 			 {
+				  DataGridViewCell ^ path_cell = dataGridViewInterpreter->Rows[e->RowIndex]->Cells[0];
+				 
 				  OpenFileDialog ^ openFileDialog = gcnew OpenFileDialog();
 				  openFileDialog->Filter = cIntOpenDialogFilters;
 			      openFileDialog->InitialDirectory = FileContext::GetDirectory(dynamic_cast<String^>(path_cell->Value));  

@@ -12,15 +12,7 @@ namespace BrainthreadIDE
 		CodeAnalysisProcess(bool run_selection) : InterpreterProcess(run_selection)
 		{
 			outputStrings = gcnew List<String ^>;
-	        	
-			worker->WorkerSupportsCancellation = false;
 
-			if( this->GetType() == CodeAnalysisProcess::typeid)
-			{ //other way doing this in RunCodeProcess 4fun
-				worker->DoWork += gcnew System::ComponentModel::DoWorkEventHandler(this, &CodeAnalysisProcess::worker_DoWork);
-			}
-			worker->RunWorkerCompleted += gcnew System::ComponentModel::RunWorkerCompletedEventHandler(this, &CodeAnalysisProcess::worker_RunWorkerCompleted);
-		
 			startInfo->Arguments = String::Format("-a {0} --verbose all --nopause",
 												 this->GetCodeLocationArgument());
 
@@ -36,10 +28,20 @@ namespace BrainthreadIDE
 		}
 
 		virtual bool Launch() override;
-	    virtual void Stop() override;
 
 	protected:
+		virtual void AttachWorkerEvents() override
+		{
+			worker->WorkerSupportsCancellation = false;
+			
+			worker->DoWork += gcnew System::ComponentModel::DoWorkEventHandler(this, &CodeAnalysisProcess::worker_DoWork);
+			worker->RunWorkerCompleted += gcnew System::ComponentModel::RunWorkerCompletedEventHandler(this, &CodeAnalysisProcess::worker_RunWorkerCompleted);
+		}
+
+	protected:
+
 		void worker_DoWork(System::Object^ sender, System::ComponentModel::DoWorkEventArgs^ e);
+	public:
 		void worker_RunWorkerCompleted(System::Object^ sender, System::ComponentModel::RunWorkerCompletedEventArgs^  e);
 
 	private:

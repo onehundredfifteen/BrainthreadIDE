@@ -10,7 +10,7 @@ namespace BrainthreadIDE
 	public ref class RunCodeRedirectionProcess : public RunCodeProcess
 	{
 	public:
-		RunCodeRedirectionProcess(String ^input_str, bool run_selection) : RunCodeProcess(run_selection)
+		RunCodeRedirectionProcess(String ^ input_str, bool run_selection) : RunCodeProcess(run_selection)
 		{
 			outputStrings = gcnew List<String ^>;
 
@@ -22,13 +22,21 @@ namespace BrainthreadIDE
 			startInfo->RedirectStandardInput = true;
 
 			//dont affect this process ->flag is not set
-			if(true == GlobalOptions::Instance->PauseProgramAfterRun) {
+			/*if(true == GlobalOptions::Instance->PauseProgramAfterRun) {
 				startInfo->Arguments = startInfo->Arguments + " --nopause";
-			}
+			}*/
 		}
 
 	protected:
-		virtual void AttachWorkerEvents() override;
+		virtual void AttachWorkerEvents() override
+		{
+			worker->WorkerSupportsCancellation = true;
+			worker->WorkerReportsProgress = true;
+
+			worker->DoWork += gcnew System::ComponentModel::DoWorkEventHandler(this, &RunCodeRedirectionProcess::worker_DoWork);
+			worker->RunWorkerCompleted += gcnew System::ComponentModel::RunWorkerCompletedEventHandler(this, &RunCodeRedirectionProcess::worker_RunWorkerCompleted);
+			worker->ProgressChanged += gcnew System::ComponentModel::ProgressChangedEventHandler(this, &RunCodeRedirectionProcess::worker_ProgressChanged);
+		}
 
 	private:
 		String ^input;

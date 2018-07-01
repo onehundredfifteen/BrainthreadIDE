@@ -11,24 +11,23 @@ namespace BrainthreadIDE
 {
 	bool DebugCodeProcess::Launch()
 	{
-		CodeParseProcess ^ parseProcess;
-		
-		if(this->Working())
+		if(this->Working)
 			return false;
 
 		this->OnStart(this, EventArgs::Empty);
 
-		parseProcess = gcnew CodeParseProcess(this->processWorkContext, false);
+		CodeParseProcess ^ parseProcess = gcnew CodeParseProcess(this->processWorkContext, false);
 
 		//chain launch debugger -> launch after successfull parse
 		parseProcess->OnComplete += gcnew System::EventHandler(this, &DebugCodeProcess::LaunchDebugger); //!
 
-		if(parseProcess->Launch() == false)
+		if(false == parseProcess->Launch())
 		{
-			processWorkContext->outputLister->AddOutputWithTimestamp("Cannot parse the code.");
-			MessageBox::Show("Cannot parse the code.", "Cannot launch parser", MessageBoxButtons::OK, MessageBoxIcon::Error);
+			processWorkContext->outputLister->AddOutputWithTimestamp("The parser cannot be started.");
+			processWorkContext->outputLister->AddIDEOutput("The debugging process can't be completed due to the pending task.");
+			MessageBox::Show("The parser cannot be started", "Terminating", MessageBoxButtons::OK, MessageBoxIcon::Error);
 			
-			this->OnComplete(this, EventArgs::Empty);
+			this->OnComplete(this, gcnew EventArgs);
 			return false;
 		}
 	 
@@ -40,14 +39,14 @@ namespace BrainthreadIDE
 		//processWorkContext->outputLister->Clear();
 		if(cli::safe_cast<CodeParseProcess^ >(sender)->ValidCode == false)
 		{
-			processWorkContext->outputLister->AddOutputWithTimestamp("Cannot launch debugger due to errors in code.");
-			MessageBox::Show("The code contains errors", "Cannot launch debugger", MessageBoxButtons::OK, MessageBoxIcon::Exclamation);
+			processWorkContext->outputLister->AddOutputWithTimestamp("The debugging process can't be completed due to errors in the code.");
+			MessageBox::Show("Your code contains errors.", "Cannot launch debugger", MessageBoxButtons::OK, MessageBoxIcon::Exclamation);
 
 			this->OnComplete(this, gcnew EventArgs);
 			return;
 		}
 
-		processWorkContext->outputLister->AddOutput(gcnew String('-', 35)); //chained with parser process
+		processWorkContext->outputLister->AddIDEOutput(gcnew String('-', 30)); //chained with parser process
 		processWorkContext->outputLister->AddOutputWithTimestamp(String::Format("Debugging with args: {0}", startInfo->Arguments));
 		
 		try
@@ -81,8 +80,6 @@ namespace BrainthreadIDE
 		worker->CancelAsync();
 		debugger->Finish();	
 
-		//delete debugger;
-
 		this->OnComplete(this, EventArgs::Empty);
 	}
 
@@ -91,17 +88,7 @@ namespace BrainthreadIDE
 		worker->CancelAsync();
 		debugger->DetachDebugee(); 
 		
-		//delete debugger;
-
 		this->OnComplete(this, EventArgs::Empty);
-	}
-
-	void DebugCodeProcess::AttachWorkerEvents()
-	{
-		worker->WorkerSupportsCancellation = true;
-
-		worker->DoWork += gcnew System::ComponentModel::DoWorkEventHandler(this, &DebugCodeProcess::worker_DoWork);
-		worker->RunWorkerCompleted += gcnew System::ComponentModel::RunWorkerCompletedEventHandler(this, &DebugCodeProcess::worker_RunWorkerCompleted);
 	}
 
     void DebugCodeProcess::worker_DoWork(System::Object^ sender, System::ComponentModel::DoWorkEventArgs^ e) 
@@ -127,7 +114,6 @@ namespace BrainthreadIDE
 		{
 			processWorkContext->outputLister->AddOutputWithTimestamp(String::Format("Program exited with code {0}", debugger->DebugeeExitCode));
 			processWorkContext->outputLister->AddIDEOutput("Debugging completed");
-			//delete debugger;
 		}
 
 		this->OnComplete(this, EventArgs::Empty);

@@ -1,7 +1,10 @@
 #pragma once
 
 #include "WorkContexts.h"
-#include "helpers/BtConstantsCreator.h"
+
+#include "helpers/InputCharFormatter.h"
+#include "helpers/BtOutputGenerator.h"
+#include "helpers/BtConstantsGenerator.h"
 #include "helpers/ui/uiBevel.h"
 
 
@@ -14,17 +17,25 @@ namespace BrainthreadIDE {
 	using namespace System::Data;
 	using namespace System::Drawing;
 
+	public enum class FormInsertBehavior : int
+	{
+				InsertConstant = 0,
+				InsertString = 1
+	};
 	/// <summary>
 	/// Summary for FormInsert
 	/// </summary>
 	public ref class FormInsert : public System::Windows::Forms::Form
 	{
 	public:
-		FormInsert(void)
+		FormInsert(FormInsertBehavior formInsertBehavior)
 		{
 			InitializeComponent();
 			
+			this->formBehavior = formInsertBehavior;
 			uiHorizontalLineBevel ^ bevel = gcnew uiHorizontalLineBevel(groupBox, 17, 78);
+
+			InitializeComponentForBehavior();
 		}
 
 	protected:
@@ -54,6 +65,8 @@ namespace BrainthreadIDE {
 		/// Required designer variable.
 		/// </summary>
 		System::ComponentModel::Container ^components;
+
+		FormInsertBehavior formBehavior;
 
 #pragma region Windows Form Designer generated code
 		/// <summary>
@@ -182,6 +195,24 @@ namespace BrainthreadIDE {
 			this->ResumeLayout(false);
 
 		}
+
+		void InitializeComponentForBehavior(void)
+		{
+			if(this->formBehavior == FormInsertBehavior::InsertString)
+			{
+				this->textBoxValue->Multiline = true;
+				this->textBoxValue->Size = System::Drawing::Size(252, 22*3);
+				
+				//checkBoxOpCloseAfterInsert->Visible = false;
+				checkBoxOpOver->Visible = false;
+				//checkBoxOpNewline->Visible = false;
+				checkBoxOpNull->Visible = false;
+
+				groupBox->Text = "Type a string to convert to brainfuck code";
+				this->Text = L"Generate a printable string";
+			}
+
+		}
 #pragma endregion
 
 private: System::Void buttonInsert_Click(System::Object^  sender, System::EventArgs^  e) {
@@ -190,28 +221,64 @@ private: System::Void buttonInsert_Click(System::Object^  sender, System::EventA
 				 String ^ to_insert;
 				 WorkContext ^ currentWorkContext = WorkContextBroker::Instance->GetCurrentContext();
 
-				 //generate
-				 if (Int32::TryParse(textBoxValue->Text, number)) {
-					 to_insert = BtConstantsCreator::GetNumberConstant(number)->ToString();
+				 if(this->formBehavior == FormInsertBehavior::InsertString)
+				 {
+					 to_insert = BtOutputGenerator::Generate(textBoxValue->Text);
 				 }
-				 else if (textBoxValue->Text->Length == 1){
-					 const auto asciiBytes = Encoding::ASCII->GetBytes(textBoxValue->Text->Substring(0,1));
-					 to_insert = BtConstantsCreator::GetNumberConstant(asciiBytes[0])->ToString();
-				 }
-				 else if(textBoxValue->Text == "_list") { //insert list 15-1000
+				 else
+				 {
+					 //generate from number
+					 if (Int32::TryParse(textBoxValue->Text, number)) {
+						 to_insert = BtConstantsGenerator::Generate(number);
+					 }
+					 else if (textBoxValue->Text->Length == 1){
+						 //generate from char
+						 const auto asciiBytes = Encoding::ASCII->GetBytes(textBoxValue->Text->Substring(0,1));
+						 to_insert = BtConstantsGenerator::Generate(asciiBytes[0]);
+					 }
+					 else if(textBoxValue->Text == "_list") { //insert list 15-1000
+						 //generate list
+						 to_insert = "+([-]++++++++++.)>";
+						 for(int i = 15; i <= 1000; ++i) {
+							  to_insert += BtConstantsGenerator::Generate(i) + ":>+*>\n ";
+							  if(i == 255) {
+								  to_insert += "\n";
+							  }
+						 }
+					 }
+					 else 
+					 {
+						 //generate string
+						 StringBuilder ^ sb = gcnew StringBuilder(">");
+						 String ^ str = InputCharFormatter::Format(textBoxValue->Text);
+				 
+						 for each(char c in str)
+						 {
+								String ^ s = BtConstantsGenerator::GetNumberConstantReversed((int)c);
+							
+								if(BtConstantsGenerator::HasMultipleLoops(s)) {
+									sb->Append(BtConstantsGenerator::Generate((int)c));
+									sb->Append(" ");
+									//sb->Append(gcnew String(c)); //comment
+									sb->Append(" >");
+								}
+								else {
+									sb->Append(s);
+									sb->Append(" ");
+									//sb->Append(gcnew String(c)); //comment
+									sb->Append(" >>");	
+								}
 
-					 to_insert = "+([-]++++++++++.)>";
-					 for(int i = 15; i <= 1000; ++i) {
-						  to_insert += BtConstantsCreator::GetNumberConstant(i)->ToString() + ":>+*>\n ";
-						  if(i == 255) {
-							  to_insert += "\n";
-						  }
+							
+							
+						 }
+
+						 sb->Remove(sb->Length-2,2); //trim last '>>'
+						 to_insert = sb->ToString();
 					 }
 				 }
-				 else {
-					 MessageBox::Show("Cannot insert strings - only numbers or individual characters are valid", "Type a number or a character", MessageBoxButtons::OK, MessageBoxIcon::Exclamation);
-					 return;
-				 }
+
+				 //finalizing
 
 				 //force zero
 				 if(checkBoxOpNull->Checked == true)
@@ -231,7 +298,7 @@ private: System::Void buttonInsert_Click(System::Object^  sender, System::EventA
 				 //close
 				 if(checkBoxOpCloseAfterInsert->Checked == true)
 				 {
-					 Close();
+					 buttonCancel_Click(sender, e);
 				 }
 			 }
 private: System::Void buttonCancel_Click(System::Object^  sender, System::EventArgs^  e) {

@@ -12,7 +12,15 @@ namespace BrainthreadIDE
 	public:
 		DebugCodeProcess(System::Drawing::Rectangle mainwindow_location, bool run_selection) : RunCodeProcess(run_selection)
 		{
-			mainWindowLocation = mainwindow_location;
+			BrainthreadIDE::Language curLang = processWorkContext->settings->GetLanguage();
+			this->mainWindowLocation = mainwindow_location;
+
+			//if forced to stop after run, remove that flag
+			if(GlobalOptions::Instance->CustomInterpreterFlag[ curLang ] &&
+				true == GlobalOptions::Instance->PauseProgramAfterRun)
+			{
+				startInfo->Arguments = startInfo->Arguments->Replace("--nopause", String::Empty);
+			}	
 		}
 		
 		property Debugger^ DebuggerInstance
@@ -38,7 +46,13 @@ namespace BrainthreadIDE
 		void MoveCarretToPosition(int new_pos);
 
 	protected:
-		virtual void AttachWorkerEvents() override; 
+		virtual void AttachWorkerEvents() override
+		{
+			worker->WorkerSupportsCancellation = true;
+			
+			worker->DoWork += gcnew System::ComponentModel::DoWorkEventHandler(this, &DebugCodeProcess::worker_DoWork);
+			worker->RunWorkerCompleted += gcnew System::ComponentModel::RunWorkerCompletedEventHandler(this, &DebugCodeProcess::worker_RunWorkerCompleted);
+		}
 
 	private:
 		void worker_DoWork(System::Object^ sender, System::ComponentModel::DoWorkEventArgs^ e);

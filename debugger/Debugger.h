@@ -17,6 +17,7 @@ namespace BrainthreadIDE
 	{
 	public:	
 		Debugger(String ^ exe_path, String ^ args);
+		!Debugger();
 		~Debugger();
 
 	public:
@@ -152,5 +153,10 @@ namespace BrainthreadIDE
 
 		int getMemoryLen();
 		int getCurrentThreadId(); 
+
+	public: static String ^ DebuggerVersion()
+		{
+			return "0.2d";
+		}
 	};
 }

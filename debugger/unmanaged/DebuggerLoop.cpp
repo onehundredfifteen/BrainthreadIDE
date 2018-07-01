@@ -99,10 +99,11 @@ namespace BrainthreadIDE
 			CloseHandle(hSymbolFile);
 			return false;
 		}*/
-		useEcx = (debug_flags[0] == 0x73);
+		useEcx = (debug_flags[0] == 0x73); // 0x73 is my flag value if set
 
 		res = CloseHandle(hSymbolFile);
-		return res;
+
+		return res == TRUE; //for c4805 warning
 	}
 
 	void DebuggerLoop::Step(int cp)

@@ -1,0 +1,63 @@
+﻿Build started 2018-01-10 20:35:08.
+     1>Project "P:\Projekty c++\Brainthread\BrainthreadIDE\BrainthreadIDE\BrainthreadIDE.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Creating "Debug\BrainthreadIDE.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       GenerateTargetFrameworkMonikerAttribute:
+       Skipping target "GenerateTargetFrameworkMonikerAttribute" because all output files are up-to-date with respect to the input files.
+       ClCompile:
+         All outputs are up-to-date.
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /AI"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0" /Zi /clr:pure /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _UNICODE /D UNICODE /EHa /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yu"StdAfx.h" /Fp"Debug\BrainthreadIDE.pch" /Fo"Debug\\" /Fd"Debug\vc100.pdb" /TP /FU"P:\Projekty c++\Brainthread\BrainthreadIDE\Debug\EditorTextBox.dll" /FU"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Core.dll" /FU"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Data.dll" /FU"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.dll" /FU"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Drawing.dll" /FU"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Windows.Forms.dll" /FU"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Xml.dll" /FU"P:\Projekty c++\Brainthread\BrainthreadIDE\Debug\TextBoxPlaceholder.dll" /analyze- /errorReport:prompt BrainthreadIDE.cpp WorkContexts.cpp debugger\Debugger.cpp launchers\CodeAnalysisProcess.cpp launchers\CodeParseProcess.cpp launchers\DebugCodeProcess.cpp launchers\InterpreterProcess.cpp launchers\RunCodeProcess.cpp launchers\RunCodeRedirectionProcess.cpp launchers\RunCodeSeparateProcess.cpp options\GlobalOptions.cpp /clr:nostdlib 
+         BrainthreadIDE.cpp
+         WorkContexts.cpp
+         Debugger.cpp
+     1>debugger\Debugger.cpp(209): warning C4965: implicit box of integer 0; use nullptr or explicit cast
+     1>debugger\Debugger.cpp(281): warning C4101: 'childNode' : unreferenced local variable
+         CodeAnalysisProcess.cpp
+         CodeParseProcess.cpp
+         DebugCodeProcess.cpp
+         InterpreterProcess.cpp
+         RunCodeProcess.cpp
+         RunCodeRedirectionProcess.cpp
+         RunCodeSeparateProcess.cpp
+         GlobalOptions.cpp
+         Generating Code...
+         All outputs are up-to-date.
+       CoreResGen:
+         No resources are out of date with respect to their source files. Skipping resource generation.
+       ResourceCompile:
+         All outputs are up-to-date.
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"P:\Projekty c++\Brainthread\BrainthreadIDE\Debug\BrainthreadIDE.exe" /INCREMENTAL /NOLOGO /ASSEMBLYRESOURCE:Debug\BrainthreadIDE.FormInsert.resources /ASSEMBLYRESOURCE:Debug\BrainthreadIDE.FormMain.resources /ASSEMBLYRESOURCE:Debug\BrainthreadIDE.FormOptions.resources /ASSEMBLYRESOURCE:Debug\BrainthreadIDE.IdeOptions.resources /MANIFEST /ManifestFile:"Debug\BrainthreadIDE.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"P:\Projekty c++\Brainthread\BrainthreadIDE\Debug\BrainthreadIDE.pdb" /ASSEMBLYDEBUG /SUBSYSTEM:WINDOWS /TLBID:1 /ENTRY:"main" /DYNAMICBASE /FIXED:NO /NXCOMPAT /MACHINE:X86 Debug\app.res
+         Debug\AssemblyInfo.obj
+         Debug\BrainthreadIDE.obj
+         Debug\Breakpoint.obj
+         Debug\DebugTimeException.obj
+         Debug\DebuggerLoop.obj
+         Debug\BtConstantsCreator.obj
+         Debug\CodeAnalysisProcess.obj
+         Debug\CodeParseProcess.obj
+         Debug\DebugCodeProcess.obj
+         Debug\Debugger.obj
+         Debug\InterpreterProcess.obj
+         Debug\RunCodeRedirectionProcess.obj
+         Debug\RunCodeProcess.obj
+         Debug\RunCodeSeparateProcess.obj
+         Debug\OptiomField.obj
+         Debug\PageSettings.obj
+         Debug\GlobalOptions.obj
+         Debug\OutputLister.obj
+         Debug\WorkContexts.obj
+         Debug\stdafx.obj
+         Debug\SyntaxHighLighter.obj
+         "Debug\.NETFramework,Version=v4.0.AssemblyAttributes.obj"
+         BrainthreadIDE.vcxproj -> P:\Projekty c++\Brainthread\BrainthreadIDE\Debug\BrainthreadIDE.exe
+       Manifest:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /outputresource:"P:\Projekty c++\Brainthread\BrainthreadIDE\Debug\BrainthreadIDE.exe;#1" /manifest Debug\BrainthreadIDE.exe.intermediate.manifest
+       FinalizeBuildStatus:
+         Deleting file "Debug\BrainthreadIDE.unsuccessfulbuild".
+         Touching "Debug\BrainthreadIDE.lastbuildstate".
+     1>Done Building Project "P:\Projekty c++\Brainthread\BrainthreadIDE\BrainthreadIDE\BrainthreadIDE.vcxproj" (build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:07.47

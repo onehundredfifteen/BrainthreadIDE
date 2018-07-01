@@ -35,11 +35,35 @@ namespace BrainthreadIDE
 
 		virtual String ^ GetStatusLabel() override
 		{
-				return "Launched program";
+			return "Launched program";
 		}
 
-		virtual bool Launch() override;
-	    virtual void Stop() override;	
+		virtual bool Launch() override
+		{
+			this->OnStart(this, EventArgs::Empty);
+			
+			processWorkContext->outputLister->AddOutputWithTimestamp(String::Format("Running {0} separately with args: {1}", Path::GetFileName(startInfo->FileName),
+																															 startInfo->Arguments));
+		
+			try
+			{
+				process = gcnew Process;
+			
+				process->StartInfo = this->startInfo;
+				process->Start();
+			}
+			catch(Exception ^ ex)
+			{
+				String ^msg = String::Format("Cannot run the program. Reason: {0}", ex->Message);
+				processWorkContext->outputLister->AddOutputWithTimestamp(msg);
+				MessageBox::Show(msg, "Launch error", MessageBoxButtons::OK, MessageBoxIcon::Error);
+				process->Close();
+			}
+
+			this->OnComplete(this, EventArgs::Empty);
+
+			return true;
+		}
 	};
 }
 
