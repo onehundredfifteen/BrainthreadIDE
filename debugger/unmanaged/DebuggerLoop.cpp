@@ -266,8 +266,8 @@ namespace BrainthreadIDE
 		process_properties.steps_executed = curThread->StepsExecuted;
 		process_properties.thread_id = curThread->Id;
 
-		process_properties.meminfo.memory_len = mte.len;
-		process_properties.meminfo.pointer_pos = (unsigned int)mte.pointer - (unsigned int)mte.mem;
+		process_properties.meminfo.memory_len = mte.len; //memreader->GetMemorySize();
+		process_properties.meminfo.pointer_pos = ((unsigned int)mte.pointer - (unsigned int)mte.mem) - (memreader->SizeOfCell() - 1);
 		process_properties.meminfo.current_cell_value = memreader->GetMemoryCellAt( process_properties.meminfo.pointer_pos );
 		process_properties.meminfo.last_nonzero_cell = memreader->GetLastNZMemoryCell();
 

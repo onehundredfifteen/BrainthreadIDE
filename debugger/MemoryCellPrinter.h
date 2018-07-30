@@ -9,36 +9,44 @@ namespace BrainthreadIDE
 	{
 	public: virtual String ^ Print(String ^ cell) 
 			{
-				return cell;
+				return this->Print(Convert::ToInt32(cell));
 			}
 	public: virtual String ^ Print(int cell) 
 			{
 				return cell.ToString();
 			}
-	
+	};
+
+	public ref class UnsignedCellPrinter : public MemoryCellPrinter
+	{
+	public: virtual String ^ Print(int cell) override
+			{
+				return static_cast<unsigned int>(cell).ToString();
+			}
 	};
 
 	public ref class CharacterCellPrinter : public MemoryCellPrinter
 	{
-	public: virtual String ^ Print(String ^ cell) override
-			{
-				Encoding^ ascii = Encoding::ASCII;
-				return ascii->GetString( gcnew array<unsigned char>{ Convert::ToInt32(cell) } );
-			}
 	public: virtual String ^ Print(int cell) override
 			{
-				Encoding^ ascii = Encoding::ASCII;
-				return ascii->GetString( gcnew array<unsigned char>{ cell } );
+				Encoding ^ encoding;
+				short cell_val =  Convert::ToInt16(cell);
+
+				if(cell_val > 0xFF)//create wide char
+				{
+					encoding = Encoding::Unicode;
+					return encoding->GetString( gcnew array<unsigned char>{ (unsigned char)cell_val, (unsigned char)(cell_val >> 8) }  );
+				}
+				else
+				{
+					encoding = Encoding::ASCII;
+					return encoding->GetString( gcnew array<unsigned char>{ (unsigned char)cell_val } );
+				}
 			}
 	};
 
 	public ref class HexCellPrinter : public MemoryCellPrinter
 	{
-	public: virtual String ^ Print(String ^ cell) override
-			{
-				int c = Convert::ToInt32(cell);
-				return c.ToString("X");
-			}
 	public: virtual String ^ Print(int cell) override
 			{
 				return cell.ToString("X");
@@ -51,7 +59,7 @@ namespace BrainthreadIDE
 			{
 				wchar_t ch = cell;
 
-				if(Char::IsControl(ch))
+				if(Char::IsControl(ch) || ch > 0xFF)
 					return MemoryCellPrinter::Print(cell);
 				else
 					return CharacterCellPrinter::Print(cell);

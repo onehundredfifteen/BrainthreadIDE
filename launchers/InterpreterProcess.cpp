@@ -1,21 +1,13 @@
 #include "StdAfx.h"
+
+#pragma comment(lib, "User32.lib")
+#include <windows.h> //for move process window
+
 #include "InterpreterProcess.h"
 #include "../plugins/PragmaResolver.h"
 
 namespace BrainthreadIDE 
 {
-	/*InterpreterProcess::InterpreterProcess(bool runSelection)
-	{
-		//worker = gcnew System::ComponentModel::BackgroundWorker();
-		//worker->WorkerReportsProgress = false;
-		//this->AttachWorkerEvents();
-
-		this->runSelection = runSelection;
-		//this->processWorkContext = WorkContextBroker::Instance->GetCurrentContext();
-
-		startInfo = gcnew ProcessStartInfo(GlobalOptions::Instance->InterpreterPath[ this->processWorkContext->settings->GetLanguage() ]);
-	}*/
-
 	String ^ InterpreterProcess::GetCodeLocationArgument()
 	{
 		const int command_len_limit = 8000; 
@@ -68,6 +60,39 @@ namespace BrainthreadIDE
 		if(pragmaResolver->HasPragmas() /*&& this->runSelection == false*/) {
 				pragmaResolver->Resolve(processWorkContext, this->processWorkContext->settings->GetLanguage());
 		}
+	}
+
+	void InterpreterProcess::MoveProcessWindow()
+	{
+		int x, y;
+		int flags = SWP_NOSIZE; // Ignores size arguments. 
+		HWND hia = GlobalOptions::Instance->DebugeeWindowStyle == 2 ? HWND_TOPMOST :  HWND_TOP;
+
+		if(GlobalOptions::Instance->DebugeeWindowStyle == 1)
+			flags |= SWP_HIDEWINDOW;
+
+		switch(GlobalOptions::Instance->DebugeeWindowPosition)
+		{
+		case 1: //quasi center
+			x = mainWindowLocation.X + mainWindowLocation.Width / 3;
+			y = mainWindowLocation.Y + mainWindowLocation.Height / 3;
+			break;
+		case 2: //top left
+			x = 0;
+			y = 0;
+			break;
+		case 3: //align right
+			x = mainWindowLocation.Right;
+			y = mainWindowLocation.Y;
+			break;
+		default:
+		case 0: //default
+			flags |= SWP_NOMOVE; break;
+
+		}
+
+		if(this->process && false == this->process->HasExited)
+			::SetWindowPos((HWND)this->process->MainWindowHandle.ToPointer(), hia, x, y, 0, 0, flags); 
 	}
 
 }

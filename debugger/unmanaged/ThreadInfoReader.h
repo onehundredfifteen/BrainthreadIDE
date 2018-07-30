@@ -23,7 +23,8 @@ class ThreadInfoReader : public MemoryReader
 				this->memory_len = 0;
 				return 0;
 			}
-			alloc(byte_memory_len);
+
+			this->alloc(byte_memory_len);
 			
 			ReadProcessMemory(hProcess,
 				tle.first,

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../WorkContexts.h"
+#include "CodeLoopBinder.h"
 
 namespace BrainthreadIDE 
 {
@@ -13,16 +14,10 @@ namespace BrainthreadIDE
 													  editorText(ctx->editorTextBox->richTextBox->Text) 
 			{
 			}
-	//TODO get source, get raw source as strings
-	/*public: int JumpOneInstruction(int cursor)
-			{
-				if(cursor >= editorText->Length) 
-					return cursor;
-				else if(editorText[cursor] != '[')
-					return cursor + 1;
 
-				return CodeLoopBinder::GetPairedInstruction(cursor, editorText);
-			}*/
+	private:
+			DefaultSyntaxHighLighter ^ syntaxHighLighter;
+			String ^ editorText;
 
 	public: int ToCursor(int instruction)
 			{
@@ -42,8 +37,9 @@ namespace BrainthreadIDE
 					++n;
 				}
 
-				return n;;
+				return n;
 			}
+
 	public: int ToInstruction(int cursor)
 			{
 				int n = 0;
@@ -74,10 +70,18 @@ namespace BrainthreadIDE
 					return sb->ToString();
 				}
 			}
+
+			/*public: int JumpOneInstruction(int cursor)
+			{
+				if(cursor >= editorText->Length) 
+					return cursor;
+				else if(editorText[cursor] != '[')
+					return cursor + 1;
+
+				return CodeLoopBinder::GetPairedInstruction(cursor, editorText);
+			}*/
 	
 
-	private:
-		DefaultSyntaxHighLighter ^ syntaxHighLighter;
-		String ^ editorText;
+	
 	};
 }

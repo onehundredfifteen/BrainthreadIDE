@@ -1,7 +1,5 @@
 #include "StdAfx.h"
 
-#pragma comment(lib, "User32.lib")
-
 #include "DebugCodeProcess.h"
 #include "CodeParseProcess.h"
 #include "../helpers/CodeContextConverter.h"
@@ -53,24 +51,28 @@ namespace BrainthreadIDE
 		{
 			BrainthreadIDE::Language curLang = processWorkContext->settings->GetLanguage();
 			
-			debugger = gcnew BrainthreadIDE::Debugger(GlobalOptions::Instance->InterpreterPath[curLang]->Trim('"'), startInfo->Arguments->Trim('"'));
-			process = Process::GetProcessById( debugger->DebugeeProcessId );
+			this->debugger = gcnew BrainthreadIDE::Debugger(GlobalOptions::Instance->InterpreterPath[curLang]->Trim('"'), startInfo->Arguments->Trim('"'));
+			this->process = Process::GetProcessById( this->debugger->DebugeeProcessId );
 		
 			//positioning debugee window
-			this->moveDebugeeWindow();
+			this->MoveProcessWindow();
 		}
 		catch(ArgumentException ^ ex)
 		{
-			processWorkContext->outputLister->AddOutputWithTimestamp(ex->Message);
+			processWorkContext->outputLister->AddOutputWithTimestamp("Cannot launch debuger due to incorrect application arguments");
+			processWorkContext->outputLister->AddIDEOutput(ex->Message);
+			
 			MessageBox::Show(ex->Message, "Cannot launch debugger", MessageBoxButtons::OK, MessageBoxIcon::Error);
 		}
 		catch(Exception ^ ex)
 		{
-			processWorkContext->outputLister->AddOutputWithTimestamp(ex->Message);
+			processWorkContext->outputLister->AddOutputWithTimestamp("Cannot enter debug mode");
+			processWorkContext->outputLister->AddIDEOutput(ex->Message);
+
 			MessageBox::Show(ex->Message, "Cannot enter debug mode", MessageBoxButtons::OK, MessageBoxIcon::Error);
 		}
 
-		processWorkContext->outputLister->AddIDEOutput(String::Format("Debugger attached to process"));
+		processWorkContext->outputLister->AddIDEOutput("Debugger attached to process");
 		
 		worker->RunWorkerAsync();
 	}
@@ -86,20 +88,21 @@ namespace BrainthreadIDE
 	void DebugCodeProcess::Detach()
 	{
 		worker->CancelAsync();
-		debugger->DetachDebugee(); 
+		debugger->DetachDebugee(false); 
 		
 		this->OnComplete(this, EventArgs::Empty);
 	}
 
     void DebugCodeProcess::worker_DoWork(System::Object^ sender, System::ComponentModel::DoWorkEventArgs^ e) 
 	{
-		while(process && !process->HasExited)
+		while(this->process && !this->process->HasExited)
 		{
 			if(worker->CancellationPending) 
 			{
 				e->Cancel = true;
 				break;
 			}
+
 			Thread::Sleep(115);   
 		}
 	}
@@ -110,10 +113,33 @@ namespace BrainthreadIDE
 		{
 			processWorkContext->outputLister->AddOutputWithTimestamp("Debug stopped by user");
 		}
+		else if(this == nullptr || this->debugger == nullptr) //event called to a dead pointer? kid of workaround
+		{
+			processWorkContext->outputLister->AddOutputWithTimestamp("Program exited prematurely");
+			processWorkContext->outputLister->AddIDEOutput("Debugging terminated with unknown error. Cannot continue at this point.");
+
+			this->OnComplete(this, gcnew EventArgs);
+			return;
+		}
+		else if(debugger->DebugeeExitCode == -1)
+		{
+			processWorkContext->outputLister->AddOutputWithTimestamp(String::Format("Program exited with code {0}", debugger->DebugeeExitCode));
+			processWorkContext->outputLister->AddIDEOutput("Debugging completed with error: Detached from debugee prematurely");
+
+			try
+			{
+				debugger->DetachDebugee(true);
+			}
+			catch(Exception ^ ex)
+			{
+				processWorkContext->outputLister->AddIDEOutput(String::Format("Cannot kill debugee {0}. Try to restart IDE.", ex->Message));
+			}
+		}
 		else
 		{
 			processWorkContext->outputLister->AddOutputWithTimestamp(String::Format("Program exited with code {0}", debugger->DebugeeExitCode));
 			processWorkContext->outputLister->AddIDEOutput("Debugging completed");
+			//processWorkContext->outputLister->AddIDEOutput(debugger->GetDebugStats());
 		}
 
 		this->OnComplete(this, EventArgs::Empty);
@@ -140,7 +166,7 @@ namespace BrainthreadIDE
 	void DebugCodeProcess::StepOver()
 	{
 		CodeContextConverter ^ ccc = gcnew CodeContextConverter(processWorkContext);
-		int pi = CodeLoopBinder::GetPairedInstruction(this->debugger->CodePosition, ccc->RawSource);
+		int pi = CodeLoopBinder::FindEndOfLoop(this->debugger->CodePosition, ccc->RawSource);
 
 		try
 		{
@@ -206,38 +232,25 @@ namespace BrainthreadIDE
 		richTextBox->Focus();
 	}
 
-	void DebugCodeProcess::moveDebugeeWindow()
+	bool DebugCodeProcess::PendingIO()
 	{
-		int x, y;
-		int flags = SWP_NOSIZE; // Ignores size arguments. 
-		HWND hia = GlobalOptions::Instance->DebugeeWindowStyle == 2 ? HWND_TOPMOST :  HWND_TOP;
-
-		if(GlobalOptions::Instance->DebugeeWindowStyle == 1)
-			flags |= SWP_HIDEWINDOW;
-
-		switch(GlobalOptions::Instance->DebugeeWindowPosition)
+		//check if program is waiting to input
+		
+		//not working well
+		/*
+		if(this->process && !this->process->HasExited)
 		{
-		case 1: //quasi center
-			x = mainWindowLocation.X + mainWindowLocation.Width / 3;
-			y = mainWindowLocation.Y + mainWindowLocation.Height / 3;
-			break;
-		case 2: //top left
-			x = 0;
-			y = 0;
-			break;
-		case 3: //align right
-			x = mainWindowLocation.Right;
-			y = mainWindowLocation.Y;
-			break;
-		default:
-		case 0: //default
-			flags |= SWP_NOMOVE; break;
+			for each(ProcessThread ^ th in this->process->Threads) {
+				if(th->ThreadState == System::Diagnostics::ThreadState::Wait && th->WaitReason == ThreadWaitReason::UserRequest)
+				{
+					return true;
+				}
+			}
+		}*/
 
-		}
 
-		::SetWindowPos((HWND)process->MainWindowHandle.ToPointer(), hia, x, y, 0, 0, flags); 
-	}
 
-	
+		return false;
+	}	
 	
 }

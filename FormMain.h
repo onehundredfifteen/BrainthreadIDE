@@ -24,7 +24,8 @@
 #include "helpers/ui/uiMenuRadioButtonGenerator.h"
 #include "helpers/ui/uiTooltip.h"
 #include "helpers/ui/uiBevel.h"
-#include "helpers/ui/uiBlinker.h"
+#include "helpers/ui/uiGridCellBlinker.h"
+#include "launchers/ui/uiControlDisabler.h"
 
 #include "debugger/DebugTreeViewExpander.h"
 
@@ -48,7 +49,7 @@ namespace BrainthreadIDE {
 	public ref class FormMain : public System::Windows::Forms::Form
 	{
 	public:
-		FormMain(String ^ argFileToOpen)
+		FormMain()
 		{
 			InitializeComponent();
 			
@@ -60,18 +61,8 @@ namespace BrainthreadIDE {
 
 			WorkContextBroker::Instance->Initialize(this, tabControlPages);
 
-			//arg processing
-			if(argFileToOpen)
-			{
-				FileContext ^ argOpenFileContext = FileContextFactory::createFileContext(argFileToOpen);
-				if(argOpenFileContext->Open()) {
-					WorkContextBroker::Instance->OpenPage(argOpenFileContext);
-				}
-				else
-					WorkContextBroker::Instance->AddPage();
-			}
-			else
-				WorkContextBroker::Instance->AddPage();
+			//add first page
+			WorkContextBroker::Instance->AddPage();
 
 			//processes
 			this->interpreterProcess = nullptr;
@@ -100,6 +91,7 @@ namespace BrainthreadIDE {
 												gcnew array<String^>{cButtonMemoryReprDecCaption,
 																	 cButtonMemoryReprCharCaption,
 																	 cButtonMemoryReprHexCaption,
+																	 cButtonMemoryReprUnsignedCaption,
 																	 cButtonMemoryReprMixCaption
 																	}, 
 												gcnew EventHandler(this, &FormMain::contextMenuButtonMemoryRepresentation_Click),
@@ -129,7 +121,7 @@ namespace BrainthreadIDE {
 
 			//apply
 			this->mainForm_UpdateUI();
-			this->mainForm_ToggleInterface(this->interpreterProcess, true);
+			this->mainForm_UpdateUIForProcess(this->interpreterProcess, true);
 			
 		}
 
@@ -161,6 +153,8 @@ namespace BrainthreadIDE {
 		literal String ^ cButtonMemoryReprCharCaption = "Character";
 		literal String ^ cButtonMemoryReprHexCaption = "Hexadecimal";
 		literal String ^ cButtonMemoryReprMixCaption = "Mixed";
+		literal String ^ cButtonMemoryReprUnsignedCaption = "Unsigned number";
+		
 		literal String ^ cButtonMemoryTabColsAutoCaption = "Fit to width";
 
 		literal String ^ cTooltipDebugStepCaption = "Step one instruction";
@@ -342,6 +336,11 @@ private: System::Windows::Forms::ToolStripMenuItem^  editorInsertStringMenuItem;
 private: System::Windows::Forms::ContextMenuStrip^  tabpageContextMenu;
 private: System::Windows::Forms::ToolStripMenuItem^  tabpageCloseMenuItem;
 private: System::Windows::Forms::ToolStripMenuItem^  tabpageCloneMenuItem;
+private: System::Windows::Forms::ToolStripButton^  toolBarButtonResolve;
+private: System::Windows::Forms::ToolStripButton^  toolBarButtonFindPair;
+private: System::Windows::Forms::ToolStripSeparator^  toolStripSeparator9;
+private: System::Windows::Forms::ToolStripSeparator^  toolStripSeparator10;
+private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 
 
 		private: System::Windows::Forms::ToolStripMenuItem^  contextMenuButtonColumnNumber;
@@ -355,6 +354,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageCloneMenuItem;
 		{
 			this->components = (gcnew System::ComponentModel::Container());
 			System::ComponentModel::ComponentResourceManager^  resources = (gcnew System::ComponentModel::ComponentResourceManager(FormMain::typeid));
+			System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle1 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
 			this->editMainMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->editorContextMenu = (gcnew System::Windows::Forms::ContextMenuStrip(this->components));
 			this->editorUndoMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
@@ -428,6 +428,9 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageCloneMenuItem;
 			this->toolBarButtonUndo = (gcnew System::Windows::Forms::ToolStripButton());
 			this->toolBarButtonRedo = (gcnew System::Windows::Forms::ToolStripButton());
 			this->toolStripSeparator3 = (gcnew System::Windows::Forms::ToolStripSeparator());
+			this->toolBarButtonResolve = (gcnew System::Windows::Forms::ToolStripButton());
+			this->toolBarButtonFindPair = (gcnew System::Windows::Forms::ToolStripButton());
+			this->toolStripSeparator9 = (gcnew System::Windows::Forms::ToolStripSeparator());
 			this->toolBarButtonRunCode = (gcnew System::Windows::Forms::ToolStripButton());
 			this->toolBarButtonDebugStep = (gcnew System::Windows::Forms::ToolStripButton());
 			this->toolBarButtonStepOver = (gcnew System::Windows::Forms::ToolStripButton());
@@ -435,6 +438,11 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageCloneMenuItem;
 			this->splitContainerMain = (gcnew System::Windows::Forms::SplitContainer());
 			this->splitContainerEditor = (gcnew System::Windows::Forms::SplitContainer());
 			this->tabControlPages = (gcnew System::Windows::Forms::TabControl());
+			this->tabpageContextMenu = (gcnew System::Windows::Forms::ContextMenuStrip(this->components));
+			this->tabpageCloseMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->toolStripSeparator10 = (gcnew System::Windows::Forms::ToolStripSeparator());
+			this->tabpageCloneMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->tabpageDiscardMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->tabControlOutput = (gcnew System::Windows::Forms::TabControl());
 			this->tabPageErrorList = (gcnew System::Windows::Forms::TabPage());
 			this->listViewOutputErrors = (gcnew System::Windows::Forms::ListView());
@@ -453,7 +461,6 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageCloneMenuItem;
 			this->tabControlRight = (gcnew System::Windows::Forms::TabControl());
 			this->tabPageProperties = (gcnew System::Windows::Forms::TabPage());
 			this->groupBoxIOOptions = (gcnew System::Windows::Forms::GroupBox());
-			this->textBoxPhOptionsInput = (gcnew TextBoxPlaceholder::TextBoxPlaceholderControl());
 			this->checkBoxOptionRedirectStreams = (gcnew System::Windows::Forms::CheckBox());
 			this->groupBoxAdvanced = (gcnew System::Windows::Forms::GroupBox());
 			this->labelOptionsCommandLine = (gcnew System::Windows::Forms::Label());
@@ -496,9 +503,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageCloneMenuItem;
 			this->toolStripSeparator6 = (gcnew System::Windows::Forms::ToolStripSeparator());
 			this->contextMenuButtonMemoryRepresentation = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->contextMenuButtonColumnNumber = (gcnew System::Windows::Forms::ToolStripMenuItem());
-			this->tabpageContextMenu = (gcnew System::Windows::Forms::ContextMenuStrip(this->components));
-			this->tabpageCloseMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
-			this->tabpageCloneMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->textBoxPhOptionsInput = (gcnew TextBoxPlaceholder::TextBoxPlaceholderControl());
 			this->editorContextMenu->SuspendLayout();
 			this->statusBar->SuspendLayout();
 			this->mainMenu->SuspendLayout();
@@ -511,6 +516,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageCloneMenuItem;
 			this->splitContainerEditor->Panel1->SuspendLayout();
 			this->splitContainerEditor->Panel2->SuspendLayout();
 			this->splitContainerEditor->SuspendLayout();
+			this->tabpageContextMenu->SuspendLayout();
 			this->tabControlOutput->SuspendLayout();
 			this->tabPageErrorList->SuspendLayout();
 			this->tabPageOutputList->SuspendLayout();
@@ -531,7 +537,6 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageCloneMenuItem;
 			this->threadContextMenu->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->dataGridViewDebugMemory))->BeginInit();
 			this->debugMemViewContextMenu->SuspendLayout();
-			this->tabpageContextMenu->SuspendLayout();
 			this->SuspendLayout();
 			// 
 			// editMainMenuItem
@@ -548,7 +553,8 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageCloneMenuItem;
 				this->toolStripMenuItem2, this->editorSelectallMenuItem, this->toolStripMenuItem3, this->editorInsertMenuItem, this->editorRestoreMenuItem, 
 				this->editorResolveMenuItem});
 			this->editorContextMenu->Name = L"editorContextMenu";
-			this->editorContextMenu->Size = System::Drawing::Size(217, 220);
+			this->editorContextMenu->OwnerItem = this->editMainMenuItem;
+			this->editorContextMenu->Size = System::Drawing::Size(182, 220);
 			// 
 			// editorUndoMenuItem
 			// 
@@ -556,7 +562,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageCloneMenuItem;
 			this->editorUndoMenuItem->ForeColor = System::Drawing::SystemColors::ControlText;
 			this->editorUndoMenuItem->Name = L"editorUndoMenuItem";
 			this->editorUndoMenuItem->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::Z));
-			this->editorUndoMenuItem->Size = System::Drawing::Size(216, 22);
+			this->editorUndoMenuItem->Size = System::Drawing::Size(181, 22);
 			this->editorUndoMenuItem->Text = L"Undo";
 			this->editorUndoMenuItem->Click += gcnew System::EventHandler(this, &FormMain::editorRichTextBox_Undo);
 			// 
@@ -565,20 +571,20 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageCloneMenuItem;
 			this->editorRedoMenuItem->Enabled = false;
 			this->editorRedoMenuItem->Name = L"editorRedoMenuItem";
 			this->editorRedoMenuItem->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::Y));
-			this->editorRedoMenuItem->Size = System::Drawing::Size(216, 22);
+			this->editorRedoMenuItem->Size = System::Drawing::Size(181, 22);
 			this->editorRedoMenuItem->Text = L"Redo";
 			this->editorRedoMenuItem->Click += gcnew System::EventHandler(this, &FormMain::editorRichTextBox_Redo);
 			// 
 			// toolStripMenuItem1
 			// 
 			this->toolStripMenuItem1->Name = L"toolStripMenuItem1";
-			this->toolStripMenuItem1->Size = System::Drawing::Size(213, 6);
+			this->toolStripMenuItem1->Size = System::Drawing::Size(178, 6);
 			// 
 			// editorCutMenuItem
 			// 
 			this->editorCutMenuItem->Name = L"editorCutMenuItem";
 			this->editorCutMenuItem->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::X));
-			this->editorCutMenuItem->Size = System::Drawing::Size(216, 22);
+			this->editorCutMenuItem->Size = System::Drawing::Size(181, 22);
 			this->editorCutMenuItem->Text = L"Cut";
 			this->editorCutMenuItem->Click += gcnew System::EventHandler(this, &FormMain::editorRichTextBox_Cut);
 			// 
@@ -586,7 +592,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageCloneMenuItem;
 			// 
 			this->editorCopyMenuItem->Name = L"editorCopyMenuItem";
 			this->editorCopyMenuItem->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::C));
-			this->editorCopyMenuItem->Size = System::Drawing::Size(216, 22);
+			this->editorCopyMenuItem->Size = System::Drawing::Size(181, 22);
 			this->editorCopyMenuItem->Text = L"Copy";
 			this->editorCopyMenuItem->Click += gcnew System::EventHandler(this, &FormMain::editorRichTextBox_Copy);
 			// 
@@ -594,34 +600,34 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageCloneMenuItem;
 			// 
 			this->editorPasteMenuItem->Name = L"editorPasteMenuItem";
 			this->editorPasteMenuItem->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::V));
-			this->editorPasteMenuItem->Size = System::Drawing::Size(216, 22);
+			this->editorPasteMenuItem->Size = System::Drawing::Size(181, 22);
 			this->editorPasteMenuItem->Text = L"Paste";
 			this->editorPasteMenuItem->Click += gcnew System::EventHandler(this, &FormMain::editorRichTextBox_Paste);
 			// 
 			// toolStripMenuItem2
 			// 
 			this->toolStripMenuItem2->Name = L"toolStripMenuItem2";
-			this->toolStripMenuItem2->Size = System::Drawing::Size(213, 6);
+			this->toolStripMenuItem2->Size = System::Drawing::Size(178, 6);
 			// 
 			// editorSelectallMenuItem
 			// 
 			this->editorSelectallMenuItem->Name = L"editorSelectallMenuItem";
 			this->editorSelectallMenuItem->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::A));
-			this->editorSelectallMenuItem->Size = System::Drawing::Size(216, 22);
+			this->editorSelectallMenuItem->Size = System::Drawing::Size(181, 22);
 			this->editorSelectallMenuItem->Text = L"Select all";
 			this->editorSelectallMenuItem->Click += gcnew System::EventHandler(this, &FormMain::editorRichTextBox_SelectAll);
 			// 
 			// toolStripMenuItem3
 			// 
 			this->toolStripMenuItem3->Name = L"toolStripMenuItem3";
-			this->toolStripMenuItem3->Size = System::Drawing::Size(213, 6);
+			this->toolStripMenuItem3->Size = System::Drawing::Size(178, 6);
 			// 
 			// editorInsertMenuItem
 			// 
 			this->editorInsertMenuItem->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(4) {this->editorInsertConstantMenuItem, 
 				this->editorInsertStringMenuItem, this->toolStripSeparator8, this->editorInsertPluginMenuItem});
 			this->editorInsertMenuItem->Name = L"editorInsertMenuItem";
-			this->editorInsertMenuItem->Size = System::Drawing::Size(216, 22);
+			this->editorInsertMenuItem->Size = System::Drawing::Size(181, 22);
 			this->editorInsertMenuItem->Text = L"Insert";
 			// 
 			// editorInsertConstantMenuItem
@@ -654,14 +660,14 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageCloneMenuItem;
 			// 
 			this->editorRestoreMenuItem->Enabled = false;
 			this->editorRestoreMenuItem->Name = L"editorRestoreMenuItem";
-			this->editorRestoreMenuItem->Size = System::Drawing::Size(216, 22);
-			this->editorRestoreMenuItem->Text = L"Restore to previous version";
+			this->editorRestoreMenuItem->Size = System::Drawing::Size(181, 22);
+			this->editorRestoreMenuItem->Text = L"Rollback all changes";
 			this->editorRestoreMenuItem->Click += gcnew System::EventHandler(this, &FormMain::editorRestoreMenuItem_Click);
 			// 
 			// editorResolveMenuItem
 			// 
 			this->editorResolveMenuItem->Name = L"editorResolveMenuItem";
-			this->editorResolveMenuItem->Size = System::Drawing::Size(216, 22);
+			this->editorResolveMenuItem->Size = System::Drawing::Size(181, 22);
 			this->editorResolveMenuItem->Text = L"Resolve pragmas";
 			this->editorResolveMenuItem->Click += gcnew System::EventHandler(this, &FormMain::editorResolveMenuItem_Click);
 			// 
@@ -689,7 +695,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageCloneMenuItem;
 			this->statusStripStatusLabel2->BorderStyle = System::Windows::Forms::Border3DStyle::Sunken;
 			this->statusStripStatusLabel2->Name = L"statusStripStatusLabel2";
 			this->statusStripStatusLabel2->Size = System::Drawing::Size(170, 17);
-			this->statusStripStatusLabel2->Text = L"state";
+			this->statusStripStatusLabel2->Text = L"Initializing IDE...";
 			this->statusStripStatusLabel2->TextAlign = System::Drawing::ContentAlignment::MiddleLeft;
 			// 
 			// statusStripStatusLabel3
@@ -985,10 +991,11 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageCloneMenuItem;
 			// 
 			// toolBar
 			// 
-			this->toolBar->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(17) {this->toolBarButtonNew, this->toolBarButtonOpen, 
+			this->toolBar->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(20) {this->toolBarButtonNew, this->toolBarButtonOpen, 
 				this->toolBarButtonSave, this->toolBarButtonSaveAll, this->toolBarButtonSaveAsProject, this->toolStripSeparator1, this->toolBarButtonCut, 
 				this->toolBarButtonCopy, this->toolBarButtonPaste, this->toolStripSeparator2, this->toolBarButtonUndo, this->toolBarButtonRedo, 
-				this->toolStripSeparator3, this->toolBarButtonRunCode, this->toolBarButtonDebugStep, this->toolBarButtonStepOver, this->toolBarButtonRunToCursor});
+				this->toolStripSeparator3, this->toolBarButtonResolve, this->toolBarButtonFindPair, this->toolStripSeparator9, this->toolBarButtonRunCode, 
+				this->toolBarButtonDebugStep, this->toolBarButtonStepOver, this->toolBarButtonRunToCursor});
 			this->toolBar->LayoutStyle = System::Windows::Forms::ToolStripLayoutStyle::HorizontalStackWithOverflow;
 			this->toolBar->Location = System::Drawing::Point(0, 24);
 			this->toolBar->Name = L"toolBar";
@@ -1044,6 +1051,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageCloneMenuItem;
 			this->toolBarButtonSaveAsProject->Name = L"toolBarButtonSaveAsProject";
 			this->toolBarButtonSaveAsProject->Size = System::Drawing::Size(23, 22);
 			this->toolBarButtonSaveAsProject->Text = L"Save as project";
+			this->toolBarButtonSaveAsProject->Click += gcnew System::EventHandler(this, &FormMain::saveAsProjectMainMenuItem_Click);
 			// 
 			// toolStripSeparator1
 			// 
@@ -1109,6 +1117,33 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageCloneMenuItem;
 			// 
 			this->toolStripSeparator3->Name = L"toolStripSeparator3";
 			this->toolStripSeparator3->Size = System::Drawing::Size(6, 25);
+			// 
+			// toolBarButtonResolve
+			// 
+			this->toolBarButtonResolve->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Image;
+			this->toolBarButtonResolve->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"toolBarButtonResolve.Image")));
+			this->toolBarButtonResolve->ImageTransparentColor = System::Drawing::Color::Magenta;
+			this->toolBarButtonResolve->Name = L"toolBarButtonResolve";
+			this->toolBarButtonResolve->Size = System::Drawing::Size(23, 22);
+			this->toolBarButtonResolve->Text = L"Resolve";
+			this->toolBarButtonResolve->ToolTipText = L"Resolve all pragmas in code";
+			this->toolBarButtonResolve->Click += gcnew System::EventHandler(this, &FormMain::editorResolveMenuItem_Click);
+			// 
+			// toolBarButtonFindPair
+			// 
+			this->toolBarButtonFindPair->DisplayStyle = System::Windows::Forms::ToolStripItemDisplayStyle::Image;
+			this->toolBarButtonFindPair->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"toolBarButtonFindPair.Image")));
+			this->toolBarButtonFindPair->ImageTransparentColor = System::Drawing::Color::Magenta;
+			this->toolBarButtonFindPair->Name = L"toolBarButtonFindPair";
+			this->toolBarButtonFindPair->Size = System::Drawing::Size(23, 22);
+			this->toolBarButtonFindPair->Text = L"Pair";
+			this->toolBarButtonFindPair->ToolTipText = L"Find paired instruction";
+			this->toolBarButtonFindPair->Click += gcnew System::EventHandler(this, &FormMain::toolBarButtonFindPair_Click);
+			// 
+			// toolStripSeparator9
+			// 
+			this->toolStripSeparator9->Name = L"toolStripSeparator9";
+			this->toolStripSeparator9->Size = System::Drawing::Size(6, 25);
 			// 
 			// toolBarButtonRunCode
 			// 
@@ -1204,6 +1239,39 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageCloneMenuItem;
 			this->tabControlPages->DragOver += gcnew System::Windows::Forms::DragEventHandler(this, &FormMain::tabControlPages_DragOver);
 			this->tabControlPages->MouseDown += gcnew System::Windows::Forms::MouseEventHandler(this, &FormMain::tabControlPages_MouseDown);
 			// 
+			// tabpageContextMenu
+			// 
+			this->tabpageContextMenu->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(4) {this->tabpageCloseMenuItem, 
+				this->toolStripSeparator10, this->tabpageCloneMenuItem, this->tabpageDiscardMenuItem});
+			this->tabpageContextMenu->Name = L"tabpageContextMenu";
+			this->tabpageContextMenu->Size = System::Drawing::Size(201, 76);
+			// 
+			// tabpageCloseMenuItem
+			// 
+			this->tabpageCloseMenuItem->Name = L"tabpageCloseMenuItem";
+			this->tabpageCloseMenuItem->Size = System::Drawing::Size(200, 22);
+			this->tabpageCloseMenuItem->Text = L"Close";
+			this->tabpageCloseMenuItem->Click += gcnew System::EventHandler(this, &FormMain::closeMainMenuItem_Click);
+			// 
+			// toolStripSeparator10
+			// 
+			this->toolStripSeparator10->Name = L"toolStripSeparator10";
+			this->toolStripSeparator10->Size = System::Drawing::Size(197, 6);
+			// 
+			// tabpageCloneMenuItem
+			// 
+			this->tabpageCloneMenuItem->Name = L"tabpageCloneMenuItem";
+			this->tabpageCloneMenuItem->Size = System::Drawing::Size(200, 22);
+			this->tabpageCloneMenuItem->Text = L"Clone this page";
+			this->tabpageCloneMenuItem->Click += gcnew System::EventHandler(this, &FormMain::tabpageCloneMenuItem_Click);
+			// 
+			// tabpageDiscardMenuItem
+			// 
+			this->tabpageDiscardMenuItem->Name = L"tabpageDiscardMenuItem";
+			this->tabpageDiscardMenuItem->Size = System::Drawing::Size(200, 22);
+			this->tabpageDiscardMenuItem->Text = L"Discard all but this page";
+			this->tabpageDiscardMenuItem->Click += gcnew System::EventHandler(this, &FormMain::tabpageDiscardMenuItem_Click);
+			// 
 			// tabControlOutput
 			// 
 			this->tabControlOutput->Alignment = System::Windows::Forms::TabAlignment::Bottom;
@@ -1282,7 +1350,6 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageCloneMenuItem;
 			this->textBoxOutput->ScrollBars = System::Windows::Forms::ScrollBars::Vertical;
 			this->textBoxOutput->Size = System::Drawing::Size(716, 157);
 			this->textBoxOutput->TabIndex = 2;
-			this->textBoxOutput->TextChanged += gcnew System::EventHandler(this, &FormMain::textBoxOutput_TextChanged);
 			// 
 			// tabPageLog
 			// 
@@ -1385,21 +1452,6 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageCloneMenuItem;
 			this->groupBoxIOOptions->TabStop = false;
 			this->groupBoxIOOptions->Text = L"Input / output redirection";
 			this->groupBoxIOOptions->Visible = false;
-			// 
-			// textBoxPhOptionsInput
-			// 
-			this->textBoxPhOptionsInput->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Left) 
-				| System::Windows::Forms::AnchorStyles::Right));
-			this->textBoxPhOptionsInput->DefaultValueMode = false;
-			this->textBoxPhOptionsInput->Location = System::Drawing::Point(19, 71);
-			this->textBoxPhOptionsInput->Multiline = true;
-			this->textBoxPhOptionsInput->Name = L"textBoxPhOptionsInput";
-			this->textBoxPhOptionsInput->NoWhitespaceMode = false;
-			this->textBoxPhOptionsInput->PlaceHolderText = nullptr;
-			this->textBoxPhOptionsInput->PlaceHolderTextColor = System::Drawing::SystemColors::ControlDark;
-			this->textBoxPhOptionsInput->ScrollBars = System::Windows::Forms::ScrollBars::Vertical;
-			this->textBoxPhOptionsInput->Size = System::Drawing::Size(298, 81);
-			this->textBoxPhOptionsInput->TabIndex = 2;
 			// 
 			// checkBoxOptionRedirectStreams
 			// 
@@ -1797,6 +1849,15 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageCloneMenuItem;
 			this->dataGridViewDebugMemory->ColumnHeadersBorderStyle = System::Windows::Forms::DataGridViewHeaderBorderStyle::Single;
 			this->dataGridViewDebugMemory->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::DisableResizing;
 			this->dataGridViewDebugMemory->ContextMenuStrip = this->debugMemViewContextMenu;
+			dataGridViewCellStyle1->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+			dataGridViewCellStyle1->BackColor = System::Drawing::SystemColors::Window;
+			dataGridViewCellStyle1->Font = (gcnew System::Drawing::Font(L"Lucida Sans Unicode", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+				static_cast<System::Byte>(238)));
+			dataGridViewCellStyle1->ForeColor = System::Drawing::SystemColors::ControlText;
+			dataGridViewCellStyle1->SelectionBackColor = System::Drawing::Color::RoyalBlue;
+			dataGridViewCellStyle1->SelectionForeColor = System::Drawing::Color::Yellow;
+			dataGridViewCellStyle1->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
+			this->dataGridViewDebugMemory->DefaultCellStyle = dataGridViewCellStyle1;
 			this->dataGridViewDebugMemory->EditMode = System::Windows::Forms::DataGridViewEditMode::EditProgrammatically;
 			this->dataGridViewDebugMemory->Location = System::Drawing::Point(0, 27);
 			this->dataGridViewDebugMemory->MultiSelect = false;
@@ -1810,7 +1871,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageCloneMenuItem;
 			this->dataGridViewDebugMemory->ShowCellToolTips = false;
 			this->dataGridViewDebugMemory->ShowEditingIcon = false;
 			this->dataGridViewDebugMemory->ShowRowErrors = false;
-			this->dataGridViewDebugMemory->Size = System::Drawing::Size(338, 285);
+			this->dataGridViewDebugMemory->Size = System::Drawing::Size(338, 264);
 			this->dataGridViewDebugMemory->TabIndex = 2;
 			this->dataGridViewDebugMemory->Scroll += gcnew System::Windows::Forms::ScrollEventHandler(this, &FormMain::dataGridViewDebugMemory_Scroll);
 			// 
@@ -1852,26 +1913,20 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageCloneMenuItem;
 			this->contextMenuButtonColumnNumber->Size = System::Drawing::Size(210, 22);
 			this->contextMenuButtonColumnNumber->Text = L"Columns";
 			// 
-			// tabpageContextMenu
+			// textBoxPhOptionsInput
 			// 
-			this->tabpageContextMenu->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(2) {this->tabpageCloseMenuItem, 
-				this->tabpageCloneMenuItem});
-			this->tabpageContextMenu->Name = L"tabpageContextMenu";
-			this->tabpageContextMenu->Size = System::Drawing::Size(155, 70);
-			// 
-			// tabpageCloseMenuItem
-			// 
-			this->tabpageCloseMenuItem->Name = L"tabpageCloseMenuItem";
-			this->tabpageCloseMenuItem->Size = System::Drawing::Size(154, 22);
-			this->tabpageCloseMenuItem->Text = L"Close this page";
-			this->tabpageCloseMenuItem->Click += gcnew System::EventHandler(this, &FormMain::closeMainMenuItem_Click);
-			// 
-			// tabpageCloneMenuItem
-			// 
-			this->tabpageCloneMenuItem->Name = L"tabpageCloneMenuItem";
-			this->tabpageCloneMenuItem->Size = System::Drawing::Size(154, 22);
-			this->tabpageCloneMenuItem->Text = L"Clone";
-			this->tabpageCloneMenuItem->Click += gcnew System::EventHandler(this, &FormMain::tabpageCloneMenuItem_Click);
+			this->textBoxPhOptionsInput->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Left) 
+				| System::Windows::Forms::AnchorStyles::Right));
+			this->textBoxPhOptionsInput->DefaultValueMode = false;
+			this->textBoxPhOptionsInput->Location = System::Drawing::Point(19, 71);
+			this->textBoxPhOptionsInput->Multiline = true;
+			this->textBoxPhOptionsInput->Name = L"textBoxPhOptionsInput";
+			this->textBoxPhOptionsInput->NoWhitespaceMode = false;
+			this->textBoxPhOptionsInput->PlaceHolderText = nullptr;
+			this->textBoxPhOptionsInput->PlaceHolderTextColor = System::Drawing::SystemColors::ControlDark;
+			this->textBoxPhOptionsInput->ScrollBars = System::Windows::Forms::ScrollBars::Vertical;
+			this->textBoxPhOptionsInput->Size = System::Drawing::Size(298, 81);
+			this->textBoxPhOptionsInput->TabIndex = 2;
 			// 
 			// FormMain
 			// 
@@ -1903,6 +1958,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageCloneMenuItem;
 			this->splitContainerEditor->Panel2->ResumeLayout(false);
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->splitContainerEditor))->EndInit();
 			this->splitContainerEditor->ResumeLayout(false);
+			this->tabpageContextMenu->ResumeLayout(false);
 			this->tabControlOutput->ResumeLayout(false);
 			this->tabPageErrorList->ResumeLayout(false);
 			this->tabPageOutputList->ResumeLayout(false);
@@ -1929,7 +1985,6 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageCloneMenuItem;
 			this->threadContextMenu->ResumeLayout(false);
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->dataGridViewDebugMemory))->EndInit();
 			this->debugMemViewContextMenu->ResumeLayout(false);
-			this->tabpageContextMenu->ResumeLayout(false);
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
@@ -1967,7 +2022,7 @@ public: void mainForm_ReadLog(String ^ path) {
 					 this->textBoxLog->Text = logFileContext->Content;
 				 }
 				 else {
-					 this->textBoxLog->Text = String::Format("Cannot load file '{0}'", logFileContext->FilePath);
+					 this->textBoxLog->Text = String::Format("Cannot find file '{0}'", logFileContext->FilePath);
 				 }
 		}
 public: void mainForm_ReadLog(void) {
@@ -1992,9 +2047,10 @@ private: void mainForm_ChangeContext(TabPage ^ selectedPage) {
 					 //ui
 					 mainForm_UpdateUI();
 					 mainForm_SetStatusBarInfo(newWorkContext);
-					 mainForm_ToggleInterface(this->interpreterProcess, false == mainForm_IsDebugTask());
+					 mainForm_UpdateUIForProcess(this->interpreterProcess, false == mainForm_IsDebugTask());
 				 }
 		}
+
 private: void mainForm_SetStatusBarInfo(WorkContext ^ workContext) {
 				 //status bar carret info update
 
@@ -2102,7 +2158,7 @@ private: void mainForm_AfterDebugTask() {
 				if(WorkContextBroker::Instance->GetCurrentContext() != debugProcess->ProcessWorkContext)
 				{
 					//select debugging page if necessary
-					TabPage ^ debugPage = WorkContextBroker::Instance->GetPage(debugProcess->ProcessWorkContext);
+					TabPage ^ debugPage = WorkContextBroker::Instance->GetPageByContext(debugProcess->ProcessWorkContext);
  					if(debugPage) {
 						this->tabControlPages->SelectedTab = debugPage;
 						this->tabControlRight->SelectedTab = this->tabPageDebug;
@@ -2112,11 +2168,24 @@ private: void mainForm_AfterDebugTask() {
 		 }
 private: bool mainForm_IsDebugTask() {
 			//check for type of process is debug process
-			    return (interpreterProcess && interpreterProcess->GetType() == DebugCodeProcess::typeid);
+			    return (this->interpreterProcess && this->interpreterProcess->GetType() == DebugCodeProcess::typeid);
+		 }
+
+private: bool mainForm_CanContinueDebugTask() {
+			//check if can perform steps, traps ect in debug process
+			    if(mainForm_IsDebugTask() && interpreterProcess->Working)
+				{
+					if(false == cli::safe_cast<DebugCodeProcess^ >(this->interpreterProcess)->PendingIO()) 
+						return true;
+					
+					MessageBox::Show("Your program is waiting for input. Cannot continue at this point.", "Pending I/O", MessageBoxButtons::OK, MessageBoxIcon::Error);
+				}
+				 
+				return false;
 		 }
 
 private: void mainForm_UpdateUI() {
-			//sets enable state for buttons	 
+			//sets enable state for controls	 
 			     bool genuineInterpreter = false;
 				 bool noInterpreter = false;
 				 bool noDebuggingPage = false;
@@ -2170,6 +2239,8 @@ private: void mainForm_UpdateUI() {
 				 noDebuggingPage = genuineInterpreter && mainForm_IsDebugTask() && 
 								   interpreterProcess->Working && workContext != interpreterProcess->ProcessWorkContext;
 
+				 //properties tabs
+				 //this->tabPageProperties->Enabled = (false == noDebuggingPage);
 				 this->tabPageDebug->Enabled = noDebuggingPage ? false : genuineInterpreter;
 
 				 if(interpreterProcess == nullptr || interpreterProcess->Working == false) //only when no process is running
@@ -2200,9 +2271,10 @@ private: void mainForm_UpdateUI() {
 					 this->labelDebugStatus->Text = cDebugLabelInfo;
 
 		}
-public: void mainForm_ToggleInterface(InterpreterProcess ^sender, bool normal_state) {
+public: void mainForm_UpdateUIForProcess(InterpreterProcess ^sender, bool normal_state) {
 				//sets ui state while process run	 
 				bool debugger_running = sender && (sender->GetType() == DebugCodeProcess::typeid) && normal_state == false;
+				bool debugger_after_last_op = debugger_running; //to do switch run icon to terminate -> threads?
 			
 				this->parseMainMenuItem->Enabled = normal_state;
 				this->analyseMainMenuItem->Enabled = normal_state;
@@ -2228,7 +2300,7 @@ public: void mainForm_ToggleInterface(InterpreterProcess ^sender, bool normal_st
 				this->buttonDebugPlaceCursor->Enabled = debugger_running;
 				
 				if(debugger_running)
-					this->dataGridViewDebugMemory->ContextMenuStrip  = this->debugMemViewContextMenu;
+					this->dataGridViewDebugMemory->ContextMenuStrip = this->debugMemViewContextMenu;
 				else
 					this->dataGridViewDebugMemory->ContextMenuStrip = nullptr;
 
@@ -2238,16 +2310,7 @@ public: void mainForm_ToggleInterface(InterpreterProcess ^sender, bool normal_st
 					this->toolBarButtonDebugStep->ToolTipText = cTooltipDebugStepCaption;
 
 		}
-private: TabPage ^ GetTabPageByCursorLocation(Point pt) {
-			//for drag n drop - fins tab page over cursor
-			for(int i = 0; i < this->tabControlPages->TabPages->Count; ++i) {
-				if(this->tabControlPages->GetTabRect(i).Contains(pt)) {
-					return this->tabControlPages->TabPages[i];
-				}
-			}
-    
-			return nullptr;
-		}
+
 private: void debugForm_MemoryScrollToPosition(int position) {
 			 //scroll to memory pos
 			 DebugCodeProcess ^ debugProcess = cli::safe_cast<DebugCodeProcess^ >(interpreterProcess);
@@ -2438,7 +2501,7 @@ private: void interpreterProcess_Start(System::Object^  sender, System::EventArg
 				InterpreterProcess ^ taskProcess = cli::safe_cast<InterpreterProcess^ >(sender);
 				
 				mainForm_UpdateUI();
-				mainForm_ToggleInterface(taskProcess, false);
+				mainForm_UpdateUIForProcess(taskProcess, false);
 				mainForm_SetStatusBarInfo(taskProcess->ProcessWorkContext);
 		}
 private: void interpreterProcess_Complete(System::Object^  sender, System::EventArgs^  e) {
@@ -2446,7 +2509,7 @@ private: void interpreterProcess_Complete(System::Object^  sender, System::Event
 				InterpreterProcess ^ taskProcess = cli::safe_cast<InterpreterProcess^ >(sender);
 
 				mainForm_UpdateUI();
-			    mainForm_ToggleInterface(taskProcess, true);
+			    mainForm_UpdateUIForProcess(taskProcess, true);
 				mainForm_SetStatusBarInfo(taskProcess->ProcessWorkContext);
 
 				mainForm_ReadLog();
@@ -2467,11 +2530,14 @@ private: void debugProcess_Start(System::Object^  sender, System::EventArgs^  e)
 
 				richTextBox->ReadOnly = true;
 				comboBoxThreadMemSelect->Enabled = true;
+				comboBoxThreadMemSelect->DataSource = nullptr;
+
 				richTextBox->Cursor = System::Windows::Forms::Cursors::Hand;
 		}
 private: void debugProcess_Complete(System::Object^  sender, System::EventArgs^  e) {
 				//clear ui at debug end 
-				RichTextBox ^ richTextBox = cli::safe_cast<InterpreterProcess^ >(sender)->ProcessWorkContext->editorTextBox->richTextBox;
+				InterpreterProcess ^ currentProcess = cli::safe_cast<InterpreterProcess^ >(sender);
+				RichTextBox ^ richTextBox = currentProcess->ProcessWorkContext->editorTextBox->richTextBox;
 
 				treeViewDebugThreadList->Nodes->Clear();
 
@@ -2479,9 +2545,15 @@ private: void debugProcess_Complete(System::Object^  sender, System::EventArgs^ 
 					treeViewDebugThreadList->Nodes->Add(String::Format("Program exited with code {0}", 
 														cli::safe_cast<DebugCodeProcess^ >(sender)->DebuggerInstance->DebugeeExitCode));
 
+				this->labelDebugStatus->Text = String::Format("Debug on {0} is finished.", currentProcess->ProcessWorkContext->fileContext->Title);
+				
 				richTextBox->ReadOnly = false;
-				//comboBoxThreadMemSelect->Enabled = false;
-				//comboBoxThreadMemSelect->DataSource = nullptr;
+				comboBoxThreadMemSelect->Enabled = false;
+
+				//disabler prevents to run debug right after its terination (for less than 1sec)
+				//this->buttonDebugStep->Enabled = false;
+				//uiControlDisabler ^ stepButtonDisabler = gcnew uiControlDisabler(this->buttonDebugStep, 2750);
+				
 				richTextBox->Cursor = System::Windows::Forms::Cursors::IBeam;
 		}
 private: void initIDEProcess_Complete(System::Object^  sender, System::EventArgs^  e) {
@@ -2489,8 +2561,8 @@ private: void initIDEProcess_Complete(System::Object^  sender, System::EventArgs
 
 				this->editorInsertStringMenuItem->Enabled = true;
 				//mainForm_UpdateUI();
-			    //mainForm_ToggleInterface(taskProcess, true);
-				//mainForm_SetStatusBarInfo(taskProcess->ProcessWorkContext);			
+			    //mainForm_UpdateUIForProcess(taskProcess, true);
+				mainForm_SetStatusBarInfo(this->initIDEProcess->ProcessWorkContext);			
 		}
 
 private: void parseMainMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
@@ -2616,9 +2688,13 @@ private: System::Void tabpageCloneMenuItem_Click(System::Object^  sender, System
 			 WorkContextBroker::Instance->ClonePage();
 		 }
 
-		 //On error list click, set cursor at given error in sourcecode
-private: void listViewOutputErrors_DoubleClick(System::Object^ sender, System::EventArgs^  e) {
+private: System::Void tabpageDiscardMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
+			 //discard all pages but this
+			 WorkContextBroker::Instance->DiscardOtherPages();
+		 }
 
+private: void listViewOutputErrors_DoubleClick(System::Object^ sender, System::EventArgs^  e) {
+			 //On error list click, set cursor at given error in sourcecode
 			 ListView ^ listView = cli::safe_cast<ListView^ >(sender);
 			 ListViewItem^ selectedListViewItem = listView->SelectedItems[0];
 			 
@@ -2677,7 +2753,7 @@ private: void comboBoxOptionsLanguage_SelectionChangeCommitted(System::Object^  
 				mainForm_SetStatusBarInfo(currentWorkContext);
 			 }
 			 mainForm_UpdateUI();
-			 mainForm_ToggleInterface(this->interpreterProcess, false == mainForm_IsDebugTask());
+			 mainForm_UpdateUIForProcess(this->interpreterProcess, false == mainForm_IsDebugTask());
 		 }
 private: void contextMenuButtonLogRefresh_Click(System::Object^  sender, System::EventArgs^  e) {
 			 
@@ -2706,21 +2782,21 @@ private: void listViewOutputErrors_ColumnWidthChanged(System::Object^  sender, S
 
 private: System::Void buttonDebugStep_Click(System::Object^  sender, System::EventArgs^  e) {
 
-			 if(mainForm_IsDebugTask() && interpreterProcess->Working)
+			 if(mainForm_CanContinueDebugTask())
 			 {
 				 this->UseWaitCursor = true;
 				 cli::safe_cast<DebugCodeProcess^ >(interpreterProcess)->Step();
 				 this->UseWaitCursor = false;
-				 
+		 
 				 mainForm_AfterDebugTask();
 			 }
 			 else
-				 debugMainMenuItem_Click(sender, e);
+				 this->debugMainMenuItem_Click(sender, e); //run debug
 
 		 }
 private: System::Void buttonDebugRunToCursor_Click(System::Object^  sender, System::EventArgs^  e) {
 
-			 if(mainForm_IsDebugTask() && interpreterProcess->Working)
+			 if(mainForm_CanContinueDebugTask())
 			 {
 				 this->UseWaitCursor = true;
 				 cli::safe_cast<DebugCodeProcess^ >(interpreterProcess)->RunToCursor();
@@ -2732,7 +2808,7 @@ private: System::Void buttonDebugRunToCursor_Click(System::Object^  sender, Syst
 		 }
 private: System::Void buttonDebugStepOver_Click(System::Object^  sender, System::EventArgs^  e) {
 			 //step over click
-			 if(mainForm_IsDebugTask() && interpreterProcess->Working)
+			 if(mainForm_CanContinueDebugTask())
 			 {
 				 this->UseWaitCursor = true;
 				 cli::safe_cast<DebugCodeProcess^ >(interpreterProcess)->StepOver();
@@ -2743,7 +2819,7 @@ private: System::Void buttonDebugStepOver_Click(System::Object^  sender, System:
 		 }
 private: System::Void buttonDebugRunToTrap_Click(System::Object^  sender, System::EventArgs^  e) {
 			 //memory trap click
-			 if(mainForm_IsDebugTask() && interpreterProcess->Working)
+			 if(mainForm_CanContinueDebugTask())
 			 {
 				 int cell_index = 1;
 				 FormTrap ^ trapWindow;
@@ -2767,17 +2843,16 @@ private: System::Void buttonDebugRunToTrap_Click(System::Object^  sender, System
 					 if(this->interpreterProcess && this->interpreterProcess->Working)
 						mainForm_AfterDebugTask();
 
-					 uiBlinker ^ selectionBlinker = gcnew uiBlinker(dataGridViewDebugMemory, Color::Red);
+					 uiGridCellBlinker ^ selectionBlinker = gcnew uiGridCellBlinker(dataGridViewDebugMemory, Color::Red);
 					 selectionBlinker->Blink(2400);
 				 }
 			 }
 		 }
 private: System::Void buttonDebugPlaceCursor_Click(System::Object^  sender, System::EventArgs^  e) {
 			 //place cursor click
-			 DebugCodeProcess ^ debugProcess;
-			 if(mainForm_IsDebugTask() && interpreterProcess->Working)
+			 if(mainForm_IsDebugTask() && this->interpreterProcess->Working)
 			 {
-				 debugProcess = cli::safe_cast<DebugCodeProcess^ >(interpreterProcess);
+				 DebugCodeProcess ^ debugProcess = cli::safe_cast<DebugCodeProcess^ >(interpreterProcess);
 				 CodeContextConverter ^ ccc = gcnew CodeContextConverter(debugProcess->ProcessWorkContext);
 
 				 debugProcess->MoveCarretToPosition( ccc->ToCursor( debugProcess->DebuggerInstance->CodePosition ));
@@ -2810,6 +2885,8 @@ private: void contextMenuButtonMemoryRepresentation_Click(System::Object^  sende
 				 
 				 if(sender_menu->Text == cButtonMemoryReprCharCaption)
 					debugProcess->DebuggerInstance->LoadMemoryImageToView(dataGridViewDebugMemory, gcnew CharacterCellPrinter());
+				 else if(sender_menu->Text == cButtonMemoryReprUnsignedCaption)
+					debugProcess->DebuggerInstance->LoadMemoryImageToView(dataGridViewDebugMemory, gcnew UnsignedCellPrinter());
 				 else if(sender_menu->Text == cButtonMemoryReprHexCaption)
 					debugProcess->DebuggerInstance->LoadMemoryImageToView(dataGridViewDebugMemory, gcnew HexCellPrinter());
 				 else if(sender_menu->Text == cButtonMemoryReprMixCaption)
@@ -2917,15 +2994,8 @@ private: System::Void treeViewDebugThreadList_MouseUp(System::Object^  sender, S
 			}
 		 }
 
-private: System::Void textBoxOutput_TextChanged(System::Object^  sender, System::EventArgs^  e) {
-			 //scroll to end text in output
-			 
-			 textBoxOutput->SelectionStart = textBoxOutput->Text->Length;
-			 textBoxOutput->ScrollToCaret();
-			 //textBoxOutput->ScrollToEnd();
-		 }
 private: void pluginsMainMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
-			 //run plugin
+			 //invoke plugin from menu
 			 
 			 String ^ code;
 			 WorkContext ^ currentWorkContext = WorkContextBroker::Instance->GetCurrentContext();
@@ -2969,11 +3039,23 @@ private: void editorInsertPluginMenuItem_Click(System::Object^  sender, System::
 		 }
 private: System::Void editorResolveMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
 			 //button resolve pragmas on demand
-			 this->interpreterProcess = gcnew PragmaResolvingProcess(  WorkContextBroker::Instance->GetCurrentContext()->editorTextBox->richTextBox->SelectionLength > 0 );	
+			 this->interpreterProcess = gcnew PragmaResolvingProcess( WorkContextBroker::Instance->GetCurrentContext()->editorTextBox->richTextBox->SelectionLength > 0 );	
 			 
 			 this->mainForm_RunTask();
 
 			 this->tabControlOutput->SelectedTab = this->tabPageOutputList;
+		 }
+private: System::Void toolBarButtonFindPair_Click(System::Object^  sender, System::EventArgs^  e) {
+			 //find paired instruction
+			 WorkContext ^ currentWorkContext = WorkContextBroker::Instance->GetCurrentContext();
+
+			 CodeContextConverter ^ ccc = gcnew CodeContextConverter(currentWorkContext);
+
+			 int paired_intr = CodeLoopBinder::GetPairedInstruction(ccc->ToInstruction( currentWorkContext->editorTextBox->richTextBox->SelectionStart), ccc->RawSource);
+			 
+			 currentWorkContext->editorTextBox->richTextBox->SelectionStart = ccc->ToCursor(paired_intr);
+			 currentWorkContext->editorTextBox->richTextBox->SelectionLength = 1;
+			 currentWorkContext->editorTextBox->richTextBox->Focus();
 		 }
 
 private: System::Void protipMainMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
@@ -2995,7 +3077,7 @@ private: System::Void tabControlPages_DragOver(System::Object^  sender, System::
 			//change tab order
             Point pt = this->tabControlPages->PointToClient( Point(e->X, e->Y));
             
-            if(this->GetTabPageByCursorLocation(pt) && e->Data->GetDataPresent(TabPage::typeid)) {
+            if(WorkContextBroker::Instance->GetPageByCursorLocation(pt) && e->Data->GetDataPresent(TabPage::typeid)) {
 				e->Effect = DragDropEffects::Move; 
             }
             else 
@@ -3004,7 +3086,7 @@ private: System::Void tabControlPages_DragOver(System::Object^  sender, System::
 private: System::Void tabControlPages_DragDrop(System::Object^  sender, System::Windows::Forms::DragEventArgs^  e) {
 			//tab move - drag n drop procedure
 			Point pt = this->tabControlPages->PointToClient( Point(e->X, e->Y));
-            TabPage ^ drag_tab, ^ hover_tab = this->GetTabPageByCursorLocation(pt);
+            TabPage ^ drag_tab, ^ hover_tab = WorkContextBroker::Instance->GetPageByCursorLocation(pt);
 
             if(hover_tab && e->Data->GetDataPresent(TabPage::typeid))
             {
@@ -3035,19 +3117,19 @@ private: System::Void tabControlPages_DragDrop(System::Object^  sender, System::
 		 }
 private: System::Void tabControlPages_MouseDown(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e) {
 			//tab move - drag n drop start
-            TabPage ^ cursor_on_tab = this->GetTabPageByCursorLocation( Point(e->X, e->Y));
+            TabPage ^ cursor_on_tab = WorkContextBroker::Instance->GetPageByCursorLocation( Point(e->X, e->Y));
 
             if(cursor_on_tab) 
 			{
 				if(e->Button == System::Windows::Forms::MouseButtons::Right &&
-					 WorkContextBroker::Instance->GetCurrentContext() ==  WorkContextBroker::Instance->GetContext(cursor_on_tab)) 
+					 WorkContextBroker::Instance->GetCurrentContext() == WorkContextBroker::Instance->GetContext(cursor_on_tab)) 
 				{	
 					//right button on current tab? popup
 					this->tabpageContextMenu->Show();//this->tabControlPages, this->tabControlPages->PointToClient(Point(e->X, e->Y)));
 				}
 				else
 				{
-					//try drop dragged page
+					//try drop dragged page instead
 					this->tabControlPages->DoDragDrop(cursor_on_tab, static_cast<DragDropEffects>(DragDropEffects::All | DragDropEffects::Move));
 				}
             }
@@ -3057,7 +3139,23 @@ private: System::Void FormMain_FormClosing(System::Object^  sender, System::Wind
 			int unsavedFilesCnt = 0;
 			StringBuilder ^ sbUnsavedNames = gcnew StringBuilder;
 			System::Windows::Forms::DialogResult dialogResult;
-			 
+
+			//check if a process is running
+			if(this->interpreterProcess && this->interpreterProcess->Working) 
+			{ 
+				dialogResult = MessageBox::Show(String::Format("A process is still running on \"{0}\".\nDo you want terminate and quit?", this->interpreterProcess->ProcessWorkContext->fileContext->Title), "Closing IDE",
+												MessageBoxButtons::YesNo, MessageBoxIcon::Exclamation);
+				
+				if(dialogResult == System::Windows::Forms::DialogResult::No) {
+					e->Cancel = true;
+					return;
+				}
+				else {
+					this->interpreterProcess->Stop();
+				}
+			}
+			
+			//check for unsaved files
 			for each(TabPage ^ page in this->tabControlPages->TabPages) {
 				WorkContext ^ context = WorkContextBroker::Instance->GetContext(page);  
 				 
@@ -3068,11 +3166,11 @@ private: System::Void FormMain_FormClosing(System::Object^  sender, System::Wind
 				}	
 			}
 
-			if(unsavedFilesCnt > 0 && (e->CloseReason == CloseReason::UserClosing || e->CloseReason == CloseReason::ApplicationExitCall)) {
-				
+			if(unsavedFilesCnt > 0 && (e->CloseReason == CloseReason::UserClosing || e->CloseReason == CloseReason::ApplicationExitCall)) 
+			{	
 				sbUnsavedNames->Remove(sbUnsavedNames->Length-2, 2); //trim last ','
 				dialogResult = MessageBox::Show(String::Format("{0} file(s) are unsaved: {1}.\nDo you want to save them all?", unsavedFilesCnt, sbUnsavedNames->ToString()), "Unsaved files", 
-												MessageBoxButtons::YesNoCancel, MessageBoxIcon::Question);
+												MessageBoxButtons::YesNoCancel, MessageBoxIcon::Question, MessageBoxDefaultButton::Button2);
 				
 				if(dialogResult == System::Windows::Forms::DialogResult::Yes) {
 					WorkContextBroker::Instance->SaveAllPages();

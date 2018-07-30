@@ -25,7 +25,7 @@ namespace BrainthreadIDE
 		
 		property Debugger^ DebuggerInstance
 		{
-			Debugger^ get() { return debugger; }
+			Debugger^ get() { return this->debugger; }
 		}
 
 		virtual String ^ GetStatusLabel() override
@@ -44,6 +44,7 @@ namespace BrainthreadIDE
 		void MemoryTrap(int index, int value, Debugger::CompareType compare);
 
 		void MoveCarretToPosition(int new_pos);
+		bool PendingIO();
 
 	protected:
 		virtual void AttachWorkerEvents() override
@@ -59,11 +60,9 @@ namespace BrainthreadIDE
 		void worker_RunWorkerCompleted(System::Object^ sender, System::ComponentModel::RunWorkerCompletedEventArgs^ e);
 
 		void LaunchDebugger(System::Object^ sender, System::EventArgs^ e);
-		void moveDebugeeWindow();
 
 	private:	
 		Debugger ^ debugger;
-		System::Drawing::Rectangle mainWindowLocation;
 		
 	};
 }

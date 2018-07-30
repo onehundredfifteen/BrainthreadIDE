@@ -1,6 +1,8 @@
 #include "StdAfx.h"
 #include "IDEInitProcess.h"
+
 #include "../helpers/BtOutputGenerator.h"
+#include "../factories/FileContextFactory.h"
 
 namespace BrainthreadIDE 
 {
@@ -11,13 +13,13 @@ namespace BrainthreadIDE
 
 		this->OnStart(this, nullptr);
 		
-		//processWorkContext->outputLister->AddOutputWithTimestamp("Task started");
-
+		AppArgumentsInit(); //cannot do this in thread
 		worker->RunWorkerAsync();
 
 		return true;
 	}
 
+	//task to do after IDE start
     void IDEInitProcess::worker_DoWork(System::Object^ sender, System::ComponentModel::DoWorkEventArgs^ e) 
 	{
 		try
@@ -35,8 +37,20 @@ namespace BrainthreadIDE
 
 	void IDEInitProcess::worker_RunWorkerCompleted(System::Object^ sender, System::ComponentModel::RunWorkerCompletedEventArgs^  e) 
 	{
-		//rocessWorkContext->outputLister->AddOutputWithTimestamp("Task completed");
-
 		this->OnComplete(this, nullptr);
+	}
+
+	void IDEInitProcess::AppArgumentsInit() 
+	{
+		//arg processing
+		array<String^> ^ args = Environment::GetCommandLineArgs();
+
+		if(args->Length == 2) //open file from arg
+		{
+			FileContext ^ argOpenFileContext = FileContextFactory::createFileContext(args[1]);
+			if(argOpenFileContext->Open()) {
+				WorkContextBroker::Instance->OpenPage(argOpenFileContext);
+			}
+		}
 	}
 }

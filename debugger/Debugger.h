@@ -33,11 +33,12 @@ namespace BrainthreadIDE
 		void RunToMemoryTrap(int memory_index, int value, CompareType compare);
 
 		void Finish();
-		void DetachDebugee();
+		void DetachDebugee(bool kill_debugee);
 
 		void LoadThreadTree(TreeView ^ threadTreeView);
 		void LoadThreadList(ComboBox ^ threadListComboBox);
 		void LoadStatus(Label ^ label);
+		String ^ GetDebugStats();
 
 		void LoadMemoryByThread();
 		
@@ -64,7 +65,7 @@ namespace BrainthreadIDE
 					return 0;
 				}
 				
-				return this->threadResource[ this->CurrentThreadId ]->CodePosition; 
+				return this->threadResource[ index ]->CodePosition; 
 			}
 		}
 	property int MemoryPosition
@@ -84,7 +85,7 @@ namespace BrainthreadIDE
 					return 0;
 				}
 				
-				return this->threadResource[ this->CurrentThreadId ]->MemoryPosition; 
+				return this->threadResource[ index ]->MemoryPosition; 
 			}
 		}
 	property int MemoryLNZPos[int]
@@ -94,12 +95,15 @@ namespace BrainthreadIDE
 					return 0;
 				}
 				
-				return this->threadResource[ this->CurrentThreadId ]->MemoryLNZPos; 
+				return this->threadResource[ index ]->MemoryLNZPos; 
 			}
 		}
 	property bool ThreadTracing[int]
 		{
-			bool get(int index) { return this->threadResource[ index ]->Trace; }
+			bool get(int index) { 
+				return this->threadResource->ContainsKey(index) && this->threadResource[ index ]->Trace; 
+			}
+
 			void set(int index, bool value) { 
 				this->threadResource[ index ]->Trace = value; 
 				this->updateTracing();
@@ -156,7 +160,7 @@ namespace BrainthreadIDE
 
 	public: static String ^ DebuggerVersion()
 		{
-			return "0.2d";
+			return "0.2e";
 		}
 	};
 }

@@ -33,6 +33,9 @@ namespace BrainthreadIDE
 			
 			process->StartInfo = this->startInfo;
 			process->Start();
+
+			//positioning process window
+			this->MoveProcessWindow();
 		}
 		catch(Exception ^ ex)
 		{
@@ -98,24 +101,28 @@ namespace BrainthreadIDE
 	String ^ RunCodeProcess::GetProcessStatistics()
 	{
 		String ^ machineName = Environment::MachineName;
+		String ^ msg = "Process statistics cannot be displayed ";
 
 		try
 		{
 			if(process && process->HasExited == true)
 			{
+				int cpu_time = (int)process->TotalProcessorTime.TotalMilliseconds;
+				int proc_time = (int)(process->ExitTime - process->StartTime).TotalMilliseconds;
+				
 				if(String::Compare(machineName, process->MachineName) && String::Compare(".", process->MachineName))
 					machineName = process->MachineName;
 			
 				return String::Format("@{0} {1} ms, CPU time: {2} ms", machineName, 
-																		 (process->ExitTime - process->StartTime).TotalMilliseconds, 
-																		 process->TotalProcessorTime.TotalMilliseconds);
+																		 proc_time, 
+																		 cpu_time);
 			}
+			else 
+				return msg;
 		}
 		catch(InvalidOperationException ^ e)
 		{
-			return e->Message;
+			return msg + e->Message;
 		}
-
-		return "";
 	}
 }

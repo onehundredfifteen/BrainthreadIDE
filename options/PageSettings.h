@@ -12,8 +12,35 @@ namespace BrainthreadIDE
 	public ref class PageSettings
 	{
 	public:
-		PageSettings(void);
+		PageSettings(void)
+		{
+			this->Default();
+		}
 
+		PageSettings(const PageSettings ^ p) 
+		{
+			this->selLanguage = p->selLanguage;
+			this->selCellsize = p->selCellsize;
+			this->selMemoryBehavior = p->selMemoryBehavior;
+			this->selEofBehavior = p->selEofBehavior;
+			this->selMemorySize = p->selMemorySize;
+			this->selAdditionalCommands = p->selAdditionalCommands;
+			this->selInput = p->selInput;
+			this->selRedirectStreams = p->selRedirectStreams;
+		}
+
+	private:
+		//selections
+		BrainthreadIDE::Language selLanguage;
+		int selCellsize;
+		int selMemoryBehavior;
+		int selEofBehavior;
+		unsigned int selMemorySize;
+		String ^ selAdditionalCommands;
+		String ^ selInput;
+		bool selRedirectStreams;
+
+	public:
 		static void Init(ComboBox ^ cLanguage, ComboBox ^ cCellsize, ComboBox ^ cMemoryBehavior,
 			                     ComboBox ^ cEofBehavior, TextBox ^ cMemorySize, TextBox ^ cAdditionalCommands,
 								 TextBox ^ cInputText, CheckBox ^ cRedirectStreams);
@@ -50,16 +77,6 @@ namespace BrainthreadIDE
 		static TextBox ^ ctAdditionalCommands;
 		static TextBox ^ ctInputText;
 		static CheckBox ^ ctRedirectStreams;
-
-		//selections
-		BrainthreadIDE::Language selLanguage;
-		int selCellsize;
-		int selMemoryBehavior;
-		int selEofBehavior;
-		unsigned int selMemorySize;
-		String ^ selAdditionalCommands;
-		String ^ selInput;
-		bool selRedirectStreams;
 
 		//constans headers
 		literal String ^ dtCellsizeDisplayHeader = "cellsizeDecs";

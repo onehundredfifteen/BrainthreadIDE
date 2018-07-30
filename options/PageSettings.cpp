@@ -4,11 +4,6 @@
 
 namespace BrainthreadIDE 
 {
-	PageSettings::PageSettings(void)
-	{
-		this->Default();
-	}
-
 	void PageSettings::Init(ComboBox ^ cLanguage, ComboBox ^ cCellsize, ComboBox ^ cMemoryBehavior,
 			                         ComboBox ^ cEofBehavior, TextBox ^ cMemorySize, TextBox ^ cAdditionalCommands,
 									 TextBox ^ cInputText, CheckBox ^ cRedirectStreams)
@@ -74,7 +69,8 @@ namespace BrainthreadIDE
 		ctLanguage->Items->Clear();
 		for(int l = 0; l < (int)Language::l__spare; l++)
 		{
-			ctLanguage->Items->Add( LanguageName::GetLanguageName( (BrainthreadIDE::Language) l));
+			if(false == String::IsNullOrEmpty( GlobalOptions::Instance->InterpreterPath[ (BrainthreadIDE::Language) l] ))
+				ctLanguage->Items->Add( LanguageName::GetLanguageName( (BrainthreadIDE::Language) l));
 		}
 
 		ctCellsize->DataSource = dtCellsize;

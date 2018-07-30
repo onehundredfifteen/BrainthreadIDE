@@ -141,13 +141,17 @@ namespace BrainthreadIDE
 
 	void Debugger::Finish()
 	{
-		debuggerLoop->Terminate();	
+		this->debuggerLoop->Terminate();	
 		//debuggerLoop->GetProcessProperties(ProcessProperties);
 	}
 
-	void Debugger::DetachDebugee()
+	void Debugger::DetachDebugee(bool kill_debugee)
 	{
-		debuggerLoop->Detach();	
+		if(true == kill_debugee) {
+			this->Finish();		
+		}
+		else
+			this->debuggerLoop->Detach();	
 		//debuggerLoop->GetProcessProperties(ProcessProperties);
 	}
 
@@ -254,9 +258,9 @@ namespace BrainthreadIDE
 			etor.Current.Value->MemoryInfoNode->BackColor = System::Drawing::SystemColors::Window;
 
 			if(false == debuggerLoop->IsThreadRunning(etor.Current.Key))
-				threadTreeView->Nodes->Add(this->getDetachedThreadInfoTreeNode(etor.Current.Key, "Thread {0} EXITED"));
+				threadTreeView->Nodes->Add(this->getDetachedThreadInfoTreeNode(etor.Current.Key, "Thread {0} EXITED")); //formatted
 			else if(false == etor.Current.Value->Trace)
-				threadTreeView->Nodes->Add(this->getDetachedThreadInfoTreeNode(etor.Current.Key, "Thread {0} DETACHED. steps: {1}"));
+				threadTreeView->Nodes->Add(this->getDetachedThreadInfoTreeNode(etor.Current.Key, "Thread {0} DETACHED. steps: {1}")); //formatted
 			else
 				threadTreeView->Nodes->Add(etor.Current.Value->MemoryInfoNode); 
 
@@ -264,7 +268,7 @@ namespace BrainthreadIDE
 				etor.Current.Value->MemoryInfoNode->BackColor = System::Drawing::Color::Yellow;
 		}
 
-		threadTreeView->Nodes->Add(String::Format("Functions call stack {0}", 0L)); 
+		threadTreeView->Nodes->Add(String::Format("Functions call stack {0}", "0")); //todo
 		threadTreeView->Nodes->Add(String::Format("Shared heap size: {0}", ProcessProperties.shstackinfo.list_size)); 
 		
 		treeViewExpander->Expand();
@@ -327,6 +331,28 @@ namespace BrainthreadIDE
 
 		label->Tag = label->Text; //copy
 	}
+
+	String ^ Debugger::GetDebugStats()
+	{
+		int total_executed_cnt = 0;
+
+		StringBuilder ^ sb = gcnew StringBuilder();
+		Dictionary<int, ThreadResourceState ^>::Enumerator etor = this->threadResource->GetEnumerator();
+
+		while(etor.MoveNext())
+		{
+			int steps_executed = debuggerLoop->GetThreadSteps(etor.Current.Key);
+			sb->Append(String::Format("\tThread {0}: {1} steps executed.\r\n", this->getThreadName(etor.Current.Key), steps_executed));
+			
+			total_executed_cnt += steps_executed;
+		}
+
+		sb->Insert(0, String::Format("Total {0} steps executed in {1} thread(s).\r\n", total_executed_cnt, this->threadResource->Count));
+
+		return sb->ToString();
+	}
+
+	//debugger internal methods
 
 	array<int> ^ Debugger::getMemoryImage(int last_cell_to_load)
 	{
@@ -423,6 +449,8 @@ namespace BrainthreadIDE
 	    for each(DataGridViewColumn ^ col in dataGridView->Columns) 
 	    {
 			col->SortMode = DataGridViewColumnSortMode::NotSortable;
+			//col->HeaderCell->Style->Font = (gcnew System::Drawing::Font(L"Lucida Sans Unicode", 10.0F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+				//static_cast<System::Byte>(0))); //238
 	    }
 		
 		//resize columns
@@ -499,7 +527,7 @@ namespace BrainthreadIDE
 	
 	int Debugger::getCurrentThreadId()
 	{
-		return ProcessProperties.thread_id;
+		return BrainthreadIDE::ProcessProperties.thread_id;
 	}
 
 }

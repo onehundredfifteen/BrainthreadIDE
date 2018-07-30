@@ -25,10 +25,12 @@ namespace BrainthreadIDE
 	protected:
 		String ^ GetCodeLocationArgument();
 		void ResolvePragmas();
+		void MoveProcessWindow();
 
 	protected:
 		Process ^ process;
 		ProcessStartInfo ^ startInfo;
+		System::Drawing::Rectangle mainWindowLocation;
 	
 	private:
 		bool runSelection;

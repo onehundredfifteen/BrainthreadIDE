@@ -35,6 +35,8 @@ namespace BrainthreadIDE
 
 		outputList->AutoResizeColumns(ColumnHeaderAutoResizeStyle::ColumnContent); 
 		outputList->AutoResizeColumns(ColumnHeaderAutoResizeStyle::HeaderSize);
+
+		outputBox->AppendText(" ");
 	}
 
 	void OutputLister::Purge()
@@ -69,7 +71,9 @@ namespace BrainthreadIDE
 
 	void OutputLister::AddOutputWithTimestamp(String ^ line)
 	{
-		this->AddOutput(String::Format("<info at {0}> {1}\r\n", DateTime::Now.ToLongTimeString(), line));
+		this->AddOutput(String::Format("{2}<info at {0}> {1}", DateTime::Now.ToLongTimeString(), 
+															   line,
+															   outputStrings->Count > 0 ? "\r\n" : "")); //no first newline
 	}
 
 	//funkcja podaje pozycje instrukcji w tekscie uzywajac jako slownika kluczy z syntax higligthera

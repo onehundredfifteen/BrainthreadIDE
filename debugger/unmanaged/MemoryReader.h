@@ -1,6 +1,8 @@
 #pragma once
 
+#include <new> 
 #include "btheaders/BTProcessEntry.h"
+#include "btheaders/DebugTimeException.h"
 
 class MemoryReader
 {
@@ -43,6 +45,24 @@ class MemoryReader
 			{
 				if(this->memory)
 					delete [] this->memory;
+
+				try
+				{
+					this->memory = new Cell [new_memory_len];
+					this->memory_len = new_memory_len;
+				}
+				catch (std::bad_alloc & )
+				{
+					if(new_memory_len > 30000) //try to read smaller mem
+					{
+						this->memory = new Cell [30000];
+						this->memory_len = 30000; 
+					}
+					else
+					{
+						throw DebugTimeException("Cannot read from memory");
+					}
+				}
 				
 				this->memory = new Cell [new_memory_len];
 				this->memory_len = new_memory_len;
@@ -63,13 +83,13 @@ class MemoryReader
 			else
 				cell_size = byte_memory_len / (mte.len - 1);
 
-			alloc(mte.len * cell_size);
+			this->alloc(mte.len * cell_size);
 			 
 			ReadProcessMemory(hProcess,
-				mte.mem,
-				this->memory,
-				mte.len * cell_size, 
-				&rv);	
+					mte.mem,
+					this->memory,
+					mte.len * cell_size, 
+					&rv);	
 
 			return rv;
 		}
@@ -104,6 +124,16 @@ class MemoryReader
 		int GetRealMemorySize()
 		{
 			return this->memory_len / cell_size;
+		}
+
+		int GetMemorySize()
+		{
+			return this->memory_len;
+		}
+
+		int SizeOfCell()
+		{
+			return this->cell_size;
 		}
 
 

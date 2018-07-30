@@ -1,41 +1,20 @@
 #pragma once
 
-#include "SyntaxHighLighter.h"
-#include "OutputLister.h"
+#include "WorkContext.h"
 
-#include "options/PageSettings.h"
-#include "file_io/FileContext.h"
-#include "file_io/ProjectFileContext.h"
+//#include "SyntaxHighLighter.h"
+//#include "OutputLister.h"
+
+//#include "options/PageSettings.h"
+//#include "file_io/FileContext.h"
+//#include "file_io/ProjectFileContext.h"
 
 
 namespace BrainthreadIDE 
 {
 	using namespace System;
 	using namespace System::Windows::Forms;
-
 	ref class FormMain;
-
-	public ref class WorkContext
-	{
-	public:	
-			EditorTextBox::EditorTextBoxControl ^ editorTextBox;
-			DefaultSyntaxHighLighter ^ syntaxHighLighter;
-			PageSettings ^ settings;
-			FileContext ^ fileContext;
-			OutputLister ^ outputLister;
-
-	public: property bool IsProjectContext {		
-				bool get() {
-					return (this->fileContext->GetType() == ProjectFileContext::typeid);
-				}
-			}
-			property bool SourceNotSaved {		
-				bool get() {
-					return (this->fileContext->HasPhysicalFile() == false ? String::IsNullOrEmpty(editorTextBox->richTextBox->Text) == false : 
-						   String::Compare(this->fileContext->Content, editorTextBox->richTextBox->Text) != 0);
-				}
-			}
-	};
 
 	public ref class WorkContextBroker
 	{
@@ -67,29 +46,36 @@ namespace BrainthreadIDE
 			
 			System::Collections::Generic::Dictionary<TabPage^, WorkContext^>^ contextPairs;
 
-			void InitializeContext(WorkContext ^ context);
-			void AddContext(TabPage ^ newTabPage, WorkContext ^ newWorkContext);
-			void SaveContent(WorkContext ^ saveWorkContext);
+			void initializeContext(WorkContext ^ context);
+			void addContext(TabPage ^ newTabPage, WorkContext ^ newWorkContext);
+			void saveContent(WorkContext ^ saveWorkContext);
+
 			TabPage ^ IsAlreadyOpened(FileContext ^ fileContext);
+			void refreshTabTitle(TabPage ^ tabPage);
 
 	public:
 			WorkContext ^ GetCurrentContext();
 			WorkContext ^ GetContext(TabPage ^ tabPage);
-			TabPage ^ GetPage(WorkContext ^ context);
+			TabPage ^ GetPageByContext(WorkContext ^ context);
+			TabPage ^ GetPageByCursorLocation(System::Drawing::Point pt);
 
 			void AddPage(void);
 			void OpenPage(void);
 			void OpenPage(FileContext ^ openFileContext);
+
 			void RemovePage(void);
+			void RemovePage(TabPage ^ tabPage);
+
 			void ClonePage(void);
+			void DiscardOtherPages(void);
 
 			void SavePage(void);
 			void SavePageAs(void);
 			void SaveAllPages(void);
 
-			void RefreshTabTitle(TabPage ^ tabPage);
 			void RefreshEditor();
 			void AddFilesToHistory();
+
 	private:
 			void RefreshEditor(WorkContext ^ workContext);
 			void AddFileToHistory(WorkContext ^ workContext);

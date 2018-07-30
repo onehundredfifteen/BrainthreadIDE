@@ -25,6 +25,8 @@ namespace BrainthreadIDE
 	private:
 		void worker_DoWork(System::Object^ sender, System::ComponentModel::DoWorkEventArgs^ e);
 		void worker_RunWorkerCompleted(System::Object^ sender, System::ComponentModel::RunWorkerCompletedEventArgs^ e);
+
+		void AppArgumentsInit();
 		
 	};
 }

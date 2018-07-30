@@ -51,6 +51,9 @@ namespace BrainthreadIDE
 			
 				process->StartInfo = this->startInfo;
 				process->Start();
+
+				//positioning process window
+				this->MoveProcessWindow();
 			}
 			catch(Exception ^ ex)
 			{

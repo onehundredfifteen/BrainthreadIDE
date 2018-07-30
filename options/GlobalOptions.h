@@ -56,9 +56,9 @@ namespace BrainthreadIDE
 																						gcnew List<String ^>(gcnew array<String ^>(6){"-l bt","-l b","-l pb","-l bf","",""}) )
 																					 );
 
-				field_list->Add(FieldId::fiSaveCodeBeforeRun, gcnew OptionField<bool>(true));
+				field_list->Add(FieldId::fiSaveCodeBeforeRun, gcnew OptionField<bool>(false));
 				field_list->Add(FieldId::fiPauseProgramAfterRun, gcnew OptionField<bool>(false));
-				field_list->Add(FieldId::fiLogPath, gcnew OptionField<String ^>( FileContext::BaseDirectory() + "\\log.txt"));
+				field_list->Add(FieldId::fiLogPath, gcnew OptionField<String ^>( FileContext::BaseDirectory() + "\\debug-log.txt"));
 				field_list->Add(FieldId::fiReadLogFlag, gcnew OptionField<bool>(false));
 				
 				field_list->Add(FieldId::fiTraceNewThread, gcnew OptionField<bool>(true));

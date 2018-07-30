@@ -92,7 +92,7 @@ namespace BrainthreadIDE {
 			this->buttonCancel->Name = L"buttonCancel";
 			this->buttonCancel->Size = System::Drawing::Size(75, 23);
 			this->buttonCancel->TabIndex = 3;
-			this->buttonCancel->Text = L"Cancel";
+			this->buttonCancel->Text = L"Close";
 			this->buttonCancel->UseVisualStyleBackColor = true;
 			this->buttonCancel->Click += gcnew System::EventHandler(this, &FormInsert::buttonCancel_Click);
 			// 

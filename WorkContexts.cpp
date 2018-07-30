@@ -29,7 +29,7 @@ namespace BrainthreadIDE
 		return nullptr;
 	}
 
-	TabPage ^ WorkContextBroker::GetPage(WorkContext ^ context)
+	TabPage ^ WorkContextBroker::GetPageByContext(WorkContext ^ context)
 	{	//get WorkContext tab
 		for each( KeyValuePair<TabPage^, WorkContext^>^ kvp in contextPairs)
 		{
@@ -39,7 +39,24 @@ namespace BrainthreadIDE
 		return nullptr;
 	}
 
-	void WorkContextBroker::InitializeContext(WorkContext ^ context)
+	TabPage ^ WorkContextBroker::GetPageByCursorLocation(System::Drawing::Point pt) 
+	{
+			//for drag n drop - fins tab page over cursor
+			for(int i = 0; i < this->Owner->TabPages->Count; ++i) {
+				if(this->Owner->GetTabRect(i).Contains(pt)) {
+					return this->Owner->TabPages[i];
+				}
+			}
+    
+			return nullptr;
+	}
+
+	void WorkContextBroker::saveContent(WorkContext ^ saveWorkContext)
+	{
+		saveWorkContext->fileContext->Content = saveWorkContext->editorTextBox->richTextBox->Text;
+	}
+
+	void WorkContextBroker::initializeContext(WorkContext ^ context)
 	{
 		//editor
 		EditorTextBox::EditorTextBoxControl ^ newEditorTextBox = gcnew EditorTextBox::EditorTextBoxControl;
@@ -68,7 +85,7 @@ namespace BrainthreadIDE
 		context->outputLister->Refresh();
 	}
 
-	void WorkContextBroker::AddContext(TabPage ^ newTabPage, WorkContext ^ newWorkContext)
+	void WorkContextBroker::addContext(TabPage ^ newTabPage, WorkContext ^ newWorkContext)
 	{
 		//adding
 		newTabPage->Controls->Add(newWorkContext->editorTextBox);
@@ -90,8 +107,8 @@ namespace BrainthreadIDE
 		TabPage^ newTabPage = gcnew TabPage;
 		WorkContext ^ newWorkContext = gcnew WorkContext;
 
-		this->InitializeContext(newWorkContext);
-		this->AddContext(newTabPage, newWorkContext);
+		this->initializeContext(newWorkContext);
+		this->addContext(newTabPage, newWorkContext);
 
 		this->RefreshEditor(newWorkContext);
 	}
@@ -108,8 +125,9 @@ namespace BrainthreadIDE
 
 	void WorkContextBroker::OpenPage(FileContext ^ openFileContext)
 	{
-		TabPage^ newTabPage;
+		TabPage^ newTabPage; 
 		WorkContext ^ newWorkContext = gcnew WorkContext;
+		WorkContext ^ previousWorkContext = GetCurrentContext();
 
 		newTabPage = this->IsAlreadyOpened(openFileContext);
 		if(newTabPage)
@@ -119,10 +137,10 @@ namespace BrainthreadIDE
 			return;
 		}
 
-		//powodzenie
+		//tab creation
 		newTabPage = gcnew TabPage;
 
-		this->InitializeContext(newWorkContext);
+		this->initializeContext(newWorkContext);
 		newWorkContext->fileContext = openFileContext;
 		newWorkContext->editorTextBox->richTextBox->Text = openFileContext->Content;
 
@@ -133,75 +151,105 @@ namespace BrainthreadIDE
 			newWorkContext->settings->Load();
 		}
 
-		this->AddContext(newTabPage, newWorkContext);
+		//commit new page 
+		this->addContext(newTabPage, newWorkContext);
+
+		//if only one empty page + just added page, replace instead
+		if(this->contextPairs->Count == 2 && false == previousWorkContext->fileContext->HasPhysicalFile()
+			&& String::IsNullOrEmpty(previousWorkContext->editorTextBox->richTextBox->Text) && false == previousWorkContext->IsProjectContext) 
+		{
+			this->RemovePage(this->GetPageByContext(previousWorkContext));
+		}
+		
+		//draw new page
 		this->RefreshEditor(newWorkContext);
 	}
 
 	void WorkContextBroker::RemovePage(void)
 	{
-		TabPage ^ deletedTabPage = Owner->SelectedTab;
-		Owner->TabPages->Remove(deletedTabPage);
+		RemovePage(Owner->SelectedTab);
+	}
 
-		this->AddFileToHistory( contextPairs[deletedTabPage] );
+	void WorkContextBroker::RemovePage(TabPage ^ tabPage)
+	{
+		Owner->TabPages->Remove(tabPage);
 
-		delete contextPairs[deletedTabPage]->fileContext;
-		delete contextPairs[deletedTabPage];
+		this->AddFileToHistory( contextPairs[tabPage] );
 
-		contextPairs->Remove(deletedTabPage);
+		delete contextPairs[tabPage]->fileContext;
+		delete contextPairs[tabPage];
+
+		contextPairs->Remove(tabPage);
 
 		if(Owner->TabPages->Count < 1) {
 			this->AddPage();
 		}
 	}
 
-	void WorkContextBroker::ClonePage(void)
-	{
-		/*TabPage^ newTabPage = gcnew TabPage;
-		WorkContext ^ newWorkContext = gcnew WorkContext;
-
-		this->InitializeContext(newWorkContext);
-		this->AddContext(newTabPage, newWorkContext);
-
-		this->RefreshEditor(newWorkContext);*/
-
-		AddPage();
-	}
-
 	void WorkContextBroker::SavePage(void)
 	{
-		WorkContext ^ currentWorkContext = this->GetCurrentContext();
+		WorkContext ^ currentWorkContext = GetCurrentContext();
 
-		this->SaveContent(currentWorkContext);
+		this->saveContent(currentWorkContext);
 		currentWorkContext->fileContext->Save();
 			
-		this->RefreshTabTitle(nullptr);
+		this->refreshTabTitle(nullptr);
 	}
 
 	void WorkContextBroker::SavePageAs(void)
 	{
 		WorkContext ^ currentWorkContext = this->GetCurrentContext();
 
-		this->SaveContent(currentWorkContext);
+		this->saveContent(currentWorkContext);
 		(cli::safe_cast<CodeFileContext^ >(currentWorkContext->fileContext))->SaveAs();
 			
-		this->RefreshTabTitle(nullptr);
+		this->refreshTabTitle(nullptr);
 	}
 
 	void WorkContextBroker::SaveAllPages(void)
 	{
 		for each( KeyValuePair<TabPage^, WorkContext^>^ kvp in contextPairs)
 		{
-			this->SaveContent(kvp->Value);
+			this->saveContent(kvp->Value);
 			kvp->Value->fileContext->Save();
 
-			this->RefreshTabTitle(kvp->Key);
+			this->refreshTabTitle(kvp->Key);
 		}
 	}
 
-	void WorkContextBroker::SaveContent(WorkContext ^ saveWorkContext)
+	void WorkContextBroker::ClonePage(void)
 	{
-		saveWorkContext->fileContext->Content = saveWorkContext->editorTextBox->richTextBox->Text;
+		WorkContext ^ newWorkContext;
+		WorkContext ^ clonedWorkContext = GetCurrentContext();
+
+		this->AddPage();
+
+		//fill with source
+		newWorkContext = GetCurrentContext(); //!
+
+		newWorkContext->editorTextBox->richTextBox->Rtf = clonedWorkContext->editorTextBox->richTextBox->Rtf;
+		newWorkContext->settings = gcnew PageSettings(clonedWorkContext->settings);
 	}
+
+	void WorkContextBroker::DiscardOtherPages(void)
+	{
+		List<TabPage ^> ^ pages = gcnew List<TabPage ^>;
+		TabPage ^ pageToSave = this->GetPageByContext(this->GetCurrentContext());
+
+		//populate tmp list
+		for each(TabPage ^ page in Owner->TabPages)
+			pages->Add(page);
+
+		//discard all without current tab
+		for each(TabPage ^ page in pages)
+		{
+			if(page != pageToSave) {
+				this->RemovePage(page);
+			}
+		}
+	}
+
+	//other methods
 
 	TabPage ^ WorkContextBroker::IsAlreadyOpened(FileContext ^ fileContext)
 	{
@@ -213,7 +261,7 @@ namespace BrainthreadIDE
 		return nullptr;
 	}
 
-	void WorkContextBroker::RefreshTabTitle(TabPage ^ tabPage)
+	void WorkContextBroker::refreshTabTitle(TabPage ^ tabPage)
 	{
 		WorkContext ^ chosenWorkContext;
 		
