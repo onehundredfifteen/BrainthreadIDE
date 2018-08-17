@@ -93,16 +93,17 @@
     <ClCompile Include="debugger\unmanaged\Breakpoint.cpp" />
     <ClCompile Include="debugger\unmanaged\btheaders\DebugTimeException.cpp" />
     <ClCompile Include="debugger\unmanaged\DebuggerLoop.cpp" />
-    <ClCompile Include="FormProtip.cpp" />
-    <ClCompile Include="helpers\BtConstantsCreator.cpp" />
+    <ClCompile Include="FormTrap.cpp" />
+    <ClCompile Include="helpers\BtConstantsGenerator.cpp" />
+    <ClCompile Include="helpers\BtOutputGenerator.cpp" />
     <ClCompile Include="launchers\CodeAnalysisProcess.cpp" />
     <ClCompile Include="launchers\CodeParseProcess.cpp" />
     <ClCompile Include="launchers\DebugCodeProcess.cpp" />
     <ClCompile Include="debugger\Debugger.cpp" />
+    <ClCompile Include="launchers\IDEInitProcess.cpp" />
     <ClCompile Include="launchers\InterpreterProcess.cpp" />
     <ClCompile Include="launchers\RunCodeRedirectionProcess.cpp" />
     <ClCompile Include="launchers\RunCodeProcess.cpp" />
-    <ClCompile Include="launchers\RunCodeSeparateProcess.cpp" />
     <ClCompile Include="options\OptiomField.cpp" />
     <ClCompile Include="options\PageSettings.cpp" />
     <ClCompile Include="options\GlobalOptions.cpp" />
@@ -134,26 +135,32 @@
     <ClInclude Include="file_io\FileContext.h" />
     <ClInclude Include="file_io\ProjectSettingsFileContext.h" />
     <ClInclude Include="file_io\XMLFileContext.h" />
-    <ClInclude Include="FormInsert.h">
-      <FileType>CppForm</FileType>
-    </ClInclude>
     <ClInclude Include="FormMain.h">
       <FileType>CppForm</FileType>
     </ClInclude>
     <ClInclude Include="FormOptions.h">
       <FileType>CppForm</FileType>
     </ClInclude>
-    <ClInclude Include="FormProtip.h">
+    <ClInclude Include="FormInsert.h" />
+    <ClInclude Include="FormProtip.h" />
+    <ClInclude Include="FormTrap.h">
       <FileType>CppForm</FileType>
     </ClInclude>
-    <ClInclude Include="helpers\BtConstantsCreator.h" />
+    <ClInclude Include="helpers\BtConstantsGenerator.h" />
+    <ClInclude Include="helpers\BtOutputGenerator.h" />
     <ClInclude Include="helpers\CodeContextConverter.h" />
     <ClInclude Include="helpers\CodeLoopBinder.h" />
     <ClInclude Include="helpers\FileSizeConverter.h" />
     <ClInclude Include="helpers\InputCharFormatter.h" />
     <ClInclude Include="debugger\MemoryCellPrinter.h" />
+    <ClInclude Include="helpers\ui\uiGridCellBlinker.h" />
     <ClInclude Include="helpers\ui\uiMenuRadioButtonGenerator.h" />
     <ClInclude Include="helpers\ui\uiTooltip.h" />
+    <ClInclude Include="launchers\BasicProcess.h" />
+    <ClInclude Include="launchers\IDEInitProcess.h" />
+    <ClInclude Include="launchers\PragmaResolvingProcess.h" />
+    <ClInclude Include="launchers\ui\DelayedTask.h" />
+    <ClInclude Include="launchers\ui\uiControlDisabler.h" />
     <ClInclude Include="options\Language.h" />
     <ClInclude Include="options\OptionFieldInterpreter.h" />
     <ClInclude Include="options\OptionFieldPlugins.h" />
@@ -180,15 +187,13 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="SyntaxHighLighter.h" />
     <ClInclude Include="helpers\ui\uiMenuButtonGenerator.h" />
+    <ClInclude Include="WorkContext.h" />
     <ClInclude Include="WorkContexts.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="app.rc" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="FormInsert.resx">
-      <DependentUpon>FormInsert.h</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="FormMain.resX">
       <DependentUpon>FormMain.h</DependentUpon>
       <SubType>Designer</SubType>
@@ -196,8 +201,10 @@
     <EmbeddedResource Include="FormOptions.resx">
       <DependentUpon>FormOptions.h</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormProtip.resx">
-      <DependentUpon>FormProtip.h</DependentUpon>
+    <EmbeddedResource Include="FormInsert.resx" />
+    <EmbeddedResource Include="FormProtip.resx" />
+    <EmbeddedResource Include="FormTrap.resx">
+      <DependentUpon>FormTrap.h</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

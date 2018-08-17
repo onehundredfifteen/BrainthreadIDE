@@ -70,10 +70,13 @@ namespace BrainthreadIDE
 			  saveFileDialog->Title = "Save project as";
 			  saveFileDialog->RestoreDirectory = true;
 
-			  if(this->filePath == String::Empty)
+			  if(false == this->HasPhysicalFile())
 				 saveFileDialog->InitialDirectory = Environment::GetFolderPath(Environment::SpecialFolder::MyDocuments);
 			  else
+			  {
 				 saveFileDialog->InitialDirectory = Path::GetDirectoryName(this->filePath);
+				 saveFileDialog->FileName = Path::GetFileName(this->filePath);
+			  }
 
 			  if (saveFileDialog->ShowDialog() == DialogResult::OK)
 			  {

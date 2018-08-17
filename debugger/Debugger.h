@@ -41,6 +41,7 @@ namespace BrainthreadIDE
 		String ^ GetDebugStats();
 
 		void LoadMemoryByThread();
+		void WriteMemoryToThread(String ^ value, int address, int threadId);
 		
 		void LoadMemoryImageToView(DataGridView ^ dataGridView);
 		void LoadMemoryImageToView(DataGridView ^ dataGridView, Int16 tab_cols);
@@ -147,6 +148,7 @@ namespace BrainthreadIDE
 	private: 
 		TreeNode ^ getThreadInfoTreeNode();
 		TreeNode ^ getDetachedThreadInfoTreeNode(int threadId, String ^ format);
+		TreeNode ^ getStackInfoTreeNode(BTProcessStackInfo &si);
 	
 		array<int> ^ getMemoryImage(int last_cell_to_load);
 

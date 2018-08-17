@@ -1,38 +1,29 @@
 #pragma once
 
-//#include <windows.h>
-
-/*#include "MemoryTape.h"
-#include "MemoryHeap.h"
-#include "FunctionHeap.h"
-#include "CodeTape.h"*/
-
-
+//memory fingerprints of data containers
 
 #define CODEPOINTER_OFFSET (sizeof(void *) * 5)
 
-struct BTMemoryTapeEntry
+struct BTMemoryTapeEntry //main memory
 {
-	void * pointer; //piórko
-
-	void * mem; //pamiec
-	unsigned len; //aktualny rozmiar pamieci
-
-	void *max_mem; //ostatnia komórka pamiêci
+	void * pointer;
+	void * mem; 
+	unsigned len; 
+	void *max_mem; 
 }; 
 
 struct BTStackEntry //for any std::stack or deque
 {
-	void * spare;
-	void * mappointer;
-	int mapsize;
-	int myoff;
+	void * my_spare;
+	void * allocator;
+	int capacity;
+	int my_offset;
 	int size;
 };
 
 struct BTThreadListEntry //for any std::vector;
 {
-	int allocator;
+	void * allocator;
 	void * first;
 	void * last;
 	void * end;

@@ -49,8 +49,13 @@ namespace BrainthreadIDE
 		if(readyToStepping)
 			CloseHandle(debugeeProcessHandle);
 
-		delete this->memreader;
-        delete this->thlreader;
+		if(debugeeStarted || this->memreader)
+		{
+			delete this->memreader;
+			delete this->thlreader;
+			delete this->heapreader;
+			delete this->shheapreader;
+		}
 	}
 
 	bool DebuggerLoop::LoadSymbols(wchar_t * debugee)
@@ -66,6 +71,8 @@ namespace BrainthreadIDE
 		
 		this->memreader = new MemoryReader(debugeeProcessHandle);
 		this->thlreader = new ThreadInfoReader(debugeeProcessHandle);
+		this->heapreader = new StackReader(debugeeProcessHandle, this->memreader);
+		this->shheapreader = new StackReader(debugeeProcessHandle, this->memreader);
 
 		//open and load file pdb
 		wcscpy(symbolFilePath, debugee);
@@ -199,7 +206,8 @@ namespace BrainthreadIDE
 		ReadProcessMemory(debugeeProcessHandle,
 		    cp_address,
 		    &cp,
-		    sizeof(unsigned int), &rv);
+		    sizeof(unsigned int), 
+			NULL);
 
 		return cp;
 	}
@@ -218,9 +226,15 @@ namespace BrainthreadIDE
 		curThread = thlist.get_thread(debug_event.dwThreadId);
 		unsigned int entry_address = curThread->this_address;
 
+		//zero meemory
 		memset(&process_properties, 0, sizeof(process_properties));
+		memset(&mte,  0, sizeof(BTMemoryTapeEntry));
+		memset(&se,   0, sizeof(BTStackEntry));
+		memset(&shse, 0, sizeof(BTStackEntry));
+		memset(&pe,   0, sizeof(BTProcessEntry));
 
-		memset(&pe, 0, sizeof(BTProcessEntry));
+		//read bt process entry
+
 		ReadProcessMemory(debugeeProcessHandle,
 				(void *)entry_address,
 				&pe,
@@ -228,8 +242,8 @@ namespace BrainthreadIDE
 
 		thlreader->ReadMemory(pe.threadinfo);
 
-		//read memory
-		memset(&mte, 0, sizeof(BTMemoryTapeEntry));
+		//read brainfuck tape memory
+		
 		ReadProcessMemory(debugeeProcessHandle,
 				pe.memory,
 				&mte,
@@ -238,23 +252,24 @@ namespace BrainthreadIDE
 	    memreader->ReadMemory(mte);
 
 		//read stack
-		memset(&se, 0, sizeof(BTStackEntry));
+		
 		ReadProcessMemory(debugeeProcessHandle,
 				pe.heap,
 				&se,
 				sizeof(BTStackEntry), &rv);
 
-	    //stackreader.ReadMemory(se);
+	    heapreader->ReadMemory(se);
 
 		//read shared stack
-		memset(&shse, 0, sizeof(BTStackEntry));
 		ReadProcessMemory(debugeeProcessHandle,
 				pe.shared_heap,
 				&shse,
 				sizeof(BTStackEntry), &rv);
 
-	    //stackreader.ReadMemory(se);
-		/*void * a;
+	    shheapreader->ReadMemory(shse);
+		
+		/*TEMPLATE
+		void * a;
 		ReadProcessMemory(debugeeProcessHandle,
 				se.mappointer,
 				&a,
@@ -266,15 +281,16 @@ namespace BrainthreadIDE
 		process_properties.steps_executed = curThread->StepsExecuted;
 		process_properties.thread_id = curThread->Id;
 
-		process_properties.meminfo.memory_len = mte.len; //memreader->GetMemorySize();
-		process_properties.meminfo.pointer_pos = ((unsigned int)mte.pointer - (unsigned int)mte.mem) - (memreader->SizeOfCell() - 1);
+		process_properties.meminfo.memory_len = mte.len; //memreader->GetRealMemorySize();
+		process_properties.meminfo.pointer_pos = ((unsigned int)mte.pointer - (unsigned int)mte.mem) / memreader->SizeOfCell();
 		process_properties.meminfo.current_cell_value = memreader->GetMemoryCellAt( process_properties.meminfo.pointer_pos );
 		process_properties.meminfo.last_nonzero_cell = memreader->GetLastNZMemoryCell();
+		process_properties.meminfo.cell_size = memreader->SizeOfCell();
 
-		process_properties.stackinfo.list_size = se.size;
-		process_properties.shstackinfo.list_size = shse.size;
+		process_properties.stackinfo.array_size = se.size;
+		process_properties.shstackinfo.array_size = shse.size;
 
-		process_properties.threadinfo.list_size = thlreader->GetRealMemorySize();
+		process_properties.threadinfo.array_size = 0;//TODO
 	}
 
 	void DebuggerLoop::GetProcessProperties(BTProcessProperties &ppe, int mem_chunk_offset)
@@ -283,12 +299,12 @@ namespace BrainthreadIDE
 		memset(&process_properties.meminfo.memory_chunk, 0, MEM_CHUNK_SIZE * sizeof(int));
 
 		for(int i = 0; i < MEM_CHUNK_SIZE; ++i)
-			process_properties.meminfo.memory_chunk[ i ] = memreader->GetMemoryCellAt(i + mem_chunk_offset);
+			process_properties.meminfo.memory_chunk[i] = this->memreader->GetMemoryCellAt(i + mem_chunk_offset);
 
-		//thread list
-		memset(&process_properties.threadinfo.list_memory, 0, LIST_MEM_SIZE * sizeof(int));
+		//thread list TODO
+		//memset(&process_properties.threadinfo.array_memory, 0, ARRAY_MEM_SIZE * sizeof(int));
 		
-		/*for(int i = 0; i < LIST_MEM_SIZE; ++i)
+		/*for(int i = 0; i < ARRAY_MEM_SIZE; ++i)
 		{
 			int thandle = thlreader->GetMemoryCellAt(i);
 			//if(thandle == 0)
@@ -297,12 +313,68 @@ namespace BrainthreadIDE
 			process_properties.threadinfo.list_memory[ i ] = GetThreadId((HANDLE) thandle );
 		}*/
 
+		//stack
+		memset(&process_properties.stackinfo.array_memory, 0, ARRAY_MEM_SIZE * sizeof(int));
+		
+		for(int i = 0; i < process_properties.stackinfo.array_size && i < ARRAY_MEM_SIZE; ++i)
+			process_properties.stackinfo.array_memory[i] = this->heapreader->GetMemoryCellAt(i);
+
+		//shared stack
+		memset(&process_properties.shstackinfo.array_memory, 0, ARRAY_MEM_SIZE * sizeof(int));
+		
+		for(int i = 0; i < process_properties.shstackinfo.array_size && i < ARRAY_MEM_SIZE; ++i)
+			process_properties.shstackinfo.array_memory[i] = this->shheapreader->GetMemoryCellAt(i);
+
+		//return
 		ppe = process_properties;
 	}
 
 	void DebuggerLoop::GetProcessProperties(BTProcessProperties &ppe)
 	{
 		GetProcessProperties(ppe, 0);
+	}
+
+	bool DebuggerLoop::WriteProcessMemory(int value, int index, int threadId)
+	{
+		SIZE_T rv;
+		BTProcessEntry pe;
+		BTMemoryTapeEntry mte;
+		memset(&pe, 0, sizeof(pe));
+		memset(&mte,  0, sizeof(BTMemoryTapeEntry));
+
+		ThreadList::Thread * curThread;
+		unsigned int entry_address, edit_address;
+		
+		if(debugeeStarted == false || readyToStepping == false)
+			return false;
+
+		curThread = thlist.get_thread(threadId);
+		entry_address = curThread->this_address;
+
+		//read bt process entry
+		::ReadProcessMemory(debugeeProcessHandle,
+				(void *)entry_address,
+				&pe,
+				sizeof(BTProcessEntry), 
+				&rv);
+
+		::ReadProcessMemory(debugeeProcessHandle,
+				pe.memory,
+				&mte,
+				sizeof(BTMemoryTapeEntry), 
+				&rv);
+
+		//set address
+		edit_address = ((unsigned int)mte.mem) + (index * this->memreader->SizeOfCell());
+		
+		//write new value
+		::WriteProcessMemory(debugeeProcessHandle,
+				(void *)edit_address,
+				&value,
+				this->memreader->SizeOfCell(), 
+				&rv);
+
+	    return rv == this->memreader->SizeOfCell();
 	}
 
 	int DebuggerLoop::HandleEvent()

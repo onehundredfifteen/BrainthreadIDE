@@ -3,7 +3,7 @@
 namespace BrainthreadIDE
 {
 	#define MEM_CHUNK_SIZE 1000
-	#define LIST_MEM_SIZE 100
+	#define ARRAY_MEM_SIZE 100
 
 	struct BTProcessMemoryInfo
 	{
@@ -14,13 +14,14 @@ namespace BrainthreadIDE
 
 		int current_cell_value;
 		int last_nonzero_cell;
+		int cell_size;
 	};
 
 	typedef struct 
 	{
-		int list_memory[ LIST_MEM_SIZE ];
+		int array_memory[ ARRAY_MEM_SIZE ];
 
-		unsigned int list_size;
+		int array_size;
 	} BTProcessStackInfo, BTProcessThreadInfo;
 
 	struct BTProcessProperties

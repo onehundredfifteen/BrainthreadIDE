@@ -87,7 +87,7 @@ namespace BrainthreadIDE {
 											GlobalOptions::Instance->Plugins->PragmaPluginNames()->ToArray(), 
 											gcnew EventHandler(this, &FormMain::editorInsertPluginMenuItem_Click));
 
-			uiMenuRadioButtonGenerator ^ dbgMemRepGenerator = gcnew uiMenuRadioButtonGenerator(this->contextMenuButtonMemoryRepresentation, 
+			this->dbgMemRepGenerator = gcnew uiMenuRadioButtonGenerator(this->contextMenuButtonMemoryRepresentation, 
 												gcnew array<String^>{cButtonMemoryReprDecCaption,
 																	 cButtonMemoryReprCharCaption,
 																	 cButtonMemoryReprHexCaption,
@@ -137,9 +137,12 @@ namespace BrainthreadIDE {
 			}
 		}
 
-	private: 
+	private:
 		 InterpreterProcess ^ interpreterProcess;
 		 IDEInitProcess ^ initIDEProcess;
+
+	private:
+		uiMenuRadioButtonGenerator ^ dbgMemRepGenerator;
 
 	protected: 
 
@@ -461,6 +464,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			this->tabControlRight = (gcnew System::Windows::Forms::TabControl());
 			this->tabPageProperties = (gcnew System::Windows::Forms::TabPage());
 			this->groupBoxIOOptions = (gcnew System::Windows::Forms::GroupBox());
+			this->textBoxPhOptionsInput = (gcnew TextBoxPlaceholder::TextBoxPlaceholderControl());
 			this->checkBoxOptionRedirectStreams = (gcnew System::Windows::Forms::CheckBox());
 			this->groupBoxAdvanced = (gcnew System::Windows::Forms::GroupBox());
 			this->labelOptionsCommandLine = (gcnew System::Windows::Forms::Label());
@@ -503,7 +507,6 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			this->toolStripSeparator6 = (gcnew System::Windows::Forms::ToolStripSeparator());
 			this->contextMenuButtonMemoryRepresentation = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->contextMenuButtonColumnNumber = (gcnew System::Windows::Forms::ToolStripMenuItem());
-			this->textBoxPhOptionsInput = (gcnew TextBoxPlaceholder::TextBoxPlaceholderControl());
 			this->editorContextMenu->SuspendLayout();
 			this->statusBar->SuspendLayout();
 			this->mainMenu->SuspendLayout();
@@ -1250,7 +1253,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			// 
 			this->tabpageCloseMenuItem->Name = L"tabpageCloseMenuItem";
 			this->tabpageCloseMenuItem->Size = System::Drawing::Size(200, 22);
-			this->tabpageCloseMenuItem->Text = L"Close";
+			this->tabpageCloseMenuItem->Text = L"Close this page";
 			this->tabpageCloseMenuItem->Click += gcnew System::EventHandler(this, &FormMain::closeMainMenuItem_Click);
 			// 
 			// toolStripSeparator10
@@ -1262,7 +1265,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			// 
 			this->tabpageCloneMenuItem->Name = L"tabpageCloneMenuItem";
 			this->tabpageCloneMenuItem->Size = System::Drawing::Size(200, 22);
-			this->tabpageCloneMenuItem->Text = L"Clone this page";
+			this->tabpageCloneMenuItem->Text = L"Duplicate";
 			this->tabpageCloneMenuItem->Click += gcnew System::EventHandler(this, &FormMain::tabpageCloneMenuItem_Click);
 			// 
 			// tabpageDiscardMenuItem
@@ -1452,6 +1455,21 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			this->groupBoxIOOptions->TabStop = false;
 			this->groupBoxIOOptions->Text = L"Input / output redirection";
 			this->groupBoxIOOptions->Visible = false;
+			// 
+			// textBoxPhOptionsInput
+			// 
+			this->textBoxPhOptionsInput->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Left) 
+				| System::Windows::Forms::AnchorStyles::Right));
+			this->textBoxPhOptionsInput->DefaultValueMode = false;
+			this->textBoxPhOptionsInput->Location = System::Drawing::Point(19, 71);
+			this->textBoxPhOptionsInput->Multiline = true;
+			this->textBoxPhOptionsInput->Name = L"textBoxPhOptionsInput";
+			this->textBoxPhOptionsInput->NoWhitespaceMode = false;
+			this->textBoxPhOptionsInput->PlaceHolderText = nullptr;
+			this->textBoxPhOptionsInput->PlaceHolderTextColor = System::Drawing::SystemColors::ControlDark;
+			this->textBoxPhOptionsInput->ScrollBars = System::Windows::Forms::ScrollBars::Vertical;
+			this->textBoxPhOptionsInput->Size = System::Drawing::Size(298, 81);
+			this->textBoxPhOptionsInput->TabIndex = 2;
 			// 
 			// checkBoxOptionRedirectStreams
 			// 
@@ -1851,14 +1869,14 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			this->dataGridViewDebugMemory->ContextMenuStrip = this->debugMemViewContextMenu;
 			dataGridViewCellStyle1->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
 			dataGridViewCellStyle1->BackColor = System::Drawing::SystemColors::Window;
-			dataGridViewCellStyle1->Font = (gcnew System::Drawing::Font(L"Lucida Sans Unicode", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+			dataGridViewCellStyle1->Font = (gcnew System::Drawing::Font(L"Segoe UI", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(238)));
 			dataGridViewCellStyle1->ForeColor = System::Drawing::SystemColors::ControlText;
 			dataGridViewCellStyle1->SelectionBackColor = System::Drawing::Color::RoyalBlue;
 			dataGridViewCellStyle1->SelectionForeColor = System::Drawing::Color::Yellow;
 			dataGridViewCellStyle1->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
 			this->dataGridViewDebugMemory->DefaultCellStyle = dataGridViewCellStyle1;
-			this->dataGridViewDebugMemory->EditMode = System::Windows::Forms::DataGridViewEditMode::EditProgrammatically;
+			this->dataGridViewDebugMemory->EditMode = System::Windows::Forms::DataGridViewEditMode::EditOnEnter;
 			this->dataGridViewDebugMemory->Location = System::Drawing::Point(0, 27);
 			this->dataGridViewDebugMemory->MultiSelect = false;
 			this->dataGridViewDebugMemory->Name = L"dataGridViewDebugMemory";
@@ -1871,8 +1889,10 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			this->dataGridViewDebugMemory->ShowCellToolTips = false;
 			this->dataGridViewDebugMemory->ShowEditingIcon = false;
 			this->dataGridViewDebugMemory->ShowRowErrors = false;
-			this->dataGridViewDebugMemory->Size = System::Drawing::Size(338, 264);
+			this->dataGridViewDebugMemory->Size = System::Drawing::Size(338, 249);
 			this->dataGridViewDebugMemory->TabIndex = 2;
+			this->dataGridViewDebugMemory->CellDoubleClick += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &FormMain::dataGridViewDebugMemory_CellDoubleClick);
+			this->dataGridViewDebugMemory->CellEndEdit += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &FormMain::dataGridViewDebugMemory_CellEndEdit);
 			this->dataGridViewDebugMemory->Scroll += gcnew System::Windows::Forms::ScrollEventHandler(this, &FormMain::dataGridViewDebugMemory_Scroll);
 			// 
 			// debugMemViewContextMenu
@@ -1912,21 +1932,6 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			this->contextMenuButtonColumnNumber->Name = L"contextMenuButtonColumnNumber";
 			this->contextMenuButtonColumnNumber->Size = System::Drawing::Size(210, 22);
 			this->contextMenuButtonColumnNumber->Text = L"Columns";
-			// 
-			// textBoxPhOptionsInput
-			// 
-			this->textBoxPhOptionsInput->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Left) 
-				| System::Windows::Forms::AnchorStyles::Right));
-			this->textBoxPhOptionsInput->DefaultValueMode = false;
-			this->textBoxPhOptionsInput->Location = System::Drawing::Point(19, 71);
-			this->textBoxPhOptionsInput->Multiline = true;
-			this->textBoxPhOptionsInput->Name = L"textBoxPhOptionsInput";
-			this->textBoxPhOptionsInput->NoWhitespaceMode = false;
-			this->textBoxPhOptionsInput->PlaceHolderText = nullptr;
-			this->textBoxPhOptionsInput->PlaceHolderTextColor = System::Drawing::SystemColors::ControlDark;
-			this->textBoxPhOptionsInput->ScrollBars = System::Windows::Forms::ScrollBars::Vertical;
-			this->textBoxPhOptionsInput->Size = System::Drawing::Size(298, 81);
-			this->textBoxPhOptionsInput->TabIndex = 2;
 			// 
 			// FormMain
 			// 
@@ -2282,6 +2287,7 @@ public: void mainForm_UpdateUIForProcess(InterpreterProcess ^sender, bool normal
 				this->runMainMenuItem->Enabled = normal_state;
 				this->runSelectionMainMenuItem->Enabled = normal_state;
 				this->runSeparateMainMenuItem->Enabled = normal_state;
+				this->editorResolveMenuItem->Enabled = normal_state;
 				this->toolBarButtonRunCode->Enabled = normal_state;
 
 				this->stopMainMenuItem->Enabled = !normal_state;
@@ -2310,7 +2316,7 @@ public: void mainForm_UpdateUIForProcess(InterpreterProcess ^sender, bool normal
 					this->toolBarButtonDebugStep->ToolTipText = cTooltipDebugStepCaption;
 
 		}
-
+/*dataGridViewDebugMemory EVENTS*/
 private: void debugForm_MemoryScrollToPosition(int position) {
 			 //scroll to memory pos
 			 DebugCodeProcess ^ debugProcess = cli::safe_cast<DebugCodeProcess^ >(interpreterProcess);
@@ -2359,7 +2365,7 @@ private: void dataGridViewDebugMemory_Scroll(System::Object^  sender, System::Wi
 									   && frow == dataGridViewMem->Rows->Count - dataGridViewMem->DisplayedRowCount(true) 
 									   && (e->Type == ScrollEventType::SmallIncrement || e->Type == ScrollEventType::LargeIncrement))
 			 {
-				 debugProcess = cli::safe_cast<DebugCodeProcess^ >(interpreterProcess);
+				 debugProcess = cli::safe_cast<DebugCodeProcess^ >(this->interpreterProcess);
 				 
 				 int old_mem_image_size = debugProcess->DebuggerInstance->MemoryForImage;
 				 int increment_cells = old_mem_image_size / 10; //+ 10% 
@@ -2376,7 +2382,27 @@ private: void dataGridViewDebugMemory_Scroll(System::Object^  sender, System::Wi
 				 }
 			 }
 		 }
-	//funkcje operacji na tekscie
+private: System::Void dataGridViewDebugMemory_CellDoubleClick(System::Object^  sender, System::Windows::Forms::DataGridViewCellEventArgs^  e) {
+			 //enter to the mode of editing memory
+			 if(mainForm_IsDebugTask())
+				this->dataGridViewDebugMemory->ReadOnly = false;
+		 }
+private: System::Void dataGridViewDebugMemory_CellEndEdit(System::Object^  sender, System::Windows::Forms::DataGridViewCellEventArgs^  e) {
+			  //try to write to the memory
+			 DebugCodeProcess ^ debugProcess = cli::safe_cast<DebugCodeProcess^ >(this->interpreterProcess);
+
+			 this->dataGridViewDebugMemory->ReadOnly = true;
+			 if(mainForm_IsDebugTask())
+			 {
+				int position = this->dataGridViewDebugMemory->Columns->Count * e->RowIndex + e->ColumnIndex;
+				DataGridViewCell ^ edited_cell = this->dataGridViewDebugMemory->Rows[e->RowIndex]->Cells[e->ColumnIndex];
+				String ^ edited_cell_value = dynamic_cast<String^>(edited_cell->Value);
+				
+				debugProcess->DebuggerInstance->WriteMemoryToThread(edited_cell_value, position, Convert::ToInt32(this->comboBoxThreadMemSelect->SelectedValue));
+				edited_cell->Style->ForeColor = Color::Red;
+			 }
+		 }
+/*editorRichTextBox EVENTS*/
 private: void editorRichTextBox_Cut(System::Object^  sender, System::EventArgs^  e) {
 				 
 				 WorkContextBroker::Instance->GetCurrentContext()->editorTextBox->richTextBox->Cut();
@@ -2607,6 +2633,8 @@ private: void debugMainMenuItem_Click(System::Object^  sender, System::EventArgs
 
 				this->tabControlRight->SelectedTab = this->tabPageDebug;
 				this->dataGridViewDebugMemory->DataSource = gcnew DataTable;
+
+				this->dbgMemRepGenerator->ResetSelection(0);
 			    
 		 }
 private: void newfileMainMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
@@ -2655,8 +2683,6 @@ private: void closeMainMenuItem_Click(System::Object^  sender, System::EventArgs
 											arr, 
 											gcnew EventHandler(this, &FormMain::recentMainMenuItem_Click),
 											true);
-
-
 		 }
 
 private: void saveAsProjectMainMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
@@ -2666,7 +2692,6 @@ private: void saveAsProjectMainMenuItem_Click(System::Object^  sender, System::E
 
 			   projectFileContext->settingsContent = currentWorkContext->settings;
 			   currentWorkContext->fileContext = projectFileContext;
-			   this->saveAsMainMenuItem_Click(sender, e);
 		 }
 
 private: void stopMainMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
@@ -2997,7 +3022,7 @@ private: System::Void treeViewDebugThreadList_MouseUp(System::Object^  sender, S
 private: void pluginsMainMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
 			 //invoke plugin from menu
 			 
-			 String ^ code;
+			 String ^ code, ^ result;
 			 WorkContext ^ currentWorkContext = WorkContextBroker::Instance->GetCurrentContext();
 			 Plugin ^ currentPlugin = GlobalOptions::Instance->Plugins->GetPlugin( cli::safe_cast<ToolStripMenuItem ^>(sender)->Text );
 
@@ -3015,9 +3040,10 @@ private: void pluginsMainMenuItem_Click(System::Object^  sender, System::EventAr
 				}
 				else
 				{
-					currentWorkContext->syntaxHighLighter->HighLightAndPaste(currentWorkContext->editorTextBox->richTextBox, 
-																			 currentPlugin->OnInvoke(code, currentWorkContext->settings->GetLanguage())
-																			);
+					result = currentPlugin->OnInvoke(code, currentWorkContext->settings->GetLanguage());
+
+					if(String::Compare(code, result) != 0) //action on text only when needed
+						currentWorkContext->syntaxHighLighter->HighLightAndPaste(currentWorkContext->editorTextBox->richTextBox, result);
 				}
 				
 				this->UseWaitCursor = false;
@@ -3073,6 +3099,7 @@ private: System::Void protipMainMenuItem_Click(System::Object^  sender, System::
 			 protip->ShowDialog(this);
 		 }
 
+/*Tab drag and drop mechanism*/
 private: System::Void tabControlPages_DragOver(System::Object^  sender, System::Windows::Forms::DragEventArgs^  e) {
 			//change tab order
             Point pt = this->tabControlPages->PointToClient( Point(e->X, e->Y));
@@ -3134,6 +3161,8 @@ private: System::Void tabControlPages_MouseDown(System::Object^  sender, System:
 				}
             }
 		 }
+
+/*Closing Form*/
 private: System::Void FormMain_FormClosing(System::Object^  sender, System::Windows::Forms::FormClosingEventArgs^  e) {
 		  //form closing
 			int unsavedFilesCnt = 0;

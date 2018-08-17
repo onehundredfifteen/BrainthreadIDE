@@ -229,6 +229,8 @@ namespace BrainthreadIDE
 
 		newWorkContext->editorTextBox->richTextBox->Rtf = clonedWorkContext->editorTextBox->richTextBox->Rtf;
 		newWorkContext->settings = gcnew PageSettings(clonedWorkContext->settings);
+
+		newWorkContext->settings->Load();
 	}
 
 	void WorkContextBroker::DiscardOtherPages(void)

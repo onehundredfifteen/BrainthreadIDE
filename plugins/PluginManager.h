@@ -95,7 +95,7 @@ namespace BrainthreadIDE
 					{
 						String ^ properties = plugin->Pragmable ? "Pragma" : "";
 						if(plugin->Invocable) {
-							if(String::IsNullOrEmpty(properties))
+							if(!String::IsNullOrEmpty(properties))
 								properties += ", ";
 
 							properties += "Invocable";
@@ -104,12 +104,12 @@ namespace BrainthreadIDE
 						return String::Format("{0} ({4})\r\n\r\n{1}\r\n{3}\r\n\r\n{2}", name->ToUpper(), 
 																						plugin->Info->Substring(0)->Insert(plugin->Info->IndexOf(','), ".dll"),  
 																						plugin->Description(),
-																						gcnew String('=', 44),
+																						gcnew String('=', (name->Length + properties->Length + 1) ),
 																						properties); 
 					} 
 				}
 
-				return "";
+				return name; //default
 			}
 
 	public: void GrantPrivileges(List<String ^> ^ granted_names)

@@ -42,7 +42,7 @@ namespace BrainthreadIDE
 			  saveFileDialog->Title = "Save file as";
 			  saveFileDialog->RestoreDirectory = true;
 
-			  if(this->filePath)
+			  if(this->HasPhysicalFile())
 			  {
 				  saveFileDialog->FileName = Path::GetFileName(this->filePath);
 				  saveFileDialog->InitialDirectory = Path::GetDirectoryName(this->filePath);

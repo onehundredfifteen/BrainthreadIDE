@@ -33,7 +33,6 @@ class MemoryReader
 	protected:
 		Cell * memory;
 		int memory_len;
-		//int real_memory_len;
 		int cell_size;
 
 		HANDLE hProcess;
@@ -79,10 +78,11 @@ class MemoryReader
 			unsigned int byte_memory_len = (unsigned int)mte.max_mem - (unsigned int)mte.mem;
 
 			if(mte.len == 1 && byte_memory_len == 0)
-				cell_size = 1;
+				this->cell_size = 1;
 			else
-				cell_size = byte_memory_len / (mte.len - 1);
+				this->cell_size = byte_memory_len / (mte.len - 1);
 
+			//read memory
 			this->alloc(mte.len * cell_size);
 			 
 			ReadProcessMemory(hProcess,
@@ -94,19 +94,19 @@ class MemoryReader
 			return rv;
 		}
 
-		int GetMemoryCellAt(unsigned int cell_address)
+		int GetMemoryCellAt(unsigned int cell_index)
 		{
-			if((int)cell_address >= this->GetRealMemorySize())
+			if((int)cell_index >= this->GetRealMemorySize())
 				return 0;
 			
 			switch (cell_size)
 			{
 				case 1:
-					return this->memory[cell_address];
+					return this->memory[cell_index];
 				case 2:
-					return reinterpret_cast <short *>(this->memory)[cell_address];
+					return reinterpret_cast <short *>(this->memory)[cell_index];
 				case 4:
-					return reinterpret_cast <int *>(this->memory)[cell_address];
+					return reinterpret_cast <int *>(this->memory)[cell_index];
 			}
 			return 0;
 		}
@@ -126,15 +126,9 @@ class MemoryReader
 			return this->memory_len / cell_size;
 		}
 
-		int GetMemorySize()
-		{
-			return this->memory_len;
-		}
-
 		int SizeOfCell()
 		{
 			return this->cell_size;
 		}
-
 
 };

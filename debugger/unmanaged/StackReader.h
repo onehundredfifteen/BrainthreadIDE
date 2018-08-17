@@ -2,71 +2,46 @@
 
 #include "MemoryReader.h"
 
-class StackReader : MemoryReader
+class StackReader : public MemoryReader
 {
     public:
-		StackReader() : MemoryReader() {
+		StackReader(HANDLE h, MemoryReader * cs_provider) : MemoryReader(h) 
+		{
+			this->cellsize_provider = cs_provider; 
 		}
 
 		~StackReader() {
 		}
-/*
-	protected:
-		Cell * memory;
-		int memory_len;
-		int real_memory_len;
-		int cell_size;
 
-		HANDLE hProcess;
-		*/
+	private:
+		MemoryReader * cellsize_provider;
 
     public:
-		int ReadMemory(BTStackEntry &se, short cell_size)
+		int ReadMemory(BTStackEntry &se)
 		{
 		    DWORD rv;
-			//unsigned int byte_memory_len = se.stack_size;
+			unsigned int array_entrypoint;// = ((unsigned int)se.mem_pointer) + 0x7ed0;
 
-			//alloc(byte_memory_len + cell_size);
-			//this->real_memory_len = this->memory_len * cell_size; 
+			this->cell_size = cellsize_provider->SizeOfCell();
 
-			//alloc(100);
+			this->alloc(se.size * this->cell_size);
 
-			/*ReadProcessMemory(hProcess,
-				mte.mem,
-				this->memory,
-				this->real_memory_len, //mte.len * cell_size, 
+			//read allocator entry
+			ReadProcessMemory(hProcess,
+				se.allocator,
+				&array_entrypoint,
+				sizeof(unsigned int), 
 				&rv);	
-				*/
 
+			//read stack memory
+			ReadProcessMemory(hProcess,
+				(void *)array_entrypoint,
+				this->memory,
+				se.size * this->cell_size, 
+				&rv);	
+			
 			return rv;
 		}
-
-		/*int GetMemoryCellAt(unsigned int rel_cell_address)
-		{
-			if((int)rel_cell_address >= this->real_memory_len)
-				return 0;
-			
-			switch (cell_size)
-			{
-				case 1:
-					return this->memory[rel_cell_address];
-				case 2:
-					return reinterpret_cast <short *>(this->memory)[rel_cell_address];
-				case 4:
-					return reinterpret_cast <int *>(this->memory)[rel_cell_address];
-			}
-			return 0;
-		}
-
-		int GetLastNZMemoryCell()
-		{
-			for(int i = memory_len - cell_size; i >= 0; i -= cell_size)
-			{
-				if(this->memory[i])
-					return i / cell_size;
-			}
-			return -1;
-		}*/
 
 
 };

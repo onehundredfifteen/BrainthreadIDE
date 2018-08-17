@@ -171,7 +171,7 @@ namespace BrainthreadIDE
 		if(just_spawned == true && GlobalOptions::Instance->TraceNewThread == false && this->threadResource->Count > 1)
 		{
 			this->threadResource[ ProcessProperties.thread_id ]->Trace = false;
-			debuggerLoop->TraceThread(ProcessProperties.thread_id, false);
+			this->debuggerLoop->TraceThread(ProcessProperties.thread_id, false);
 		}
 			
 	}
@@ -247,12 +247,13 @@ namespace BrainthreadIDE
 	void Debugger::LoadThreadTree(TreeView ^ threadTreeView)
 	{
 		DebugTreeViewExpander ^ treeViewExpander = gcnew DebugTreeViewExpander(threadTreeView);
+		array<MemoryCellPrinter^> ^ memPrinters = gcnew array<MemoryCellPrinter^>{gcnew MemoryCellPrinter(), gcnew CharacterCellPrinter()};
 		Dictionary<int, ThreadResourceState ^>::Enumerator etor = threadResource->GetEnumerator();
-		//TreeNode ^ old_selected_node = threadTreeView->SelectedNode; !!!!!!!!!
 		
 		threadTreeView->BeginUpdate();
 		threadTreeView->Nodes->Clear();
 
+		//thread tree
 		while(etor.MoveNext())
 		{
 			etor.Current.Value->MemoryInfoNode->BackColor = System::Drawing::SystemColors::Window;
@@ -264,12 +265,15 @@ namespace BrainthreadIDE
 			else
 				threadTreeView->Nodes->Add(etor.Current.Value->MemoryInfoNode); 
 
-			if(etor.Current.Key == getCurrentThreadId())
+			if(etor.Current.Key == getCurrentThreadId()) //current thread highlight
 				etor.Current.Value->MemoryInfoNode->BackColor = System::Drawing::Color::Yellow;
 		}
 
+		//
 		threadTreeView->Nodes->Add(String::Format("Functions call stack {0}", "0")); //todo
-		threadTreeView->Nodes->Add(String::Format("Shared heap size: {0}", ProcessProperties.shstackinfo.list_size)); 
+
+		//
+		threadTreeView->Nodes->Add( this->getStackInfoTreeNode(ProcessProperties.shstackinfo)); 
 		
 		treeViewExpander->Expand();
 		threadTreeView->EndUpdate();
@@ -352,6 +356,28 @@ namespace BrainthreadIDE
 		return sb->ToString();
 	}
 
+	void Debugger::WriteMemoryToThread(String ^ value, int index, int threadId)
+	{
+		IntegerDigest ^ printer = gcnew IntegerDigest(gcnew MemoryCellPrinter());
+
+		if(false == this->ThreadTracing[threadId])
+		{
+			MessageBox::Show(String::Format("Cannot write to thread {0}.\nThis thread isn't traced or has been exited.", this->getThreadName(threadId)), "Writing to memory",
+												MessageBoxButtons::OK, MessageBoxIcon::Exclamation);
+		}
+		else if(index < 0 || index >= this->getMemoryLen())
+		{
+			MessageBox::Show(String::Format("Cannot write '{0}' as '{1}' to memory at position {2}.\nThe position is out of bounds.", value, printer->Digest(value), index), "Writing to memory",
+												MessageBoxButtons::OK, MessageBoxIcon::Exclamation);
+		}
+		else if(false == this->debuggerLoop->WriteProcessMemory(printer->Digest(value), index, threadId))
+		{ 
+			MessageBox::Show(String::Format("Cannot write '{0}' as '{1}' to memory at position {2}.\nYour value isn't stored.", value, printer->Digest(value), index), "Writing to memory",
+												MessageBoxButtons::OK, MessageBoxIcon::Exclamation);
+		}
+
+	}
+
 	//debugger internal methods
 
 	array<int> ^ Debugger::getMemoryImage(int last_cell_to_load)
@@ -380,14 +406,15 @@ namespace BrainthreadIDE
 	
 	TreeNode ^ Debugger::getThreadInfoTreeNode()
 	{
-		TreeNode ^mainNode, ^memoryNode, ^stackNode, ^threadsNode, ^childNode;
+		TreeNode ^mainNode, ^memoryNode, ^threadsNode, ^childNode;
 
+		float kb = (float)(ProcessProperties.meminfo.memory_len * ProcessProperties.meminfo.cell_size) / 1000.0F;
 		array<MemoryCellPrinter^> ^ memPrinters = gcnew array<MemoryCellPrinter^>{gcnew MemoryCellPrinter(), gcnew CharacterCellPrinter(), gcnew HexCellPrinter()};
 		
 		mainNode = gcnew TreeNode( String::Format("Thread {0}: instruction: {1} steps: {2}", getThreadName(ProcessProperties.thread_id) , 
 																							 ProcessProperties.code_pointer_pos, 
 																							 debuggerLoop->GetThreadSteps(ProcessProperties.thread_id)));
-		//memory
+		//memory nodes
 		memoryNode = gcnew TreeNode( String::Format("Memory position {0}", ProcessProperties.meminfo.pointer_pos+1 ));
 
 		
@@ -396,13 +423,11 @@ namespace BrainthreadIDE
 																		 memPrinters[2]->Print( ProcessProperties.meminfo.current_cell_value )));
 
 		memoryNode->Nodes->Add( String::Format("Last non-zero cell position: {0}", ProcessProperties.meminfo.last_nonzero_cell+1));
-		memoryNode->Nodes->Add( String::Format("Memory size: {0}", ProcessProperties.meminfo.memory_len));
-		
-		//stack
-		stackNode = gcnew TreeNode( String::Format("Heap size: {0}", ProcessProperties.stackinfo.list_size ));
+
+		memoryNode->Nodes->Add( String::Format("Memory size: {0} ({1} kb)", ProcessProperties.meminfo.memory_len, kb.ToString(L"F") ));
 
 		//child threads
-		threadsNode = gcnew TreeNode( String::Format("Child threads: {0}", ProcessProperties.threadinfo.list_size ));
+		threadsNode = gcnew TreeNode( String::Format("Child threads: {0}", ProcessProperties.threadinfo.array_size ));
 		/*
 		for(int i = 0; i < ProcessProperties.threadinfo.list_size; ++i)
 		{
@@ -414,7 +439,7 @@ namespace BrainthreadIDE
 
 
 		mainNode->Nodes->Add( memoryNode);
-		mainNode->Nodes->Add( stackNode);
+		mainNode->Nodes->Add( this->getStackInfoTreeNode(ProcessProperties.stackinfo) );
 		mainNode->Nodes->Add( threadsNode);
 
 		mainNode->Tag = static_cast<int>(ProcessProperties.thread_id);
@@ -430,6 +455,22 @@ namespace BrainthreadIDE
 		
 		mainNode->Tag = static_cast<int>(threadId);
 		return mainNode;
+	}
+
+	TreeNode ^ Debugger::getStackInfoTreeNode(BTProcessStackInfo &si)
+	{
+		array<MemoryCellPrinter^> ^ memPrinters = gcnew array<MemoryCellPrinter^>{gcnew MemoryCellPrinter(), gcnew CharacterCellPrinter()};
+																				
+		TreeNode ^ stackNode = gcnew TreeNode( String::Format("Heap size: {0}", si.array_size ));
+
+		//stack elements
+		for(int n = 1, i = Math::Min((int)si.array_size, (int)ARRAY_MEM_SIZE) - 1; i >= 0; --i, ++n)
+			stackNode->Nodes->Add( String::Format("{0}: {1} '{2}' {3}", n, 
+																	 memPrinters[0]->Print( si.array_memory[i] ),
+																	 memPrinters[1]->Print( si.array_memory[i] ),
+																	 (n == 1 ? "Top" : "")));
+
+		return stackNode;
 	}
 
 	void Debugger::customizeView(DataGridView ^ dataGridView)

@@ -239,7 +239,7 @@ namespace BrainthreadIDE
 				int lang = Convert::ToInt16(node->InnerText); //not 32
 				if(lang >= (int)Language::l__spare)
 				{
-					MessageBox::Show("This language is not supported. Setting Brainfuck as project's language.","Unkown language", MessageBoxButtons::OK, MessageBoxIcon::Exclamation);
+					MessageBox::Show("This language is not supported. Setting Brainfuck as project's language.","Unknown language", MessageBoxButtons::OK, MessageBoxIcon::Exclamation);
 				    selLanguage = Language::lBrainfuck;
 				}
 				else 

@@ -159,6 +159,7 @@ namespace BrainthreadIDE {
 			this->buttonSetGutterBackColor = (gcnew System::Windows::Forms::Button());
 			this->buttonSetGutterForeColor = (gcnew System::Windows::Forms::Button());
 			this->buttonSetBackColor = (gcnew System::Windows::Forms::Button());
+			this->editorTextBoxTest = (gcnew EditorTextBox::EditorTextBoxControl());
 			this->tabPageInterpreterOptions = (gcnew System::Windows::Forms::TabPage());
 			this->groupBoxInops = (gcnew System::Windows::Forms::GroupBox());
 			this->checkBoxNotPurgeOutputLog = (gcnew System::Windows::Forms::CheckBox());
@@ -198,7 +199,6 @@ namespace BrainthreadIDE {
 			this->buttonSaveOptions = (gcnew System::Windows::Forms::Button());
 			this->buttonCancelOptions = (gcnew System::Windows::Forms::Button());
 			this->buttonDefault = (gcnew System::Windows::Forms::Button());
-			this->editorTextBoxTest = (gcnew EditorTextBox::EditorTextBoxControl());
 			this->tabControlOptions->SuspendLayout();
 			this->tabPageVisualOptions->SuspendLayout();
 			this->groupBoxVisual->SuspendLayout();
@@ -330,6 +330,20 @@ namespace BrainthreadIDE {
 			this->buttonSetBackColor->Text = L"Background Color";
 			this->buttonSetBackColor->UseVisualStyleBackColor = true;
 			this->buttonSetBackColor->Click += gcnew System::EventHandler(this, &FormOptions::buttonSetForeColor_Click);
+			// 
+			// editorTextBoxTest
+			// 
+			this->editorTextBoxTest->BackColor = System::Drawing::SystemColors::ControlLight;
+			this->editorTextBoxTest->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
+			this->editorTextBoxTest->GutterBackColor = System::Drawing::SystemColors::ControlLight;
+			this->editorTextBoxTest->GutterForeColor = System::Drawing::Color::Black;
+			this->editorTextBoxTest->GutterMargin = static_cast<System::UInt32>(6);
+			this->editorTextBoxTest->Location = System::Drawing::Point(213, 34);
+			this->editorTextBoxTest->Name = L"editorTextBoxTest";
+			this->editorTextBoxTest->Size = System::Drawing::Size(441, 310);
+			this->editorTextBoxTest->TabIndent = false;
+			this->editorTextBoxTest->TabIndex = 0;
+			this->editorTextBoxTest->UndoLimit = static_cast<System::UInt32>(0);
 			// 
 			// tabPageInterpreterOptions
 			// 
@@ -712,7 +726,6 @@ namespace BrainthreadIDE {
 			// checkedListBoxPlugins
 			// 
 			this->checkedListBoxPlugins->BorderStyle = System::Windows::Forms::BorderStyle::FixedSingle;
-			this->checkedListBoxPlugins->CheckOnClick = true;
 			this->checkedListBoxPlugins->Dock = System::Windows::Forms::DockStyle::Fill;
 			this->checkedListBoxPlugins->Font = (gcnew System::Drawing::Font(L"Segoe UI", 9.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
 				static_cast<System::Byte>(238)));
@@ -767,20 +780,6 @@ namespace BrainthreadIDE {
 			this->buttonDefault->Text = L"Default";
 			this->buttonDefault->UseVisualStyleBackColor = true;
 			this->buttonDefault->Click += gcnew System::EventHandler(this, &FormOptions::buttonDefault_Click);
-			// 
-			// editorTextBoxTest
-			// 
-			this->editorTextBoxTest->BackColor = System::Drawing::SystemColors::ControlLight;
-			this->editorTextBoxTest->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
-			this->editorTextBoxTest->GutterBackColor = System::Drawing::SystemColors::ControlLight;
-			this->editorTextBoxTest->GutterForeColor = System::Drawing::Color::Black;
-			this->editorTextBoxTest->GutterMargin = static_cast<System::UInt32>(6);
-			this->editorTextBoxTest->Location = System::Drawing::Point(213, 34);
-			this->editorTextBoxTest->Name = L"editorTextBoxTest";
-			this->editorTextBoxTest->Size = System::Drawing::Size(441, 310);
-			this->editorTextBoxTest->TabIndent = false;
-			this->editorTextBoxTest->TabIndex = 0;
-			this->editorTextBoxTest->UndoLimit = static_cast<System::UInt32>(0);
 			// 
 			// FormOptions
 			// 
