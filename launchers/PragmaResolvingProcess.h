@@ -1,6 +1,7 @@
 #pragma once
 
 #include "InterpreterProcess.h"
+#include "../plugins/PragmaResolver.h"
 
 namespace BrainthreadIDE 
 {
@@ -27,6 +28,17 @@ namespace BrainthreadIDE
 			this->OnComplete(this, EventArgs::Empty);
 			return true;
 		}	
+
+		virtual void ResolvePragmas() override
+		{
+			PragmaResolver ^ pragmaResolver = gcnew PragmaResolver(this->Source, GlobalOptions::Instance->Plugins);
+
+			if(pragmaResolver->HasPragmas()) {
+					pragmaResolver->Resolve(processWorkContext, this->processWorkContext->settings->GetLanguage());
+			}
+			else
+				this->processWorkContext->outputLister->AddIDEOutput("No pragma found in the code");
+		}
 		
 	};
 }

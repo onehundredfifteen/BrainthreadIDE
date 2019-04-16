@@ -6,17 +6,20 @@ class ThreadInfoReader : public MemoryReader
 {
     public:
 		ThreadInfoReader(HANDLE h) : MemoryReader(h) {
+			this->cell_size = sizeof(HANDLE);
 		}
 		
 		ThreadInfoReader() : MemoryReader() {
+			this->cell_size = sizeof(HANDLE);
 		}
 
     public:
 		int ReadMemory(BTThreadListEntry &tle)
 		{
 		    DWORD rv;
-			unsigned int byte_memory_len = (unsigned int)tle.last - (unsigned int)tle.first;
-			cell_size = sizeof(HANDLE); //HANDLE
+			const unsigned int byte_memory_len = (unsigned int)tle.last - (unsigned int)tle.first;
+			
+			//this->cell_size = sizeof(HANDLE); //HANDLE
 		
 			if(byte_memory_len == 0)
 			{
@@ -35,12 +38,12 @@ class ThreadInfoReader : public MemoryReader
 			return rv;
 		}
 
-		int GetMemoryCellAt(unsigned int cell_address)
+		HANDLE GetMemoryCellAt(unsigned int cell_address)
 		{
 			if((int)cell_address >= this->GetRealMemorySize())
 				return 0;
 			
-			return reinterpret_cast <int *>(this->memory)[cell_address];
+			return (HANDLE)((this->memory)[cell_address]);
 		}
 
 

@@ -35,39 +35,63 @@ namespace BrainthreadIDE
 
 		static int GetPairedInstruction(int pos, String ^ code) 
 		{
-			int i, p_cnt = 1;
+			int result = pos;
 			char c, c_pair;
 
 			if(pos >= code->Length || instructionPairs->ContainsKey( (char)code[pos]) == false)
-				return pos;
+				return result;
 
 			c = (char)code[pos];
 			c_pair = (char)instructionPairs[c];
-
-			if(c < c_pair) //look at right [ -> ]
-			{
-				for(i = pos + 1; p_cnt && i < code->Length; ++i)
-				{
-					if(code[i] == c)
-						++p_cnt;
-					else if(code[i] == c_pair)
-						--p_cnt;
-				}
-
-				return i - 1;
+			
+			//look at right [ -> ]
+			if((c < c_pair && c != '<') || c == '>') // > is rather paired with < at right
+			{ 
+				result = lookRight(pos, c, c_pair, code);
+				if(result == -1)//not found? invert direction
+					return lookLeft(pos, c, c_pair, code);
+				else
+					return result;
 			}
 			else //look at left ] -> [
 			{
-				for(i = pos - 1; p_cnt && i >= 0; --i)
-				{
-					if(code[i] == c)
-						++p_cnt;
-					else if(code[i] == c_pair)
-						--p_cnt;
-				}
-
-				return i + 1;
+				result = lookLeft(pos, c, c_pair, code);
+				if(result == -1)
+					return lookRight(pos, c, c_pair, code);
+				else
+					return result;
 			}
+		}
+
+	private: 
+		static int lookRight(int start_pos, char c,  char c_pair, String ^ code)
+		{
+			int i, p_cnt = 1;
+
+			for(i = start_pos + 1; p_cnt && i < code->Length; ++i)
+			{
+				if(code[i] == c)
+					++p_cnt;
+				else if(code[i] == c_pair)
+					--p_cnt;
+			}
+
+			return p_cnt ? -1 : (i - 1);
+		}
+
+		static int lookLeft(int start_pos, char c,  char c_pair, String ^ code)
+		{
+			int i, p_cnt = 1;
+
+			for(i = start_pos - 1; p_cnt && i >= 0; --i)
+			{
+				if(code[i] == c)
+					++p_cnt;
+				else if(code[i] == c_pair)
+					--p_cnt;
+			}
+
+			return p_cnt ? -1 : (i + 1);
 		}
 	
 	};

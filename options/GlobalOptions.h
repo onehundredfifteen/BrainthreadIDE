@@ -29,6 +29,7 @@ namespace BrainthreadIDE
 				fiTraceNewThread,
 				fiMemViewOnThreadCaptionClick,
 				fiThreadNames,
+				fiThreadTreeIcons,
 				fiStepSelect,
 				fiDebugeeWindowStyle,
 				fiDebugeeWindowPosition,
@@ -64,6 +65,7 @@ namespace BrainthreadIDE
 				field_list->Add(FieldId::fiTraceNewThread, gcnew OptionField<bool>(true));
 				field_list->Add(FieldId::fiMemViewOnThreadCaptionClick, gcnew OptionField<bool>(true));
 				field_list->Add(FieldId::fiThreadNames, gcnew OptionField<int>(0));
+				field_list->Add(FieldId::fiThreadTreeIcons, gcnew OptionField<int>(0));
 				field_list->Add(FieldId::fiStepSelect, gcnew OptionField<bool>(true));
 				field_list->Add(FieldId::fiDebugeeWindowStyle, gcnew OptionField<int>(0));
 				field_list->Add(FieldId::fiDebugeeWindowPosition, gcnew OptionField<int>(0));
@@ -218,6 +220,12 @@ namespace BrainthreadIDE
 			{
 				int get() { 
 					return safe_cast<OptionField<int> ^>(field_list[FieldId::fiThreadNames])->Value;
+				}
+			}
+			property int ThreadTreeIcons
+			{
+				int get() { 
+					return safe_cast<OptionField<int> ^>(field_list[FieldId::fiThreadTreeIcons])->Value;
 				}
 			}
 			property bool DebugStepSelect

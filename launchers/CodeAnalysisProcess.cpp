@@ -58,6 +58,7 @@ namespace BrainthreadIDE
 		if(e->Error != nullptr /*|| cli::safe_cast<int>(e->Result) != 1*/)
 		{
 			processWorkContext->outputLister->AddOutputWithTimestamp("Code parse failed");
+			//processWorkContext->outputLister->AddIDEOutput("Error message: " + e->Error->Message);
 		}
 		else
 			processWorkContext->outputLister->AddOutputWithTimestamp("Task completed");

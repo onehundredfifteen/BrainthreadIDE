@@ -21,12 +21,22 @@ struct BTStackEntry //for any std::stack or deque
 	int size;
 };
 
+struct BTFunctionsEntry //for function heap object
+{
+	void * my_spare;
+	void * my_spare_2;
+	int map_size;
+	int my_offset;
+
+	BTStackEntry callstack;
+};
+
 struct BTThreadListEntry //for any std::vector;
 {
-	void * allocator;
 	void * first;
 	void * last;
 	void * end;
+	int my_val;
 };
 
 struct BTProcessEntry

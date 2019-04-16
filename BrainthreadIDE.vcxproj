@@ -90,6 +90,8 @@
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
     <ClCompile Include="BrainthreadIDE.cpp" />
+    <ClCompile Include="debugger\ThreadMonitor.cpp" />
+    <ClCompile Include="debugger\ThreadState.cpp" />
     <ClCompile Include="debugger\unmanaged\Breakpoint.cpp" />
     <ClCompile Include="debugger\unmanaged\btheaders\DebugTimeException.cpp" />
     <ClCompile Include="debugger\unmanaged\DebuggerLoop.cpp" />
@@ -117,13 +119,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debugger\DebugTreeViewExpander.h" />
-    <ClInclude Include="debugger\ThreadResourceState.h" />
+    <ClInclude Include="debugger\ThreadMonitor.h" />
+    <ClInclude Include="debugger\ThreadState.h" />
     <ClInclude Include="debugger\TreeViewExpander.h" />
     <ClInclude Include="debugger\unmanaged\Breakpoint.h" />
     <ClInclude Include="debugger\unmanaged\btheaders\BTProcessEntry.h" />
     <ClInclude Include="debugger\unmanaged\btheaders\BTProcessMemoryInfo.h" />
     <ClInclude Include="debugger\unmanaged\btheaders\DebugTimeException.h" />
     <ClInclude Include="debugger\unmanaged\DebuggerLoop.h" />
+    <ClInclude Include="debugger\unmanaged\FunctionReader.h" />
     <ClInclude Include="debugger\unmanaged\MemoryReader.h" />
     <ClInclude Include="debugger\unmanaged\StackReader.h" />
     <ClInclude Include="debugger\unmanaged\Thread.h" />
@@ -134,6 +138,7 @@
     <ClInclude Include="file_io\CodeFileContext.h" />
     <ClInclude Include="file_io\FileContext.h" />
     <ClInclude Include="file_io\ProjectSettingsFileContext.h" />
+    <ClInclude Include="file_io\ProtectedFileContext.h" />
     <ClInclude Include="file_io\XMLFileContext.h" />
     <ClInclude Include="FormMain.h">
       <FileType>CppForm</FileType>

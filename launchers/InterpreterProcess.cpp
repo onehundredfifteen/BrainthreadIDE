@@ -68,7 +68,7 @@ namespace BrainthreadIDE
 		int flags = SWP_NOSIZE; // Ignores size arguments. 
 		HWND hia = GlobalOptions::Instance->DebugeeWindowStyle == 2 ? HWND_TOPMOST :  HWND_TOP;
 
-		if(GlobalOptions::Instance->DebugeeWindowStyle == 1)
+		if(GlobalOptions::Instance->DebugeeWindowStyle == 1 && false == GlobalOptions::Instance->PauseProgramAfterRun)
 			flags |= SWP_HIDEWINDOW;
 
 		switch(GlobalOptions::Instance->DebugeeWindowPosition)

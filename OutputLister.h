@@ -47,9 +47,11 @@ namespace BrainthreadIDE
 		int GetInstructionFromLine(String ^ line);
 
 	private: 
-		literal String ^ cMessage = "Message";
 		literal String ^ cError = "Error";
+		literal String ^ cMessage = "Message";
 		literal String ^ cWarning = "Warning";
+		literal String ^ cException = "[stderr]";
+
 		literal String ^ cCodeValid = "Code is valid";
 		literal String ^ cCodeSane = "Code is sane";
 		literal String ^ cCodeHas = "Code has";

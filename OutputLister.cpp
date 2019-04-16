@@ -73,7 +73,7 @@ namespace BrainthreadIDE
 	{
 		this->AddOutput(String::Format("{2}<info at {0}> {1}", DateTime::Now.ToLongTimeString(), 
 															   line,
-															   outputStrings->Count > 0 ? "\r\n" : "")); //no first newline
+															   outputStrings->Count > 0 ? "\r\n>" : "")); //no first newline
 	}
 
 	//funkcja podaje pozycje instrukcji w tekscie uzywajac jako slownika kluczy z syntax higligthera
@@ -124,6 +124,13 @@ namespace BrainthreadIDE
 
 			if(line->Contains(cCodeHas))//warnings or errors goes on top of list
 				item->important = true;
+		}
+		else if(line->StartsWith(cException))
+		{
+			item->kind = cError;
+			item->instruction = 0;
+			item->description = line->Substring(cException->Length)->Trim();
+			item->important = false;
 		}
 		else if(line->Contains(cCodeValid) || line->Contains(cCodeSane))
 		{

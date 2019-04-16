@@ -37,7 +37,7 @@ namespace BrainthreadIDE
 		//processWorkContext->outputLister->Clear();
 		if(cli::safe_cast<CodeParseProcess^ >(sender)->ValidCode == false)
 		{
-			processWorkContext->outputLister->AddOutputWithTimestamp("The debugging process can't be completed due to errors in the code.");
+			this->processWorkContext->outputLister->AddOutputWithTimestamp("The debugging process can't be completed due to errors in the code.");
 			MessageBox::Show("Your code contains errors.", "Cannot launch debugger", MessageBoxButtons::OK, MessageBoxIcon::Exclamation);
 
 			this->OnComplete(this, gcnew EventArgs);
@@ -51,30 +51,24 @@ namespace BrainthreadIDE
 		{
 			BrainthreadIDE::Language curLang = processWorkContext->settings->GetLanguage();
 			
-			this->debugger = gcnew BrainthreadIDE::Debugger(GlobalOptions::Instance->InterpreterPath[curLang]->Trim('"'), startInfo->Arguments->Trim('"'));
+			this->debugger = gcnew BrainthreadIDE::Debugger(GlobalOptions::Instance->InterpreterPath[curLang]->Trim('"'), startInfo->Arguments->Trim('"'), curLang);
 			this->process = Process::GetProcessById( this->debugger->DebugeeProcessId );
 		
 			//positioning debugee window
 			this->MoveProcessWindow();
 		}
-		catch(ArgumentException ^ ex)
-		{
-			processWorkContext->outputLister->AddOutputWithTimestamp("Cannot launch debuger due to incorrect application arguments");
-			processWorkContext->outputLister->AddIDEOutput(ex->Message);
-			
-			MessageBox::Show(ex->Message, "Cannot launch debugger", MessageBoxButtons::OK, MessageBoxIcon::Error);
-		}
-		catch(Exception ^ ex)
-		{
-			processWorkContext->outputLister->AddOutputWithTimestamp("Cannot enter debug mode");
-			processWorkContext->outputLister->AddIDEOutput(ex->Message);
+		catch(Exception ^ ex) {
+			this->processWorkContext->outputLister->AddOutputWithTimestamp("Cannot enter debug mode");
+			this->processWorkContext->outputLister->AddIDEOutput(ex->Message);
 
 			MessageBox::Show(ex->Message, "Cannot enter debug mode", MessageBoxButtons::OK, MessageBoxIcon::Error);
+			this->OnComplete(this, gcnew EventArgs);
 		}
 
-		processWorkContext->outputLister->AddIDEOutput("Debugger attached to process");
+		this->processWorkContext->outputLister->AddIDEOutput("Debugger attached to process");
 		
 		worker->RunWorkerAsync();
+		//this->OnStart(this, gcnew EventArgs); //2nd call to refresh 1st step
 	}
 
 	void DebugCodeProcess::Stop()
@@ -82,7 +76,7 @@ namespace BrainthreadIDE
 		worker->CancelAsync();
 		debugger->Finish();	
 
-		this->OnComplete(this, EventArgs::Empty);
+		//this->OnComplete(this, EventArgs::Empty); //moved to worker_RunWorkerCompleted
 	}
 
 	void DebugCodeProcess::Detach()
@@ -90,12 +84,12 @@ namespace BrainthreadIDE
 		worker->CancelAsync();
 		debugger->DetachDebugee(false); 
 		
-		this->OnComplete(this, EventArgs::Empty);
+		//this->OnComplete(this, EventArgs::Empty);
 	}
 
     void DebugCodeProcess::worker_DoWork(System::Object^ sender, System::ComponentModel::DoWorkEventArgs^ e) 
 	{
-		while(this->process && !this->process->HasExited)
+		while(this->process && !this->process->HasExited && this->debugger)
 		{
 			if(worker->CancellationPending) 
 			{
@@ -103,7 +97,7 @@ namespace BrainthreadIDE
 				break;
 			}
 
-			Thread::Sleep(115);   
+			Thread::Sleep(115);   //maybe less?
 		}
 	}
 
@@ -111,35 +105,38 @@ namespace BrainthreadIDE
 	{
 		if(e->Cancelled)    
 		{
-			processWorkContext->outputLister->AddOutputWithTimestamp("Debug stopped by user");
+			this->processWorkContext->outputLister->AddOutputWithTimestamp("Debug stopped by user");
 		}
-		else if(this == nullptr || this->debugger == nullptr) //event called to a dead pointer? kid of workaround
+		else if(/*this == nullptr ||*/ this->debugger == nullptr) //event called to a dead pointer? kid of workaround
 		{
-			processWorkContext->outputLister->AddOutputWithTimestamp("Program exited prematurely");
-			processWorkContext->outputLister->AddIDEOutput("Debugging terminated with unknown error. Cannot continue at this point.");
+			this->processWorkContext->outputLister->AddOutputWithTimestamp("Program exited prematurely");
+			this->processWorkContext->outputLister->AddIDEOutput("Debugging terminated with unknown error. Cannot continue at this point.");
 
 			this->OnComplete(this, gcnew EventArgs);
 			return;
 		}
 		else if(debugger->DebugeeExitCode == -1)
 		{
-			processWorkContext->outputLister->AddOutputWithTimestamp(String::Format("Program exited with code {0}", debugger->DebugeeExitCode));
-			processWorkContext->outputLister->AddIDEOutput("Debugging completed with error: Detached from debugee prematurely");
+			this->processWorkContext->outputLister->AddOutputWithTimestamp(String::Format("Program exited with code {0}", debugger->DebugeeExitCode));
+			this->processWorkContext->outputLister->AddIDEOutput("Debugging completed with error: Detached from debugee prematurely");
 
-			try
-			{
+			try {
 				debugger->DetachDebugee(true);
 			}
-			catch(Exception ^ ex)
-			{
-				processWorkContext->outputLister->AddIDEOutput(String::Format("Cannot kill debugee {0}. Try to restart IDE.", ex->Message));
+			catch(Exception ^ ex) {
+				this->processWorkContext->outputLister->AddIDEOutput(String::Format("Cannot kill debugee {0}. Try to restart IDE.", ex->Message));
 			}
 		}
 		else
 		{
-			processWorkContext->outputLister->AddOutputWithTimestamp(String::Format("Program exited with code {0}", debugger->DebugeeExitCode));
-			processWorkContext->outputLister->AddIDEOutput("Debugging completed");
-			//processWorkContext->outputLister->AddIDEOutput(debugger->GetDebugStats());
+			try {
+				this->processWorkContext->outputLister->AddOutputWithTimestamp(String::Format("Program exited with code {0}", debugger->DebugeeExitCode));
+				this->processWorkContext->outputLister->AddIDEOutput("Debugging completed");
+				processWorkContext->outputLister->AddIDEOutput(debugger->GetDebugStats());
+			}
+			catch(...) {
+				return;
+			}
 		}
 
 		this->OnComplete(this, EventArgs::Empty);
@@ -152,9 +149,8 @@ namespace BrainthreadIDE
 		{
 			this->debugger->RunStep();
 		}
-		catch(Exception ^ ex)
-		{
-			processWorkContext->outputLister->AddOutputWithTimestamp(ex->Message);
+		catch(Exception ^ ex) {
+			this->processWorkContext->outputLister->AddOutputWithTimestamp(ex->Message);
 			MessageBox::Show(ex->Message, "Step exception", MessageBoxButtons::OK, MessageBoxIcon::Error);
 		}
 		
@@ -172,10 +168,9 @@ namespace BrainthreadIDE
 		{
 			this->debugger->RunToInstruction( pi + 1 );
 		}
-		catch(Exception ^ ex)
-		{
-			processWorkContext->outputLister->AddOutputWithTimestamp(ex->Message);
-			MessageBox::Show(ex->Message, "Step exception", MessageBoxButtons::OK, MessageBoxIcon::Error);
+		catch(Exception ^ ex) {
+			this->processWorkContext->outputLister->AddOutputWithTimestamp(ex->Message);
+			MessageBox::Show(ex->Message, "Step over exception", MessageBoxButtons::OK, MessageBoxIcon::Error);
 		}
 
 		this->MoveCarretToPosition( ccc->ToCursor( this->debugger->CodePosition ));
@@ -189,10 +184,9 @@ namespace BrainthreadIDE
 		{
 			this->debugger->RunToInstruction( ccc->ToInstruction( processWorkContext->editorTextBox->richTextBox->SelectionStart ));
 		}
-		catch(Exception ^ ex)
-		{
-			processWorkContext->outputLister->AddOutputWithTimestamp(ex->Message);
-			MessageBox::Show(ex->Message, "Step exception", MessageBoxButtons::OK, MessageBoxIcon::Error);
+		catch(Exception ^ ex) {
+			this->processWorkContext->outputLister->AddOutputWithTimestamp(ex->Message);
+			MessageBox::Show(ex->Message, "Run to cursor exception", MessageBoxButtons::OK, MessageBoxIcon::Error);
 		}
 
 		this->MoveCarretToPosition( ccc->ToCursor( this->debugger->CodePosition ));
@@ -204,9 +198,8 @@ namespace BrainthreadIDE
 		{
 			this->debugger->RunToMemoryTrap(index - 1, value, compare);
 		}
-		catch(Exception ^ ex)
-		{
-			processWorkContext->outputLister->AddOutputWithTimestamp(ex->Message);
+		catch(Exception ^ ex) {
+			this->processWorkContext->outputLister->AddOutputWithTimestamp(ex->Message);
 			MessageBox::Show(ex->Message, "Memory Trap exception", MessageBoxButtons::OK, MessageBoxIcon::Error);
 		}
 

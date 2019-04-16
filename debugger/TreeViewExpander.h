@@ -14,38 +14,52 @@ namespace BrainthreadIDE
 	public ref class TreeViewExpander 
 	{
 	public: TreeViewExpander(TreeView ^ tv) 
+				: treeView(tv)
 			{
-				this->treeView = tv;
-				this->expandStates = gcnew ArrayList;
+				this->expandStates = gcnew ArrayList(this->treeView->Nodes->Count);
 
 				//get first layer
-				expandStates->Add( this->GetExpandedState(this->treeView->Nodes) );
-
-				//get second layers
-				for each(TreeNode ^ child_node in this->treeView->Nodes)
-				{
-					expandStates->Add( this->GetExpandedState(child_node->Nodes) );
+				for each(TreeNode ^ node in this->treeView->Nodes) {
+					this->expandStates->Add( gcnew ExpanderItem(node));
 				}
 			}
 
+	public: ref class ExpanderItem 
+			{
+			public: ExpanderItem(TreeNode ^ node) 
+						: isExpanded(node->IsExpanded) {
+						this->items = gcnew ArrayList;
+
+						for each(TreeNode ^ _node in node->Nodes)
+								this->items->Add(gcnew ExpanderItem(_node));
+
+					}
+
+			public: void Expand(TreeNode^ node) {
+						System::Collections::IEnumerator ^ etor = (safe_cast<System::Collections::IEnumerable^>(node->Nodes))->GetEnumerator();
+
+						if(this->isExpanded)
+							node->Expand();
+
+						for each(ExpanderItem ^ item in this->items)
+							if(etor->MoveNext()) {
+								item->Expand( safe_cast<TreeNode^>(etor->Current) );
+							}	
+					}
+			private:
+				bool isExpanded;
+				ArrayList ^ items;
+			};
+
 	public: virtual void Expand() 
 			{
-				int i = 1;
-		
-				if(expandStates->Count && expandStates[0])
-				{
-					//evaluate new items expand int 1st layer
-					if(this->treeView->Nodes->Count != cli::safe_cast< array<bool> ^ >(expandStates[0])->Length)
-						this->ApplyChanges();
-					
-					//set first layer
-					this->SetExpandedState(this->treeView->Nodes, cli::safe_cast< array<bool> ^ >(expandStates[0]));
-
-					//get second layers
-					for each(TreeNode ^ child_node in this->treeView->Nodes)
-					{
-						this->SetExpandedState(child_node->Nodes, cli::safe_cast< array<bool> ^ >(expandStates[i++]));
-					}
+				this->CollapseAll();
+				if(expandStates->Count > 0) {
+					System::Collections::IEnumerator ^ etor = (safe_cast<System::Collections::IEnumerable^>(this->treeView->Nodes))->GetEnumerator();
+					for each(ExpanderItem ^ item in this->expandStates)
+						if(etor->MoveNext()) {
+								item->Expand( safe_cast<TreeNode^>(etor->Current) );
+							}	
 				}
 			}
 
@@ -57,52 +71,9 @@ namespace BrainthreadIDE
 			{
 				this->treeView->CollapseAll();
 			}
-
-	protected: virtual void ApplyChanges() 
-			{
-				if(this->treeView->Nodes->Count > cli::safe_cast< array<bool> ^ >(expandStates[0])->Length)
-				{ //copy expand state from 1st node collection
-					for (int i = this->treeView->Nodes->Count - cli::safe_cast< array<bool> ^ >(expandStates[0])->Length; i > 0; --i)
-					{
-						expandStates->Add(nullptr);
-					}
-				}
-			}
-
-	private: array<bool> ^ GetExpandedState(TreeNodeCollection ^ nodes) 
-			{
-				int i = 0;
-				array<bool> ^ res;
-				
-				if(nodes->Count == 0)
-					return nullptr;
-
-				res = gcnew array<bool>(nodes->Count);
-
-				for each(TreeNode ^ child_node in nodes)
-				{
-					res[i++] = child_node->IsExpanded;
-				}
-
-				return res;
-			}
-
-	private: void SetExpandedState(TreeNodeCollection ^ nodes, array<bool> ^ exp_states) 
-			{
-				int i = 0;
-				
-				if(exp_states == nullptr)
-					return;
-
-				for each(TreeNode ^ child_node in nodes)
-				{
-					if(i < exp_states->Length && exp_states[i++])
-						child_node->Expand();
-				}
-			}
 	
 	protected: 
 		TreeView ^ treeView;
-		ArrayList ^ expandStates;
+		ArrayList ^ expandStates; //System::Collections::Generic::List<ExpanderItem ^> ^ expandStates;
 	};
 }

@@ -23,7 +23,7 @@ namespace BrainthreadIDE
 		{
 			debugeeStarted = false;
 
-			throw DebugTimeException( "Can't create process", GetLastError());
+			throw DebugTimeException("Can't create debugee process", GetLastError());
 		}
 		
 		SetThreadPriority(procinfo.hThread, THREAD_PRIORITY_IDLE);
@@ -36,13 +36,13 @@ namespace BrainthreadIDE
 		thlist.add_thread(ThreadList::Thread(procinfo.dwThreadId, procinfo.hThread));
 		
 		if(false == this->LoadSymbols(debugee)) {
-			throw DebugTimeException( "Can't load symbols", GetLastError());
+			throw DebugTimeException("Can't load symbols", GetLastError());
 		}
 
 		ResumeThread(procinfo.hThread);
 
 		this->WaitForFirstBreakpoint();
-		this->Step(0);
+		this->Step(0);//fist step executed
 	}
 	DebuggerLoop::~DebuggerLoop()
 	{
@@ -55,6 +55,7 @@ namespace BrainthreadIDE
 			delete this->thlreader;
 			delete this->heapreader;
 			delete this->shheapreader;
+			delete this->funreader;
 		}
 	}
 
@@ -73,6 +74,7 @@ namespace BrainthreadIDE
 		this->thlreader = new ThreadInfoReader(debugeeProcessHandle);
 		this->heapreader = new StackReader(debugeeProcessHandle, this->memreader);
 		this->shheapreader = new StackReader(debugeeProcessHandle, this->memreader);
+		this->funreader = new FunctionReader(debugeeProcessHandle, this->memreader);
 
 		//open and load file pdb
 		wcscpy(symbolFilePath, debugee);
@@ -147,9 +149,9 @@ namespace BrainthreadIDE
 				    debug_event.dwDebugEventCode == EXCEPTION_DEBUG_EVENT) 
 			{
 				if(debug_event.u.Exception.dwFirstChance)
-					throw DebugTimeException( "An internal first-chance exception was raised", debug_event.u.Exception.ExceptionRecord.ExceptionCode);
+					throw LanguageException("First-chance exception: run your code and check the log", debug_event.u.Exception.ExceptionRecord.ExceptionCode);
 				else
-					throw DebugTimeException( "An internal exception was raised", debug_event.u.Exception.ExceptionRecord.ExceptionCode);
+					throw DebugTimeException("An internal exception was raised", debug_event.u.Exception.ExceptionRecord.ExceptionCode);
 			}
 			else if(debug_event.dwDebugEventCode == RIP_EVENT)
 			{
@@ -182,9 +184,9 @@ namespace BrainthreadIDE
 				    debug_event.dwDebugEventCode == EXCEPTION_DEBUG_EVENT) 
 			{
 				if(debug_event.u.Exception.dwFirstChance)
-					throw DebugTimeException( "An internal first-chance exception was raised", debug_event.u.Exception.ExceptionRecord.ExceptionCode);
+					throw LanguageException("First-chance exception: run your code and check the log", debug_event.u.Exception.ExceptionRecord.ExceptionCode);
 				else
-					throw DebugTimeException( "An internal exception was raised", debug_event.u.Exception.ExceptionRecord.ExceptionCode);
+					throw DebugTimeException("An internal exception was raised", debug_event.u.Exception.ExceptionRecord.ExceptionCode);
 			}
 			else if(debug_event.dwDebugEventCode == RIP_EVENT)
 			{
@@ -219,6 +221,7 @@ namespace BrainthreadIDE
 		BTProcessEntry pe;
 		BTMemoryTapeEntry mte;
 		BTStackEntry se, shse;
+		BTFunctionsEntry fe;
 
 		if(debugeeStarted == false || readyToStepping == false)
 			return;
@@ -231,6 +234,7 @@ namespace BrainthreadIDE
 		memset(&mte,  0, sizeof(BTMemoryTapeEntry));
 		memset(&se,   0, sizeof(BTStackEntry));
 		memset(&shse, 0, sizeof(BTStackEntry));
+		memset(&fe,   0, sizeof(BTFunctionsEntry));
 		memset(&pe,   0, sizeof(BTProcessEntry));
 
 		//read bt process entry
@@ -267,6 +271,14 @@ namespace BrainthreadIDE
 				sizeof(BTStackEntry), &rv);
 
 	    shheapreader->ReadMemory(shse);
+
+		//read functions object
+		ReadProcessMemory(debugeeProcessHandle,
+				pe.functions,
+				&fe,
+				sizeof(BTFunctionsEntry), &rv);
+		
+	    funreader->ReadMemory(fe);
 		
 		/*TEMPLATE
 		void * a;
@@ -290,10 +302,13 @@ namespace BrainthreadIDE
 		process_properties.stackinfo.array_size = se.size;
 		process_properties.shstackinfo.array_size = shse.size;
 
-		process_properties.threadinfo.array_size = 0;//TODO
+		process_properties.funinfo.loaded_functions = fe.map_size;
+		process_properties.funinfo.callstack_size = fe.callstack.size;
+
+		process_properties.threadinfo.array_size =  ((unsigned int)pe.threadinfo.last - (unsigned int)pe.threadinfo.first) / thlreader->SizeOfCell();
 	}
 
-	void DebuggerLoop::GetProcessProperties(BTProcessProperties &ppe, int mem_chunk_offset)
+	void DebuggerLoop::FillProcessProperties(BTProcessProperties &ppe, int mem_chunk_offset)
 	{
 		//memory
 		memset(&process_properties.meminfo.memory_chunk, 0, MEM_CHUNK_SIZE * sizeof(int));
@@ -301,17 +316,24 @@ namespace BrainthreadIDE
 		for(int i = 0; i < MEM_CHUNK_SIZE; ++i)
 			process_properties.meminfo.memory_chunk[i] = this->memreader->GetMemoryCellAt(i + mem_chunk_offset);
 
-		//thread list TODO
-		//memset(&process_properties.threadinfo.array_memory, 0, ARRAY_MEM_SIZE * sizeof(int));
+		//thread list 
+		memset(&process_properties.threadinfo.array_memory, 0, ARRAY_MEM_SIZE * sizeof(int));
 		
-		/*for(int i = 0; i < ARRAY_MEM_SIZE; ++i)
+		for(int i = 0; i < process_properties.threadinfo.array_size; ++i)
 		{
-			int thandle = thlreader->GetMemoryCellAt(i);
-			//if(thandle == 0)
-				//break;
+			HANDLE valid_handle;
 
-			process_properties.threadinfo.list_memory[ i ] = GetThreadId((HANDLE) thandle );
-		}*/
+			DuplicateHandle(debugeeProcessHandle, 
+                    (HANDLE)this->thlreader->GetMemoryCellAt(i), 
+                    GetCurrentProcess(),
+                    &valid_handle, 
+                    0,
+                    FALSE,
+                    DUPLICATE_SAME_ACCESS);
+
+			process_properties.threadinfo.array_memory[i] = GetThreadId(valid_handle);
+			CloseHandle(valid_handle);
+		}
 
 		//stack
 		memset(&process_properties.stackinfo.array_memory, 0, ARRAY_MEM_SIZE * sizeof(int));
@@ -325,14 +347,45 @@ namespace BrainthreadIDE
 		for(int i = 0; i < process_properties.shstackinfo.array_size && i < ARRAY_MEM_SIZE; ++i)
 			process_properties.shstackinfo.array_memory[i] = this->shheapreader->GetMemoryCellAt(i);
 
+		//functions call stack
+		memset(&process_properties.funinfo.return_addresses, 0, ARRAY_MEM_SIZE * sizeof(int));
+		memset(&process_properties.funinfo.functions, 0, ARRAY_MEM_SIZE * sizeof(int));
+		
+		for(int i = 0; i < process_properties.funinfo.callstack_size && i < ARRAY_MEM_SIZE; ++i)
+		{
+			process_properties.funinfo.functions[i] = this->funreader->GetHiMemoryCellAt(i);
+			process_properties.funinfo.return_addresses[i] = this->funreader->GetMemoryCellAt(i);
+		}
+
 		//return
 		ppe = process_properties;
 	}
 
-	void DebuggerLoop::GetProcessProperties(BTProcessProperties &ppe)
+	void DebuggerLoop::FillProcessProperties(BTProcessProperties &ppe)
 	{
-		GetProcessProperties(ppe, 0);
+		FillProcessProperties(ppe, 0);
 	}
+	/*
+	void DebuggerLoop::FillHeapArray(StackReader * stack_reader, BTProcessStackInfo &si)
+	{
+		memset(&si.array_memory, 0, ARRAY_MEM_SIZE * sizeof(int));
+
+		if(stackinfo.array_size < ARRAY_MEM_SIZE) //copy all in reverse order
+		{
+			for(int n = 0, i = Math::Min((int)fi.callstack_size, (int)ARRAY_MEM_SIZE) - 1; i >= 0; --i, ++n)
+				process_properties.stackinfo.array_memory[i] = stack_reader->GetMemoryCellAt(i);
+		}
+		else //copy first n then the rest
+		{
+			int start_index = si.array_size - ARRAY_MEM_SIZE + SKIP_INDEX;
+			
+			for(int i = 0; i < SKIP_INDEX; ++i)
+				process_properties.stackinfo.array_memory[i] = stack_reader->GetMemoryCellAt(i);
+
+			for(int i = start_index; i < si.array_size; ++i)
+				process_properties.stackinfo.array_memory[i] = stack_reader->GetMemoryCellAt(i);
+		}
+	}*/
 
 	bool DebuggerLoop::WriteProcessMemory(int value, int index, int threadId)
 	{

@@ -27,17 +27,6 @@ namespace BrainthreadIDE
 				}
 			}
 
-	protected: virtual void ApplyChanges() override 
-			{
-				if(this->treeView->Nodes->Count > cli::safe_cast< array<bool> ^ >(expandStates[0])->Length)
-				{ //copy expand state from 1st node collection
-					for (int i = this->treeView->Nodes->Count - cli::safe_cast< array<bool> ^ >(expandStates[0])->Length; i > 0; --i)
-					{
-						expandStates->Insert(this->treeView->Nodes->Count - 1, nullptr);
-					}
-				}
-			}
-
 	
 	};
 }

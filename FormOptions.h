@@ -117,6 +117,9 @@ namespace BrainthreadIDE {
 	private: System::Windows::Forms::Label^  labelThreadName;
 	private: System::Windows::Forms::CheckBox^  checkBoxDebugSelection;
 	private: System::Windows::Forms::ComboBox^  comboBoxThreadNames;
+	private: System::Windows::Forms::GroupBox^  groupBoxDebuggerStyle;
+	private: System::Windows::Forms::ComboBox^  comboBoxThreadDistinction;
+	private: System::Windows::Forms::Label^  labelThreadHighlight;
 
 
 
@@ -176,6 +179,8 @@ namespace BrainthreadIDE {
 			this->Column4 = (gcnew System::Windows::Forms::DataGridViewButtonColumn());
 			this->labelUnlockInfo = (gcnew System::Windows::Forms::Label());
 			this->tabPageDebuggerOptions = (gcnew System::Windows::Forms::TabPage());
+			this->groupBoxDebuggerStyle = (gcnew System::Windows::Forms::GroupBox());
+			this->checkBoxDebugSelection = (gcnew System::Windows::Forms::CheckBox());
 			this->label1 = (gcnew System::Windows::Forms::Label());
 			this->groupBoxDebuggerWndPos = (gcnew System::Windows::Forms::GroupBox());
 			this->labelDebugeeStyle = (gcnew System::Windows::Forms::Label());
@@ -183,8 +188,9 @@ namespace BrainthreadIDE {
 			this->labelDebugeePos = (gcnew System::Windows::Forms::Label());
 			this->comboBoxDebugeeWindowPos = (gcnew System::Windows::Forms::ComboBox());
 			this->groupBoxDebugger = (gcnew System::Windows::Forms::GroupBox());
+			this->comboBoxThreadDistinction = (gcnew System::Windows::Forms::ComboBox());
+			this->labelThreadHighlight = (gcnew System::Windows::Forms::Label());
 			this->labelThreadName = (gcnew System::Windows::Forms::Label());
-			this->checkBoxDebugSelection = (gcnew System::Windows::Forms::CheckBox());
 			this->checkBoxThrdMemOnClick = (gcnew System::Windows::Forms::CheckBox());
 			this->comboBoxThreadNames = (gcnew System::Windows::Forms::ComboBox());
 			this->checkBoxTraceEachTread = (gcnew System::Windows::Forms::CheckBox());
@@ -208,6 +214,7 @@ namespace BrainthreadIDE {
 			this->groupBoxInterpreter->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->dataGridViewInterpreter))->BeginInit();
 			this->tabPageDebuggerOptions->SuspendLayout();
+			this->groupBoxDebuggerStyle->SuspendLayout();
 			this->groupBoxDebuggerWndPos->SuspendLayout();
 			this->groupBoxDebugger->SuspendLayout();
 			this->tabPagePliginsOptions->SuspendLayout();
@@ -517,6 +524,7 @@ namespace BrainthreadIDE {
 			// 
 			// tabPageDebuggerOptions
 			// 
+			this->tabPageDebuggerOptions->Controls->Add(this->groupBoxDebuggerStyle);
 			this->tabPageDebuggerOptions->Controls->Add(this->label1);
 			this->tabPageDebuggerOptions->Controls->Add(this->groupBoxDebuggerWndPos);
 			this->tabPageDebuggerOptions->Controls->Add(this->groupBoxDebugger);
@@ -527,6 +535,26 @@ namespace BrainthreadIDE {
 			this->tabPageDebuggerOptions->TabIndex = 2;
 			this->tabPageDebuggerOptions->Text = L"Debugger";
 			this->tabPageDebuggerOptions->UseVisualStyleBackColor = true;
+			// 
+			// groupBoxDebuggerStyle
+			// 
+			this->groupBoxDebuggerStyle->Controls->Add(this->checkBoxDebugSelection);
+			this->groupBoxDebuggerStyle->Location = System::Drawing::Point(368, 142);
+			this->groupBoxDebuggerStyle->Name = L"groupBoxDebuggerStyle";
+			this->groupBoxDebuggerStyle->Size = System::Drawing::Size(328, 126);
+			this->groupBoxDebuggerStyle->TabIndex = 4;
+			this->groupBoxDebuggerStyle->TabStop = false;
+			this->groupBoxDebuggerStyle->Text = L"Step-by-step debugger";
+			// 
+			// checkBoxDebugSelection
+			// 
+			this->checkBoxDebugSelection->AutoSize = true;
+			this->checkBoxDebugSelection->Location = System::Drawing::Point(20, 34);
+			this->checkBoxDebugSelection->Name = L"checkBoxDebugSelection";
+			this->checkBoxDebugSelection->Size = System::Drawing::Size(174, 17);
+			this->checkBoxDebugSelection->TabIndex = 7;
+			this->checkBoxDebugSelection->Text = L"Highlight current instruction";
+			this->checkBoxDebugSelection->UseVisualStyleBackColor = true;
 			// 
 			// label1
 			// 
@@ -546,7 +574,7 @@ namespace BrainthreadIDE {
 			this->groupBoxDebuggerWndPos->Controls->Add(this->comboBoxDebugeeWindowPos);
 			this->groupBoxDebuggerWndPos->Location = System::Drawing::Point(20, 142);
 			this->groupBoxDebuggerWndPos->Name = L"groupBoxDebuggerWndPos";
-			this->groupBoxDebuggerWndPos->Size = System::Drawing::Size(676, 126);
+			this->groupBoxDebuggerWndPos->Size = System::Drawing::Size(328, 126);
 			this->groupBoxDebuggerWndPos->TabIndex = 2;
 			this->groupBoxDebuggerWndPos->TabStop = false;
 			this->groupBoxDebuggerWndPos->Text = L"Debugee window apperance";
@@ -554,7 +582,7 @@ namespace BrainthreadIDE {
 			// labelDebugeeStyle
 			// 
 			this->labelDebugeeStyle->AutoSize = true;
-			this->labelDebugeeStyle->Location = System::Drawing::Point(22, 38);
+			this->labelDebugeeStyle->Location = System::Drawing::Point(19, 38);
 			this->labelDebugeeStyle->Name = L"labelDebugeeStyle";
 			this->labelDebugeeStyle->Size = System::Drawing::Size(80, 13);
 			this->labelDebugeeStyle->TabIndex = 5;
@@ -565,15 +593,15 @@ namespace BrainthreadIDE {
 			this->comboBoxDebugeeWindowStyle->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
 			this->comboBoxDebugeeWindowStyle->FormattingEnabled = true;
 			this->comboBoxDebugeeWindowStyle->Items->AddRange(gcnew cli::array< System::Object^  >(3) {L"Default", L"Hide window", L"Always stay on top"});
-			this->comboBoxDebugeeWindowStyle->Location = System::Drawing::Point(163, 35);
+			this->comboBoxDebugeeWindowStyle->Location = System::Drawing::Point(135, 35);
 			this->comboBoxDebugeeWindowStyle->Name = L"comboBoxDebugeeWindowStyle";
-			this->comboBoxDebugeeWindowStyle->Size = System::Drawing::Size(197, 21);
+			this->comboBoxDebugeeWindowStyle->Size = System::Drawing::Size(172, 21);
 			this->comboBoxDebugeeWindowStyle->TabIndex = 4;
 			// 
 			// labelDebugeePos
 			// 
 			this->labelDebugeePos->AutoSize = true;
-			this->labelDebugeePos->Location = System::Drawing::Point(22, 74);
+			this->labelDebugeePos->Location = System::Drawing::Point(19, 69);
 			this->labelDebugeePos->Name = L"labelDebugeePos";
 			this->labelDebugeePos->Size = System::Drawing::Size(100, 13);
 			this->labelDebugeePos->TabIndex = 3;
@@ -585,15 +613,16 @@ namespace BrainthreadIDE {
 			this->comboBoxDebugeeWindowPos->FormattingEnabled = true;
 			this->comboBoxDebugeeWindowPos->Items->AddRange(gcnew cli::array< System::Object^  >(4) {L"Default", L"Form center", L"Screen top left", 
 				L"Align to right edge of form"});
-			this->comboBoxDebugeeWindowPos->Location = System::Drawing::Point(163, 71);
+			this->comboBoxDebugeeWindowPos->Location = System::Drawing::Point(135, 66);
 			this->comboBoxDebugeeWindowPos->Name = L"comboBoxDebugeeWindowPos";
-			this->comboBoxDebugeeWindowPos->Size = System::Drawing::Size(197, 21);
+			this->comboBoxDebugeeWindowPos->Size = System::Drawing::Size(172, 21);
 			this->comboBoxDebugeeWindowPos->TabIndex = 0;
 			// 
 			// groupBoxDebugger
 			// 
+			this->groupBoxDebugger->Controls->Add(this->comboBoxThreadDistinction);
+			this->groupBoxDebugger->Controls->Add(this->labelThreadHighlight);
 			this->groupBoxDebugger->Controls->Add(this->labelThreadName);
-			this->groupBoxDebugger->Controls->Add(this->checkBoxDebugSelection);
 			this->groupBoxDebugger->Controls->Add(this->checkBoxThrdMemOnClick);
 			this->groupBoxDebugger->Controls->Add(this->comboBoxThreadNames);
 			this->groupBoxDebugger->Controls->Add(this->checkBoxTraceEachTread);
@@ -604,33 +633,43 @@ namespace BrainthreadIDE {
 			this->groupBoxDebugger->TabStop = false;
 			this->groupBoxDebugger->Text = L"Threading";
 			// 
+			// comboBoxThreadDistinction
+			// 
+			this->comboBoxThreadDistinction->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
+			this->comboBoxThreadDistinction->FormattingEnabled = true;
+			this->comboBoxThreadDistinction->Items->AddRange(gcnew cli::array< System::Object^  >(3) {L"Icons", L"Colors (no icons)", 
+				L"No distinction"});
+			this->comboBoxThreadDistinction->Location = System::Drawing::Point(473, 64);
+			this->comboBoxThreadDistinction->Name = L"comboBoxThreadDistinction";
+			this->comboBoxThreadDistinction->Size = System::Drawing::Size(172, 21);
+			this->comboBoxThreadDistinction->TabIndex = 10;
+			// 
+			// labelThreadHighlight
+			// 
+			this->labelThreadHighlight->AutoSize = true;
+			this->labelThreadHighlight->Location = System::Drawing::Point(345, 67);
+			this->labelThreadHighlight->Name = L"labelThreadHighlight";
+			this->labelThreadHighlight->Size = System::Drawing::Size(103, 13);
+			this->labelThreadHighlight->TabIndex = 9;
+			this->labelThreadHighlight->Text = L"Thread distinction:";
+			// 
 			// labelThreadName
 			// 
 			this->labelThreadName->AutoSize = true;
-			this->labelThreadName->Location = System::Drawing::Point(365, 35);
+			this->labelThreadName->Location = System::Drawing::Point(345, 35);
 			this->labelThreadName->Name = L"labelThreadName";
 			this->labelThreadName->Size = System::Drawing::Size(81, 13);
 			this->labelThreadName->TabIndex = 8;
 			this->labelThreadName->Text = L"Thread names:";
-			// 
-			// checkBoxDebugSelection
-			// 
-			this->checkBoxDebugSelection->AutoSize = true;
-			this->checkBoxDebugSelection->Location = System::Drawing::Point(368, 66);
-			this->checkBoxDebugSelection->Name = L"checkBoxDebugSelection";
-			this->checkBoxDebugSelection->Size = System::Drawing::Size(174, 17);
-			this->checkBoxDebugSelection->TabIndex = 7;
-			this->checkBoxDebugSelection->Text = L"Highlight current instruction";
-			this->checkBoxDebugSelection->UseVisualStyleBackColor = true;
 			// 
 			// checkBoxThrdMemOnClick
 			// 
 			this->checkBoxThrdMemOnClick->AutoSize = true;
 			this->checkBoxThrdMemOnClick->Location = System::Drawing::Point(22, 66);
 			this->checkBoxThrdMemOnClick->Name = L"checkBoxThrdMemOnClick";
-			this->checkBoxThrdMemOnClick->Size = System::Drawing::Size(210, 17);
+			this->checkBoxThrdMemOnClick->Size = System::Drawing::Size(240, 17);
 			this->checkBoxThrdMemOnClick->TabIndex = 1;
-			this->checkBoxThrdMemOnClick->Text = L"Click on thread tree to view memory";
+			this->checkBoxThrdMemOnClick->Text = L"Click on thread tree node to view memory";
 			this->checkBoxThrdMemOnClick->UseVisualStyleBackColor = true;
 			// 
 			// comboBoxThreadNames
@@ -814,6 +853,8 @@ namespace BrainthreadIDE {
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->dataGridViewInterpreter))->EndInit();
 			this->tabPageDebuggerOptions->ResumeLayout(false);
 			this->tabPageDebuggerOptions->PerformLayout();
+			this->groupBoxDebuggerStyle->ResumeLayout(false);
+			this->groupBoxDebuggerStyle->PerformLayout();
 			this->groupBoxDebuggerWndPos->ResumeLayout(false);
 			this->groupBoxDebuggerWndPos->PerformLayout();
 			this->groupBoxDebugger->ResumeLayout(false);
@@ -949,7 +990,7 @@ private: void comboBoxSyntaxHighlightStyle_SelectedIndexChanged(System::Object^ 
 
 private: void FormOptions_Shown(System::Object^  sender, System::EventArgs^  e) {
 			 
-			 GlobalOptions::Instance->PairControls(gcnew array<System::Windows::Forms::Control ^>(14) {
+			 GlobalOptions::Instance->PairControls(gcnew array<System::Windows::Forms::Control ^>(15) {
 																						editorTextBoxTest, 
 																						comboBoxSyntaxHighlightStyle, 
 																						dataGridViewInterpreter,
@@ -960,6 +1001,7 @@ private: void FormOptions_Shown(System::Object^  sender, System::EventArgs^  e) 
 																						checkBoxTraceEachTread,
 																						checkBoxThrdMemOnClick,
 																						comboBoxThreadNames,
+																						comboBoxThreadDistinction,
 																						checkBoxDebugSelection,
 																						comboBoxDebugeeWindowStyle,
 																						comboBoxDebugeeWindowPos,

@@ -2,7 +2,7 @@
 
 #include "Breakpoint.h"
 #include "Thread.h"
-#include "StackReader.h"
+#include "FunctionReader.h"
 #include "ThreadInfoReader.h"
 
 #include "btheaders/BTProcessMemoryInfo.h"
@@ -28,8 +28,8 @@ namespace BrainthreadIDE//::Debug
 		void Detach();
 		void Terminate();
 
-		void GetProcessProperties(BTProcessProperties &ppe);
-		void GetProcessProperties(BTProcessProperties &ppe, int mem_chunk_offset);
+		void FillProcessProperties(BTProcessProperties &ppe);
+		void FillProcessProperties(BTProcessProperties &ppe, int mem_chunk_offset);
 		
 		int GetProcessId();
 		int GetProcessExitCode();
@@ -63,6 +63,7 @@ namespace BrainthreadIDE//::Debug
 		ThreadInfoReader * thlreader;
 		StackReader * heapreader;
 		StackReader * shheapreader;
+		FunctionReader * funreader;
 
 	private:
 		int HandleEvent();

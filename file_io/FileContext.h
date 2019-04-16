@@ -16,9 +16,9 @@ namespace BrainthreadIDE
 		FileContext(void)
 		{
 			++fileCounter;
-			isModified = false;
+			this->isModified = false;
 
-			fileName = String::Concat(L"untitled_", (fileCounter).ToString());
+			this->fileName = String::Concat(L"untitled_", (fileCounter).ToString());
 		}
 
 		FileContext(String ^ filepath)
@@ -36,7 +36,7 @@ namespace BrainthreadIDE
 
 	    virtual property String ^ Title {
 			String ^ get() {
-				return fileName;
+				return this->fileName;
 			}
 		}
 
@@ -45,20 +45,20 @@ namespace BrainthreadIDE
 				return fileContent;
 			}
 			void set(String ^ val) {
-				isModified = (String::Compare(fileContent, val) != 0);
-				fileContent = val;
+				this->isModified = (String::Compare(this->fileContent, val) != 0);
+				this->fileContent = val;
 			}
 		}
 
 		property String ^ FilePath {
 			String ^ get() {
-				return filePath;
+				return this->filePath;
 			}
 		}	
 
 		property bool IsModified {
 			bool get() {
-				return isModified;
+				return this->isModified;
 			}
 		}
 

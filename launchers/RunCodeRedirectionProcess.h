@@ -21,10 +21,9 @@ namespace BrainthreadIDE
 			startInfo->RedirectStandardError = true;
 			startInfo->RedirectStandardInput = true;
 
-			//dont affect this process ->flag is not set
-			/*if(true == GlobalOptions::Instance->PauseProgramAfterRun) {
-				startInfo->Arguments = startInfo->Arguments + " --nopause";
-			}*/
+			if(false == this->ForcedNoPause) {
+				this->ForcedNoPause = true;
+			}	
 		}
 
 	protected:

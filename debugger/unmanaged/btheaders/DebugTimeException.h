@@ -17,9 +17,9 @@ public:
   {
 	  cnvt.str("");
 	  if(error_code == 0)
-		  cnvt << "Debugger exception: " << message;
+		  cnvt << "Debugger error: " << message;
 	  else
-		  cnvt << "Debugger exception: " << message << ". Error code: " << error_code;
+		  cnvt << "Debugger error: " << message << ". Error code: " << error_code;
 	  
     
       s = cnvt.str();
@@ -31,6 +31,14 @@ protected:
 	static std::string s;
 	int error_code;
 	const char * message;
+};
+
+class LanguageException : public DebugTimeException {
+public:
+
+  LanguageException(const char * msg, int ec = 0)
+    : DebugTimeException(msg, ec)
+    {}
 };
 
 

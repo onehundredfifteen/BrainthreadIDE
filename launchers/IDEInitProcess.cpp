@@ -24,7 +24,7 @@ namespace BrainthreadIDE
 	{
 		try
 		{
-			//BtOutputGenerator::BtOutputGenerator();
+			BtOutputGenerator::BtOutputGenerator();
 		}
 		catch(...)
 		{

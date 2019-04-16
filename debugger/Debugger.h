@@ -1,10 +1,12 @@
 #pragma once
 
-#include "MemoryCellPrinter.h"
-#include "ThreadResourceState.h"
+#include "ThreadMonitor.h"
+//#include "ThreadState.h"
+//#include "MemoryCellPrinter.h"
 #include "unmanaged/DebuggerLoop.h"
+#include "../options/Language.h"
 
-namespace BrainthreadIDE
+namespace BrainthreadIDE 
 {
 	static BTProcessProperties ProcessProperties;
 
@@ -16,7 +18,7 @@ namespace BrainthreadIDE
 	public ref class Debugger
 	{
 	public:	
-		Debugger(String ^ exe_path, String ^ args);
+		Debugger(String ^ exe_path, String ^ args, BrainthreadIDE::Language lang);
 		!Debugger();
 		~Debugger();
 
@@ -38,94 +40,83 @@ namespace BrainthreadIDE
 		void LoadThreadTree(TreeView ^ threadTreeView);
 		void LoadThreadList(ComboBox ^ threadListComboBox);
 		void LoadStatus(Label ^ label);
-		String ^ GetDebugStats();
 
-		void LoadMemoryByThread();
+		void UpdateDataFromMemory();
 		void WriteMemoryToThread(String ^ value, int address, int threadId);
 		
 		void LoadMemoryImageToView(DataGridView ^ dataGridView);
 		void LoadMemoryImageToView(DataGridView ^ dataGridView, Int16 tab_cols);
 		void LoadMemoryImageToView(DataGridView ^ dataGridView, MemoryCellPrinter ^ memPrinter);	
-
 		void LoadMemoryImageToView(DataGridView ^ dataGridView, int threadId);
 
-	property int CodePosition
-		{
+		String ^ GetDebugStats();
+		void ExceptionDumpToThreadTree(TreeView ^ threadTreeView);
+
+	property int CodePosition {
 			int get() { 
-				if(false == this->threadResource->ContainsKey(this->CurrentThreadId)) {
-					return 0;
-				}
-				
-				return this->threadResource[ this->CurrentThreadId ]->CodePosition; 
+				return this->threadMonitor->CurrentThreadState()->CodePosition; 
 			}
 		}
-	property int CodePosition[int]
-		{
+	property int CodePosition[int] {
 			int get(int index) { 
-				if(false == this->threadResource->ContainsKey(index)) {
+				if(false == this->threadMonitor->IsWatched(index)) {
 					return 0;
 				}
 				
-				return this->threadResource[ index ]->CodePosition; 
+				return this->threadMonitor->GetThreadState(index)->CodePosition; 
 			}
 		}
-	property int MemoryPosition
-		{
+	property int MemoryPosition {
 			int get() { 
-				if(false == this->threadResource->ContainsKey(this->CurrentThreadId)) {
-					return 0;
-				}
-				
-				return this->threadResource[ this->CurrentThreadId ]->MemoryPosition; 
+				return this->threadMonitor->CurrentThreadState()->MemoryPosition; 
 			}
 		}
-	property int MemoryPosition[int]
-		{
+	property int MemoryPosition[int] {
 			int get(int index) { 
-				if(false == this->threadResource->ContainsKey(index)) {
+				if(false == this->threadMonitor->IsWatched(index)) {
 					return 0;
 				}
 				
-				return this->threadResource[ index ]->MemoryPosition; 
+				return this->threadMonitor->GetThreadState(index)->MemoryPosition; 
 			}
 		}
 	property int MemoryLNZPos[int]
 		{
 			int get(int index) { 
-				if(false == this->threadResource->ContainsKey(index)) {
+				if(false == this->threadMonitor->IsWatched(index)) {
 					return 0;
 				}
 				
-				return this->threadResource[ index ]->MemoryLNZPos; 
+				return this->threadMonitor->GetThreadState(index)->MemoryLNZPos;
 			}
 		}
 	property bool ThreadTracing[int]
 		{
 			bool get(int index) { 
-				return this->threadResource->ContainsKey(index) && this->threadResource[ index ]->Trace; 
+				return this->threadMonitor->IsWatched(index) && this->threadMonitor->GetThreadState(index)->Trace; 
 			}
 
-			void set(int index, bool value) { 
-				this->threadResource[ index ]->Trace = value; 
-				this->updateTracing();
+			void set(int index, bool value) {
+				ThreadState ^ state = this->threadMonitor->GetThreadState(index);
+
+				if(state) {
+					state->Trace = value; 
+					this->updateThreadTracing();
+				}
 			}
 		}
 
-	property int CurrentThreadId
-		{
-			int get() { return this->getCurrentThreadId(); }
+	property int CurrentThreadId {
+			int get() { return this->threadMonitor->CurrentThreadId; }
 		}
-    property int DebugeeProcessId
-		{
+    property int DebugeeProcessId {
 			int get() { return this->debuggerLoop ? this->debuggerLoop->GetProcessId() : -1; }
 		}
-	property int DebugeeExitCode
-		{
+	property int DebugeeExitCode {
 			int get() { return this->debuggerLoop ? this->debuggerLoop->GetProcessExitCode() : -1; }
 		}
 
-	property int MemoryForImage
-		{
+	property int MemoryForImage {
 			int get() { return memoryForImage; }
 			void set(int value) 
 			{ 
@@ -139,30 +130,29 @@ namespace BrainthreadIDE
 	private:
 		DebuggerLoop * debuggerLoop;
 		MemoryCellPrinter ^ memPrinter;
+		ThreadMonitor ^ threadMonitor;
 
-		Dictionary<int, ThreadResourceState ^> ^ threadResource;
+		BrainthreadIDE::Language language;
 
 		int memoryForImage;
 		int memoryTableCols;
 	
-	private: 
-		TreeNode ^ getThreadInfoTreeNode();
-		TreeNode ^ getDetachedThreadInfoTreeNode(int threadId, String ^ format);
-		TreeNode ^ getStackInfoTreeNode(BTProcessStackInfo &si);
-	
+	private:
 		array<int> ^ getMemoryImage(int last_cell_to_load);
-
 		void customizeView(DataGridView ^ dataGridView);
-		void updateTracing();
-		bool compareValues(int a, int b, CompareType compare);
-		String ^ getThreadName(int threadId);
-
 		int getMemoryLen();
-		int getCurrentThreadId(); 
+
+		void updateThreadTracing();
+		void updateIdleThreadsProgress();
+
+		bool compareValues(int a, int b, CompareType compare);
 
 	public: static String ^ DebuggerVersion()
 		{
-			return "0.2e";
+			return "0.4";
 		}
+
+	/*private: 
+		literal String ^ cThreadInfoNodeKey = "thread_info_node";*/
 	};
 }

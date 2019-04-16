@@ -10,8 +10,8 @@ namespace BrainthreadIDE
 
         for each(char c in str) 
 		{
-            String ^ a = G[lastc, c];
-            String ^ b = G[0, c];
+            String ^ a = Template[lastc, c];
+            String ^ b = Template[0, c];
             if (a->Length <= b->Length) {
                 sb->Append(a);
             } else {
@@ -27,19 +27,19 @@ namespace BrainthreadIDE
 
 	void BtOutputGenerator::Init()
 	{
-		// initial state for G[x][y]: go from x to y using +s or -s.                                
-        for (int x = 0; x < 256; x++) 
+		// initial state for Template[x][y]: go from x to y using +s or -s.                                
+        for (int x = 0; x < tp_len; x++) 
 		{
-            for (int y = 0; y < 256; y++) 
+            for (int y = 0; y < tp_len; y++) 
 			{
                 int delta = y - x;
-                if (delta > 128) delta -= 256;
-                if (delta < -128) delta += 256;
+                if (delta > 128) delta -= tp_len;
+                if (delta < -128) delta += tp_len;
 
                 if (delta >= 0) {
-                    G[x,y] = gcnew String('+', delta);
+                    Template[x,y] = gcnew String('+', delta);
                 } else {
-                    G[x,y] = gcnew String('-', -delta);
+                    Template[x,y] = gcnew String('-', -delta);
                 }
             }
         }
@@ -50,35 +50,35 @@ namespace BrainthreadIDE
             iter = false;
 
             // multiplication by n/d                                                                
-            for (int x = 0; x < 256; x++) {
+            for (int x = 0; x < tp_len; x++) {
                 for (int n = 1; n < 40; n++) {
                     for (int d = 1; d < 40; d++) {
                         int j = x;
                         int y = 0;
-                        for (int i = 0; i < 256; i++) {
+                        for (int i = 0; i < tp_len; i++) {
                             if (j == 0) break;
-                            j = (j - d + 256) & 255;
+                            j = (j - d + tp_len) & 255;
                             y = (y + n) & 255;
                         }
                         if (j == 0) {
                             String ^ s = "[" + gcnew String('-', d) + ">" + gcnew String('+', n) + "<]>";
-                            if (s->Length < G[x, y]->Length) {
-                                G[x, y] = s;
+                            if (s->Length < Template[x, y]->Length) {
+                                Template[x, y] = s;
                                 iter = true;
                             }
                         }
 
                         j = x;
                         y = 0;
-                        for (int i = 0; i < 256; i++) {
+                        for (int i = 0; i < tp_len; i++) {
                             if (j == 0) break;
                             j = (j + d) & 255;
-                            y = (y - n + 256) & 255;
+                            y = (y - n + tp_len) & 255;
                         }
                         if (j == 0) {
                             String ^ s = "[" + gcnew String('+', d) + ">" + gcnew String('-', n) + "<]>";
-                            if (s->Length < G[x,y]->Length) {
-                                G[x,y] = s;
+                            if (s->Length < Template[x,y]->Length) {
+                                Template[x,y] = s;
                                 iter = true;
                             }
                         }
@@ -87,17 +87,42 @@ namespace BrainthreadIDE
             }
 
             // combine number schemes                                                               
-            for (int x = 0; x < 256; x++) {
-                for (int y = 0; y < 256; y++) {
-                    for (int z = 0; z < 256; z++) {
-                        if (G[x,z]->Length + G[z,y]->Length < G[x,y]->Length) {
-                            G[x,y] = G[x,z] + G[z,y];
+            for (int x = 0; x < tp_len; x++) {
+                for (int y = 0; y < tp_len; y++) {
+                    for (int z = 0; z < tp_len; z++) {
+                        if (Template[x,z]->Length + Template[z,y]->Length < Template[x,y]->Length) {
+                            Template[x,y] = Template[x,z] + Template[z,y];
                             iter = true;
                         }
                     }
                 }
             }
 		}
+	}
+
+	void BtOutputGenerator::InitFromMemory(FileContext ^ memFile)
+	{
+		array<Char>^ sep_1 = gcnew array<Char>{'\n'};
+		//array<Char>^ sep_2 = gcnew array<Char>{'\t'};
+		array<String ^> ^ conctenatedArr = memFile->Content->Split( sep_1, tp_len * tp_len, StringSplitOptions::None );
+
+		for (int x = 0; x < tp_len; x++) {
+			for (int y = 0; y < tp_len; y++)
+				Template[x,y] = conctenatedArr[x * tp_len + y];
+		}
+	}
+
+	void BtOutputGenerator::SaveToMemory(FileContext ^ memFile)
+	{
+		StringBuilder ^ sb = gcnew StringBuilder();
+
+		for (int x = 0; x < tp_len; x++) {
+			for (int y = 0; y < tp_len; y++)
+				sb->Append(Template[x,y] + "\n");
+		}
+
+		memFile->Content = sb->ToString();
+		memFile->Save();
 	}
 
 	

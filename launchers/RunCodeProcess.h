@@ -45,11 +45,10 @@ namespace BrainthreadIDE
 													 processWorkContext->settings->GetRunString());
 				}
 
-				//pause only when option is set and is not a redirection
-				if(false == GlobalOptions::Instance->PauseProgramAfterRun 
-					&& false == this->ProcessWorkContext->settings->GetRedirectionOption())
+				//PAUSE only when option is set and is not a redirection
+				if(true == GlobalOptions::Instance->PauseProgramAfterRun)
 				{
-					startInfo->Arguments = startInfo->Arguments + " --nopause";
+					this->ForcedNoPause = false;
 				}	
 			}
 
@@ -84,9 +83,28 @@ namespace BrainthreadIDE
 		void worker_DoWork(System::Object^ sender, System::ComponentModel::DoWorkEventArgs^ e);
 		void worker_RunWorkerCompleted(System::Object^ sender, System::ComponentModel::RunWorkerCompletedEventArgs^ e);
 
-	//protected:	
-		//default log name
-		//literal String ^ cLogFileName = "btrun.log";
+	protected:
+		property bool ForcedNoPause
+		{
+			bool get()
+			{
+				return (this->startInfo && this->startInfo->Arguments->IndexOf(cNoPauseArg) > 0); //anyway cannot be first arg
+			}
+			void set(bool val)
+			{
+				if(nullptr == this->startInfo)
+					throw gcnew Exception("Cannot force to pause a not working process"); 
+				else if(true == GlobalOptions::Instance->CustomInterpreterFlag[ this->processWorkContext->settings->GetLanguage() ] )
+					return; //not suport to custom interreters 	
+				else if(true == val && false == this->ForcedNoPause)
+					this->startInfo->Arguments = String::Concat( this->startInfo->Arguments->Trim(), " ", cNoPauseArg );
+				else if(false == val && true == this->ForcedNoPause)
+					this->startInfo->Arguments = startInfo->Arguments->Replace("--nopause", String::Empty);	
+			}
+		}
+
+	private:	
+		literal String ^ cNoPauseArg = "--nopause";
 		
 	};
 }

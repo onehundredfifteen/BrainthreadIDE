@@ -15,11 +15,10 @@ namespace BrainthreadIDE
 			BrainthreadIDE::Language curLang = processWorkContext->settings->GetLanguage();
 			this->mainWindowLocation = mainwindow_location;
 
-			//if forced to stop after run, remove that flag
-			if(GlobalOptions::Instance->CustomInterpreterFlag[ curLang ] &&
-				true == GlobalOptions::Instance->PauseProgramAfterRun)
+			if(false == this->ForcedNoPause)
 			{
-				startInfo->Arguments = startInfo->Arguments->Replace("--nopause", String::Empty);
+				//startInfo->Arguments = startInfo->Arguments->Replace("--nopause", String::Empty);
+				this->ForcedNoPause = true;
 			}	
 		}
 		

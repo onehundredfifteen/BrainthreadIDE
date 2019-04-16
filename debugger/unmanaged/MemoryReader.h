@@ -38,7 +38,7 @@ class MemoryReader
 		HANDLE hProcess;
 
 	protected:
-		void alloc(int new_memory_len)
+		void alloc(unsigned int new_memory_len)
 		{	  
 			if(this->memory_len != new_memory_len)
 			{

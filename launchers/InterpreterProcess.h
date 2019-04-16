@@ -23,8 +23,8 @@ namespace BrainthreadIDE
 		virtual String ^ GetStatusLabel() = 0;
 
 	protected:
+		virtual void ResolvePragmas();
 		String ^ GetCodeLocationArgument();
-		void ResolvePragmas();
 		void MoveProcessWindow();
 
 	protected:
@@ -35,12 +35,12 @@ namespace BrainthreadIDE
 	private:
 		bool runSelection;
 
-	private:
+	protected:
 		property String ^ Source
 		{
 			String ^ get()
 			{
-				if(runSelection == false)
+				if(false == runSelection)
 					return processWorkContext->editorTextBox->richTextBox->Text;
 				else
 					return processWorkContext->editorTextBox->richTextBox->SelectedText;

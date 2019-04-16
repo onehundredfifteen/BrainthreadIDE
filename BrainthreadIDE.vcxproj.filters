@@ -90,6 +90,12 @@
     <ClCompile Include="launchers\IDEInitProcess.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="debugger\ThreadState.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debugger\ThreadMonitor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -209,9 +215,6 @@
     <ClInclude Include="debugger\MemoryCellPrinter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="debugger\ThreadResourceState.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="debugger\TreeViewExpander.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -291,6 +294,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WorkContext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="debugger\unmanaged\FunctionReader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="debugger\ThreadMonitor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="debugger\ThreadState.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="file_io\ProtectedFileContext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

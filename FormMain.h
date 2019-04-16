@@ -344,6 +344,10 @@ private: System::Windows::Forms::ToolStripButton^  toolBarButtonFindPair;
 private: System::Windows::Forms::ToolStripSeparator^  toolStripSeparator9;
 private: System::Windows::Forms::ToolStripSeparator^  toolStripSeparator10;
 private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
+private: System::Windows::Forms::ImageList^  imageListThreadTree;
+private: System::Windows::Forms::ToolStripMenuItem^  contextMenuButtonFindParent;
+private: System::Windows::Forms::ToolStripMenuItem^  editorFindPairedInstructionMenuItem;
+
 
 
 		private: System::Windows::Forms::ToolStripMenuItem^  contextMenuButtonColumnNumber;
@@ -495,10 +499,12 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			this->treeViewDebugThreadList = (gcnew System::Windows::Forms::TreeView());
 			this->threadContextMenu = (gcnew System::Windows::Forms::ContextMenuStrip(this->components));
 			this->contextMenuButtonTrackThread = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->contextMenuButtonFindParent = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->toolStripSeparator7 = (gcnew System::Windows::Forms::ToolStripSeparator());
 			this->contextMenuButtonExpandAll = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->contextMenuButtonCollapseAll = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->contextMenuButtonCollapseTree = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->imageListThreadTree = (gcnew System::Windows::Forms::ImageList(this->components));
 			this->comboBoxThreadMemSelect = (gcnew System::Windows::Forms::ComboBox());
 			this->dataGridViewDebugMemory = (gcnew System::Windows::Forms::DataGridView());
 			this->debugMemViewContextMenu = (gcnew System::Windows::Forms::ContextMenuStrip(this->components));
@@ -507,6 +513,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			this->toolStripSeparator6 = (gcnew System::Windows::Forms::ToolStripSeparator());
 			this->contextMenuButtonMemoryRepresentation = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->contextMenuButtonColumnNumber = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->editorFindPairedInstructionMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->editorContextMenu->SuspendLayout();
 			this->statusBar->SuspendLayout();
 			this->mainMenu->SuspendLayout();
@@ -551,13 +558,12 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			// 
 			// editorContextMenu
 			// 
-			this->editorContextMenu->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(12) {this->editorUndoMenuItem, 
+			this->editorContextMenu->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(13) {this->editorUndoMenuItem, 
 				this->editorRedoMenuItem, this->toolStripMenuItem1, this->editorCutMenuItem, this->editorCopyMenuItem, this->editorPasteMenuItem, 
 				this->toolStripMenuItem2, this->editorSelectallMenuItem, this->toolStripMenuItem3, this->editorInsertMenuItem, this->editorRestoreMenuItem, 
-				this->editorResolveMenuItem});
+				this->editorResolveMenuItem, this->editorFindPairedInstructionMenuItem});
 			this->editorContextMenu->Name = L"editorContextMenu";
-			this->editorContextMenu->OwnerItem = this->editMainMenuItem;
-			this->editorContextMenu->Size = System::Drawing::Size(182, 220);
+			this->editorContextMenu->Size = System::Drawing::Size(194, 242);
 			// 
 			// editorUndoMenuItem
 			// 
@@ -565,7 +571,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			this->editorUndoMenuItem->ForeColor = System::Drawing::SystemColors::ControlText;
 			this->editorUndoMenuItem->Name = L"editorUndoMenuItem";
 			this->editorUndoMenuItem->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::Z));
-			this->editorUndoMenuItem->Size = System::Drawing::Size(181, 22);
+			this->editorUndoMenuItem->Size = System::Drawing::Size(193, 22);
 			this->editorUndoMenuItem->Text = L"Undo";
 			this->editorUndoMenuItem->Click += gcnew System::EventHandler(this, &FormMain::editorRichTextBox_Undo);
 			// 
@@ -574,20 +580,20 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			this->editorRedoMenuItem->Enabled = false;
 			this->editorRedoMenuItem->Name = L"editorRedoMenuItem";
 			this->editorRedoMenuItem->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::Y));
-			this->editorRedoMenuItem->Size = System::Drawing::Size(181, 22);
+			this->editorRedoMenuItem->Size = System::Drawing::Size(193, 22);
 			this->editorRedoMenuItem->Text = L"Redo";
 			this->editorRedoMenuItem->Click += gcnew System::EventHandler(this, &FormMain::editorRichTextBox_Redo);
 			// 
 			// toolStripMenuItem1
 			// 
 			this->toolStripMenuItem1->Name = L"toolStripMenuItem1";
-			this->toolStripMenuItem1->Size = System::Drawing::Size(178, 6);
+			this->toolStripMenuItem1->Size = System::Drawing::Size(190, 6);
 			// 
 			// editorCutMenuItem
 			// 
 			this->editorCutMenuItem->Name = L"editorCutMenuItem";
 			this->editorCutMenuItem->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::X));
-			this->editorCutMenuItem->Size = System::Drawing::Size(181, 22);
+			this->editorCutMenuItem->Size = System::Drawing::Size(193, 22);
 			this->editorCutMenuItem->Text = L"Cut";
 			this->editorCutMenuItem->Click += gcnew System::EventHandler(this, &FormMain::editorRichTextBox_Cut);
 			// 
@@ -595,7 +601,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			// 
 			this->editorCopyMenuItem->Name = L"editorCopyMenuItem";
 			this->editorCopyMenuItem->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::C));
-			this->editorCopyMenuItem->Size = System::Drawing::Size(181, 22);
+			this->editorCopyMenuItem->Size = System::Drawing::Size(193, 22);
 			this->editorCopyMenuItem->Text = L"Copy";
 			this->editorCopyMenuItem->Click += gcnew System::EventHandler(this, &FormMain::editorRichTextBox_Copy);
 			// 
@@ -603,34 +609,34 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			// 
 			this->editorPasteMenuItem->Name = L"editorPasteMenuItem";
 			this->editorPasteMenuItem->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::V));
-			this->editorPasteMenuItem->Size = System::Drawing::Size(181, 22);
+			this->editorPasteMenuItem->Size = System::Drawing::Size(193, 22);
 			this->editorPasteMenuItem->Text = L"Paste";
 			this->editorPasteMenuItem->Click += gcnew System::EventHandler(this, &FormMain::editorRichTextBox_Paste);
 			// 
 			// toolStripMenuItem2
 			// 
 			this->toolStripMenuItem2->Name = L"toolStripMenuItem2";
-			this->toolStripMenuItem2->Size = System::Drawing::Size(178, 6);
+			this->toolStripMenuItem2->Size = System::Drawing::Size(190, 6);
 			// 
 			// editorSelectallMenuItem
 			// 
 			this->editorSelectallMenuItem->Name = L"editorSelectallMenuItem";
 			this->editorSelectallMenuItem->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::A));
-			this->editorSelectallMenuItem->Size = System::Drawing::Size(181, 22);
+			this->editorSelectallMenuItem->Size = System::Drawing::Size(193, 22);
 			this->editorSelectallMenuItem->Text = L"Select all";
 			this->editorSelectallMenuItem->Click += gcnew System::EventHandler(this, &FormMain::editorRichTextBox_SelectAll);
 			// 
 			// toolStripMenuItem3
 			// 
 			this->toolStripMenuItem3->Name = L"toolStripMenuItem3";
-			this->toolStripMenuItem3->Size = System::Drawing::Size(178, 6);
+			this->toolStripMenuItem3->Size = System::Drawing::Size(190, 6);
 			// 
 			// editorInsertMenuItem
 			// 
 			this->editorInsertMenuItem->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(4) {this->editorInsertConstantMenuItem, 
 				this->editorInsertStringMenuItem, this->toolStripSeparator8, this->editorInsertPluginMenuItem});
 			this->editorInsertMenuItem->Name = L"editorInsertMenuItem";
-			this->editorInsertMenuItem->Size = System::Drawing::Size(181, 22);
+			this->editorInsertMenuItem->Size = System::Drawing::Size(193, 22);
 			this->editorInsertMenuItem->Text = L"Insert";
 			// 
 			// editorInsertConstantMenuItem
@@ -663,14 +669,14 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			// 
 			this->editorRestoreMenuItem->Enabled = false;
 			this->editorRestoreMenuItem->Name = L"editorRestoreMenuItem";
-			this->editorRestoreMenuItem->Size = System::Drawing::Size(181, 22);
+			this->editorRestoreMenuItem->Size = System::Drawing::Size(193, 22);
 			this->editorRestoreMenuItem->Text = L"Rollback all changes";
 			this->editorRestoreMenuItem->Click += gcnew System::EventHandler(this, &FormMain::editorRestoreMenuItem_Click);
 			// 
 			// editorResolveMenuItem
 			// 
 			this->editorResolveMenuItem->Name = L"editorResolveMenuItem";
-			this->editorResolveMenuItem->Size = System::Drawing::Size(181, 22);
+			this->editorResolveMenuItem->Size = System::Drawing::Size(193, 22);
 			this->editorResolveMenuItem->Text = L"Resolve pragmas";
 			this->editorResolveMenuItem->Click += gcnew System::EventHandler(this, &FormMain::editorResolveMenuItem_Click);
 			// 
@@ -994,6 +1000,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			// 
 			// toolBar
 			// 
+			this->toolBar->ImageScalingSize = System::Drawing::Size(24, 24);
 			this->toolBar->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(20) {this->toolBarButtonNew, this->toolBarButtonOpen, 
 				this->toolBarButtonSave, this->toolBarButtonSaveAll, this->toolBarButtonSaveAsProject, this->toolStripSeparator1, this->toolBarButtonCut, 
 				this->toolBarButtonCopy, this->toolBarButtonPaste, this->toolStripSeparator2, this->toolBarButtonUndo, this->toolBarButtonRedo, 
@@ -1002,9 +1009,9 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			this->toolBar->LayoutStyle = System::Windows::Forms::ToolStripLayoutStyle::HorizontalStackWithOverflow;
 			this->toolBar->Location = System::Drawing::Point(0, 24);
 			this->toolBar->Name = L"toolBar";
-			this->toolBar->Size = System::Drawing::Size(1110, 25);
+			this->toolBar->Size = System::Drawing::Size(1110, 39);
 			this->toolBar->TabIndex = 6;
-			this->toolBar->Text = L"toolStrip1";
+			this->toolBar->Text = L"Select something";
 			// 
 			// toolBarButtonNew
 			// 
@@ -1012,7 +1019,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			this->toolBarButtonNew->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"toolBarButtonNew.Image")));
 			this->toolBarButtonNew->ImageTransparentColor = System::Drawing::Color::Magenta;
 			this->toolBarButtonNew->Name = L"toolBarButtonNew";
-			this->toolBarButtonNew->Size = System::Drawing::Size(23, 22);
+			this->toolBarButtonNew->Size = System::Drawing::Size(36, 36);
 			this->toolBarButtonNew->Text = L"Create a new file";
 			this->toolBarButtonNew->Click += gcnew System::EventHandler(this, &FormMain::newfileMainMenuItem_Click);
 			// 
@@ -1022,7 +1029,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			this->toolBarButtonOpen->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"toolBarButtonOpen.Image")));
 			this->toolBarButtonOpen->ImageTransparentColor = System::Drawing::Color::Magenta;
 			this->toolBarButtonOpen->Name = L"toolBarButtonOpen";
-			this->toolBarButtonOpen->Size = System::Drawing::Size(23, 22);
+			this->toolBarButtonOpen->Size = System::Drawing::Size(33, 22);
 			this->toolBarButtonOpen->Text = L"Open existing file";
 			this->toolBarButtonOpen->Click += gcnew System::EventHandler(this, &FormMain::openfileMainMenuItem_Click);
 			// 
@@ -1032,7 +1039,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			this->toolBarButtonSave->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"toolBarButtonSave.Image")));
 			this->toolBarButtonSave->ImageTransparentColor = System::Drawing::Color::Magenta;
 			this->toolBarButtonSave->Name = L"toolBarButtonSave";
-			this->toolBarButtonSave->Size = System::Drawing::Size(23, 22);
+			this->toolBarButtonSave->Size = System::Drawing::Size(33, 22);
 			this->toolBarButtonSave->Text = L"Save current file";
 			this->toolBarButtonSave->Click += gcnew System::EventHandler(this, &FormMain::savefileMainMenuItem_Click);
 			// 
@@ -1042,7 +1049,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			this->toolBarButtonSaveAll->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"toolBarButtonSaveAll.Image")));
 			this->toolBarButtonSaveAll->ImageTransparentColor = System::Drawing::Color::Magenta;
 			this->toolBarButtonSaveAll->Name = L"toolBarButtonSaveAll";
-			this->toolBarButtonSaveAll->Size = System::Drawing::Size(23, 22);
+			this->toolBarButtonSaveAll->Size = System::Drawing::Size(33, 22);
 			this->toolBarButtonSaveAll->Text = L"Save all";
 			this->toolBarButtonSaveAll->Click += gcnew System::EventHandler(this, &FormMain::saveAllMainMenuItem_Click);
 			// 
@@ -1052,7 +1059,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			this->toolBarButtonSaveAsProject->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"toolBarButtonSaveAsProject.Image")));
 			this->toolBarButtonSaveAsProject->ImageTransparentColor = System::Drawing::Color::Magenta;
 			this->toolBarButtonSaveAsProject->Name = L"toolBarButtonSaveAsProject";
-			this->toolBarButtonSaveAsProject->Size = System::Drawing::Size(23, 22);
+			this->toolBarButtonSaveAsProject->Size = System::Drawing::Size(33, 22);
 			this->toolBarButtonSaveAsProject->Text = L"Save as project";
 			this->toolBarButtonSaveAsProject->Click += gcnew System::EventHandler(this, &FormMain::saveAsProjectMainMenuItem_Click);
 			// 
@@ -1067,7 +1074,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			this->toolBarButtonCut->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"toolBarButtonCut.Image")));
 			this->toolBarButtonCut->ImageTransparentColor = System::Drawing::Color::Magenta;
 			this->toolBarButtonCut->Name = L"toolBarButtonCut";
-			this->toolBarButtonCut->Size = System::Drawing::Size(23, 22);
+			this->toolBarButtonCut->Size = System::Drawing::Size(33, 22);
 			this->toolBarButtonCut->Text = L"Cut";
 			this->toolBarButtonCut->Click += gcnew System::EventHandler(this, &FormMain::editorRichTextBox_Cut);
 			// 
@@ -1077,7 +1084,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			this->toolBarButtonCopy->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"toolBarButtonCopy.Image")));
 			this->toolBarButtonCopy->ImageTransparentColor = System::Drawing::Color::Magenta;
 			this->toolBarButtonCopy->Name = L"toolBarButtonCopy";
-			this->toolBarButtonCopy->Size = System::Drawing::Size(23, 22);
+			this->toolBarButtonCopy->Size = System::Drawing::Size(33, 22);
 			this->toolBarButtonCopy->Text = L"Copy";
 			this->toolBarButtonCopy->Click += gcnew System::EventHandler(this, &FormMain::editorRichTextBox_Copy);
 			// 
@@ -1087,7 +1094,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			this->toolBarButtonPaste->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"toolBarButtonPaste.Image")));
 			this->toolBarButtonPaste->ImageTransparentColor = System::Drawing::Color::Magenta;
 			this->toolBarButtonPaste->Name = L"toolBarButtonPaste";
-			this->toolBarButtonPaste->Size = System::Drawing::Size(23, 22);
+			this->toolBarButtonPaste->Size = System::Drawing::Size(33, 22);
 			this->toolBarButtonPaste->Text = L"Paste";
 			this->toolBarButtonPaste->Click += gcnew System::EventHandler(this, &FormMain::editorRichTextBox_Paste);
 			// 
@@ -1102,7 +1109,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			this->toolBarButtonUndo->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"toolBarButtonUndo.Image")));
 			this->toolBarButtonUndo->ImageTransparentColor = System::Drawing::Color::Magenta;
 			this->toolBarButtonUndo->Name = L"toolBarButtonUndo";
-			this->toolBarButtonUndo->Size = System::Drawing::Size(23, 22);
+			this->toolBarButtonUndo->Size = System::Drawing::Size(33, 22);
 			this->toolBarButtonUndo->Text = L"Undo";
 			this->toolBarButtonUndo->Click += gcnew System::EventHandler(this, &FormMain::editorRichTextBox_Undo);
 			// 
@@ -1112,7 +1119,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			this->toolBarButtonRedo->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"toolBarButtonRedo.Image")));
 			this->toolBarButtonRedo->ImageTransparentColor = System::Drawing::Color::Magenta;
 			this->toolBarButtonRedo->Name = L"toolBarButtonRedo";
-			this->toolBarButtonRedo->Size = System::Drawing::Size(23, 22);
+			this->toolBarButtonRedo->Size = System::Drawing::Size(33, 22);
 			this->toolBarButtonRedo->Text = L"Redo";
 			this->toolBarButtonRedo->Click += gcnew System::EventHandler(this, &FormMain::editorRichTextBox_Redo);
 			// 
@@ -1127,7 +1134,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			this->toolBarButtonResolve->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"toolBarButtonResolve.Image")));
 			this->toolBarButtonResolve->ImageTransparentColor = System::Drawing::Color::Magenta;
 			this->toolBarButtonResolve->Name = L"toolBarButtonResolve";
-			this->toolBarButtonResolve->Size = System::Drawing::Size(23, 22);
+			this->toolBarButtonResolve->Size = System::Drawing::Size(33, 22);
 			this->toolBarButtonResolve->Text = L"Resolve";
 			this->toolBarButtonResolve->ToolTipText = L"Resolve all pragmas in code";
 			this->toolBarButtonResolve->Click += gcnew System::EventHandler(this, &FormMain::editorResolveMenuItem_Click);
@@ -1138,7 +1145,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			this->toolBarButtonFindPair->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"toolBarButtonFindPair.Image")));
 			this->toolBarButtonFindPair->ImageTransparentColor = System::Drawing::Color::Magenta;
 			this->toolBarButtonFindPair->Name = L"toolBarButtonFindPair";
-			this->toolBarButtonFindPair->Size = System::Drawing::Size(23, 22);
+			this->toolBarButtonFindPair->Size = System::Drawing::Size(33, 22);
 			this->toolBarButtonFindPair->Text = L"Pair";
 			this->toolBarButtonFindPair->ToolTipText = L"Find paired instruction";
 			this->toolBarButtonFindPair->Click += gcnew System::EventHandler(this, &FormMain::toolBarButtonFindPair_Click);
@@ -1154,7 +1161,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			this->toolBarButtonRunCode->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"toolBarButtonRunCode.Image")));
 			this->toolBarButtonRunCode->ImageTransparentColor = System::Drawing::Color::Magenta;
 			this->toolBarButtonRunCode->Name = L"toolBarButtonRunCode";
-			this->toolBarButtonRunCode->Size = System::Drawing::Size(23, 22);
+			this->toolBarButtonRunCode->Size = System::Drawing::Size(33, 22);
 			this->toolBarButtonRunCode->Text = L"Run code";
 			this->toolBarButtonRunCode->Click += gcnew System::EventHandler(this, &FormMain::runMainMenuItem_Click);
 			// 
@@ -1164,7 +1171,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			this->toolBarButtonDebugStep->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"toolBarButtonDebugStep.Image")));
 			this->toolBarButtonDebugStep->ImageTransparentColor = System::Drawing::Color::Magenta;
 			this->toolBarButtonDebugStep->Name = L"toolBarButtonDebugStep";
-			this->toolBarButtonDebugStep->Size = System::Drawing::Size(23, 22);
+			this->toolBarButtonDebugStep->Size = System::Drawing::Size(33, 22);
 			this->toolBarButtonDebugStep->Text = L"Run code";
 			this->toolBarButtonDebugStep->ToolTipText = L"Step one instruction";
 			this->toolBarButtonDebugStep->Click += gcnew System::EventHandler(this, &FormMain::buttonDebugStep_Click);
@@ -1175,7 +1182,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			this->toolBarButtonStepOver->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"toolBarButtonStepOver.Image")));
 			this->toolBarButtonStepOver->ImageTransparentColor = System::Drawing::Color::Magenta;
 			this->toolBarButtonStepOver->Name = L"toolBarButtonStepOver";
-			this->toolBarButtonStepOver->Size = System::Drawing::Size(23, 22);
+			this->toolBarButtonStepOver->Size = System::Drawing::Size(33, 22);
 			this->toolBarButtonStepOver->Text = L"Step over instruction";
 			this->toolBarButtonStepOver->ToolTipText = L"Step over instruction";
 			this->toolBarButtonStepOver->Click += gcnew System::EventHandler(this, &FormMain::buttonDebugStepOver_Click);
@@ -1186,14 +1193,14 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			this->toolBarButtonRunToCursor->Image = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"toolBarButtonRunToCursor.Image")));
 			this->toolBarButtonRunToCursor->ImageTransparentColor = System::Drawing::Color::Magenta;
 			this->toolBarButtonRunToCursor->Name = L"toolBarButtonRunToCursor";
-			this->toolBarButtonRunToCursor->Size = System::Drawing::Size(23, 22);
+			this->toolBarButtonRunToCursor->Size = System::Drawing::Size(33, 22);
 			this->toolBarButtonRunToCursor->ToolTipText = L"Run to instruction at cursor";
 			this->toolBarButtonRunToCursor->Click += gcnew System::EventHandler(this, &FormMain::buttonDebugRunToCursor_Click);
 			// 
 			// splitContainerMain
 			// 
 			this->splitContainerMain->Dock = System::Windows::Forms::DockStyle::Fill;
-			this->splitContainerMain->Location = System::Drawing::Point(0, 49);
+			this->splitContainerMain->Location = System::Drawing::Point(0, 63);
 			this->splitContainerMain->Name = L"splitContainerMain";
 			// 
 			// splitContainerMain.Panel1
@@ -1204,7 +1211,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			// 
 			this->splitContainerMain->Panel2->Controls->Add(this->tabControlRight);
 			this->splitContainerMain->Panel2MinSize = 335;
-			this->splitContainerMain->Size = System::Drawing::Size(1110, 707);
+			this->splitContainerMain->Size = System::Drawing::Size(1110, 693);
 			this->splitContainerMain->SplitterDistance = 730;
 			this->splitContainerMain->TabIndex = 7;
 			// 
@@ -1222,8 +1229,8 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			// splitContainerEditor.Panel2
 			// 
 			this->splitContainerEditor->Panel2->Controls->Add(this->tabControlOutput);
-			this->splitContainerEditor->Size = System::Drawing::Size(730, 707);
-			this->splitContainerEditor->SplitterDistance = 514;
+			this->splitContainerEditor->Size = System::Drawing::Size(730, 693);
+			this->splitContainerEditor->SplitterDistance = 503;
 			this->splitContainerEditor->TabIndex = 0;
 			// 
 			// tabControlPages
@@ -1234,7 +1241,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			this->tabControlPages->Location = System::Drawing::Point(0, 0);
 			this->tabControlPages->Name = L"tabControlPages";
 			this->tabControlPages->SelectedIndex = 0;
-			this->tabControlPages->Size = System::Drawing::Size(730, 514);
+			this->tabControlPages->Size = System::Drawing::Size(730, 503);
 			this->tabControlPages->TabIndex = 4;
 			this->tabControlPages->Selected += gcnew System::Windows::Forms::TabControlEventHandler(this, &FormMain::tabControlPages_Selected);
 			this->tabControlPages->Deselected += gcnew System::Windows::Forms::TabControlEventHandler(this, &FormMain::tabControlPages_Deselected);
@@ -1285,7 +1292,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			this->tabControlOutput->Location = System::Drawing::Point(0, 0);
 			this->tabControlOutput->Name = L"tabControlOutput";
 			this->tabControlOutput->SelectedIndex = 0;
-			this->tabControlOutput->Size = System::Drawing::Size(730, 189);
+			this->tabControlOutput->Size = System::Drawing::Size(730, 186);
 			this->tabControlOutput->TabIndex = 0;
 			// 
 			// tabPageErrorList
@@ -1294,7 +1301,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			this->tabPageErrorList->Location = System::Drawing::Point(4, 4);
 			this->tabPageErrorList->Name = L"tabPageErrorList";
 			this->tabPageErrorList->Padding = System::Windows::Forms::Padding(3);
-			this->tabPageErrorList->Size = System::Drawing::Size(722, 163);
+			this->tabPageErrorList->Size = System::Drawing::Size(722, 160);
 			this->tabPageErrorList->TabIndex = 0;
 			this->tabPageErrorList->Text = L"Error List";
 			this->tabPageErrorList->UseVisualStyleBackColor = true;
@@ -1310,7 +1317,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			this->listViewOutputErrors->Location = System::Drawing::Point(3, 3);
 			this->listViewOutputErrors->MultiSelect = false;
 			this->listViewOutputErrors->Name = L"listViewOutputErrors";
-			this->listViewOutputErrors->Size = System::Drawing::Size(716, 157);
+			this->listViewOutputErrors->Size = System::Drawing::Size(716, 154);
 			this->listViewOutputErrors->TabIndex = 0;
 			this->listViewOutputErrors->UseCompatibleStateImageBehavior = false;
 			this->listViewOutputErrors->View = System::Windows::Forms::View::Details;
@@ -1423,7 +1430,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			this->tabControlRight->Location = System::Drawing::Point(0, 0);
 			this->tabControlRight->Name = L"tabControlRight";
 			this->tabControlRight->SelectedIndex = 0;
-			this->tabControlRight->Size = System::Drawing::Size(376, 707);
+			this->tabControlRight->Size = System::Drawing::Size(376, 693);
 			this->tabControlRight->TabIndex = 0;
 			// 
 			// tabPageProperties
@@ -1437,7 +1444,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			this->tabPageProperties->Location = System::Drawing::Point(4, 22);
 			this->tabPageProperties->Name = L"tabPageProperties";
 			this->tabPageProperties->Padding = System::Windows::Forms::Padding(3);
-			this->tabPageProperties->Size = System::Drawing::Size(368, 681);
+			this->tabPageProperties->Size = System::Drawing::Size(368, 667);
 			this->tabPageProperties->TabIndex = 0;
 			this->tabPageProperties->Text = L"Properties";
 			this->tabPageProperties->UseVisualStyleBackColor = true;
@@ -1791,55 +1798,78 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			// 
 			this->treeViewDebugThreadList->ContextMenuStrip = this->threadContextMenu;
 			this->treeViewDebugThreadList->Dock = System::Windows::Forms::DockStyle::Fill;
+			this->treeViewDebugThreadList->ImageIndex = 0;
+			this->treeViewDebugThreadList->ImageList = this->imageListThreadTree;
 			this->treeViewDebugThreadList->Location = System::Drawing::Point(0, 0);
 			this->treeViewDebugThreadList->Name = L"treeViewDebugThreadList";
+			this->treeViewDebugThreadList->SelectedImageIndex = 0;
 			this->treeViewDebugThreadList->Size = System::Drawing::Size(338, 186);
 			this->treeViewDebugThreadList->TabIndex = 6;
 			this->treeViewDebugThreadList->AfterSelect += gcnew System::Windows::Forms::TreeViewEventHandler(this, &FormMain::treeViewDebugThreadList_AfterSelect);
+			this->treeViewDebugThreadList->NodeMouseDoubleClick += gcnew System::Windows::Forms::TreeNodeMouseClickEventHandler(this, &FormMain::treeViewDebugThreadList_NodeMouseDoubleClick);
 			this->treeViewDebugThreadList->MouseUp += gcnew System::Windows::Forms::MouseEventHandler(this, &FormMain::treeViewDebugThreadList_MouseUp);
 			// 
 			// threadContextMenu
 			// 
-			this->threadContextMenu->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(5) {this->contextMenuButtonTrackThread, 
-				this->toolStripSeparator7, this->contextMenuButtonExpandAll, this->contextMenuButtonCollapseAll, this->contextMenuButtonCollapseTree});
+			this->threadContextMenu->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(6) {this->contextMenuButtonTrackThread, 
+				this->contextMenuButtonFindParent, this->toolStripSeparator7, this->contextMenuButtonExpandAll, this->contextMenuButtonCollapseAll, 
+				this->contextMenuButtonCollapseTree});
 			this->threadContextMenu->Name = L"threadContextMenu";
-			this->threadContextMenu->Size = System::Drawing::Size(163, 98);
+			this->threadContextMenu->Size = System::Drawing::Size(180, 120);
 			// 
 			// contextMenuButtonTrackThread
 			// 
 			this->contextMenuButtonTrackThread->CheckOnClick = true;
 			this->contextMenuButtonTrackThread->Name = L"contextMenuButtonTrackThread";
-			this->contextMenuButtonTrackThread->Size = System::Drawing::Size(162, 22);
+			this->contextMenuButtonTrackThread->Size = System::Drawing::Size(179, 22);
 			this->contextMenuButtonTrackThread->Text = L"Trace this thread";
 			this->contextMenuButtonTrackThread->Visible = false;
 			this->contextMenuButtonTrackThread->Click += gcnew System::EventHandler(this, &FormMain::contextMenuButtonTrackThread_Click);
 			// 
+			// contextMenuButtonFindParent
+			// 
+			this->contextMenuButtonFindParent->Name = L"contextMenuButtonFindParent";
+			this->contextMenuButtonFindParent->Size = System::Drawing::Size(179, 22);
+			this->contextMenuButtonFindParent->Text = L"Select thread parent";
+			this->contextMenuButtonFindParent->Visible = false;
+			this->contextMenuButtonFindParent->Click += gcnew System::EventHandler(this, &FormMain::contextMenuButtonFindParent_Click);
+			// 
 			// toolStripSeparator7
 			// 
 			this->toolStripSeparator7->Name = L"toolStripSeparator7";
-			this->toolStripSeparator7->Size = System::Drawing::Size(159, 6);
+			this->toolStripSeparator7->Size = System::Drawing::Size(176, 6);
 			this->toolStripSeparator7->Visible = false;
 			// 
 			// contextMenuButtonExpandAll
 			// 
 			this->contextMenuButtonExpandAll->Name = L"contextMenuButtonExpandAll";
-			this->contextMenuButtonExpandAll->Size = System::Drawing::Size(162, 22);
+			this->contextMenuButtonExpandAll->Size = System::Drawing::Size(179, 22);
 			this->contextMenuButtonExpandAll->Text = L"Expand tree";
 			this->contextMenuButtonExpandAll->Click += gcnew System::EventHandler(this, &FormMain::contextMenuButtonExpandAll_Click);
 			// 
 			// contextMenuButtonCollapseAll
 			// 
 			this->contextMenuButtonCollapseAll->Name = L"contextMenuButtonCollapseAll";
-			this->contextMenuButtonCollapseAll->Size = System::Drawing::Size(162, 22);
+			this->contextMenuButtonCollapseAll->Size = System::Drawing::Size(179, 22);
 			this->contextMenuButtonCollapseAll->Text = L"Collapse tree";
 			this->contextMenuButtonCollapseAll->Click += gcnew System::EventHandler(this, &FormMain::contextMenuButtonExpandAll_Click);
 			// 
 			// contextMenuButtonCollapseTree
 			// 
 			this->contextMenuButtonCollapseTree->Name = L"contextMenuButtonCollapseTree";
-			this->contextMenuButtonCollapseTree->Size = System::Drawing::Size(162, 22);
+			this->contextMenuButtonCollapseTree->Size = System::Drawing::Size(179, 22);
 			this->contextMenuButtonCollapseTree->Text = L"Collapse threads";
 			this->contextMenuButtonCollapseTree->Click += gcnew System::EventHandler(this, &FormMain::contextMenuButtonExpandAll_Click);
+			// 
+			// imageListThreadTree
+			// 
+			this->imageListThreadTree->ImageStream = (cli::safe_cast<System::Windows::Forms::ImageListStreamer^  >(resources->GetObject(L"imageListThreadTree.ImageStream")));
+			this->imageListThreadTree->TransparentColor = System::Drawing::Color::White;
+			this->imageListThreadTree->Images->SetKeyName(0, L"null.png");
+			this->imageListThreadTree->Images->SetKeyName(1, L"thread (1).png");
+			this->imageListThreadTree->Images->SetKeyName(2, L"pass.png");
+			this->imageListThreadTree->Images->SetKeyName(3, L"nottraced.png");
+			this->imageListThreadTree->Images->SetKeyName(4, L"exit.png");
 			// 
 			// comboBoxThreadMemSelect
 			// 
@@ -1889,7 +1919,7 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			this->dataGridViewDebugMemory->ShowCellToolTips = false;
 			this->dataGridViewDebugMemory->ShowEditingIcon = false;
 			this->dataGridViewDebugMemory->ShowRowErrors = false;
-			this->dataGridViewDebugMemory->Size = System::Drawing::Size(338, 249);
+			this->dataGridViewDebugMemory->Size = System::Drawing::Size(338, 231);
 			this->dataGridViewDebugMemory->TabIndex = 2;
 			this->dataGridViewDebugMemory->CellDoubleClick += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &FormMain::dataGridViewDebugMemory_CellDoubleClick);
 			this->dataGridViewDebugMemory->CellEndEdit += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &FormMain::dataGridViewDebugMemory_CellEndEdit);
@@ -1932,6 +1962,13 @@ private: System::Windows::Forms::ToolStripMenuItem^  tabpageDiscardMenuItem;
 			this->contextMenuButtonColumnNumber->Name = L"contextMenuButtonColumnNumber";
 			this->contextMenuButtonColumnNumber->Size = System::Drawing::Size(210, 22);
 			this->contextMenuButtonColumnNumber->Text = L"Columns";
+			// 
+			// editorFindPairedInstructionMenuItem
+			// 
+			this->editorFindPairedInstructionMenuItem->Name = L"editorFindPairedInstructionMenuItem";
+			this->editorFindPairedInstructionMenuItem->Size = System::Drawing::Size(193, 22);
+			this->editorFindPairedInstructionMenuItem->Text = L"Find paired instruction";
+			this->editorFindPairedInstructionMenuItem->Click += gcnew System::EventHandler(this, &FormMain::toolBarButtonFindPair_Click);
 			// 
 			// FormMain
 			// 
@@ -2079,8 +2116,8 @@ private: void mainForm_SetStatusBarInfo(WorkContext ^ workContext) {
 					 }
 
 					 if(text_len > 0) {
-						 statusStripStatusLabel3->Text = String::Format("Line {0}   Col {1}   Char {2}  {3}", 
-									workContext->editorTextBox->richTextBox->GetLineFromCharIndex(cur_pos),
+						 statusStripStatusLabel3->Text = String::Format("Ln {0} Col {1} Ch {2} {3}", 
+									workContext->editorTextBox->richTextBox->GetLineFromCharIndex(cur_pos) + 1,
 									cur_pos - workContext->editorTextBox->richTextBox->GetFirstCharIndexOfCurrentLine(),
 									cur_pos,
 									selection_info);
@@ -2142,7 +2179,7 @@ private: void mainForm_RunTask() {
 					}
 				}
 		 }
-private: void mainForm_AfterDebugTask() {
+private: void mainForm_UpdateDebugTab() {
 			 //work todo after step, step over, run to cursor etc
 				DebugCodeProcess ^ debugProcess = cli::safe_cast<DebugCodeProcess^ >(this->interpreterProcess);
 				int n_frow, frow = dataGridViewDebugMemory->FirstDisplayedScrollingRowIndex; //save old first displayed row index
@@ -2156,9 +2193,10 @@ private: void mainForm_AfterDebugTask() {
 					dataGridViewDebugMemory->FirstDisplayedScrollingRowIndex = frow;
 				}
 
-				debugProcess->DebuggerInstance->LoadThreadTree(treeViewDebugThreadList);
-				debugProcess->DebuggerInstance->LoadThreadList(comboBoxThreadMemSelect);
-				debugProcess->DebuggerInstance->LoadStatus(labelDebugStatus);
+				this->treeViewDebugThreadList->ImageList = this->imageListThreadTree;
+				debugProcess->DebuggerInstance->LoadThreadTree(this->treeViewDebugThreadList);
+				debugProcess->DebuggerInstance->LoadThreadList(this->comboBoxThreadMemSelect);
+				debugProcess->DebuggerInstance->LoadStatus(this->labelDebugStatus);
 
 				if(WorkContextBroker::Instance->GetCurrentContext() != debugProcess->ProcessWorkContext)
 				{
@@ -2178,7 +2216,7 @@ private: bool mainForm_IsDebugTask() {
 
 private: bool mainForm_CanContinueDebugTask() {
 			//check if can perform steps, traps ect in debug process
-			    if(mainForm_IsDebugTask() && interpreterProcess->Working)
+			    if(mainForm_IsDebugTask() && this->interpreterProcess->Working)
 				{
 					if(false == cli::safe_cast<DebugCodeProcess^ >(this->interpreterProcess)->PendingIO()) 
 						return true;
@@ -2337,7 +2375,7 @@ private: void debugForm_MemoryScrollToPosition(int position) {
 
 					 debugProcess->DebuggerInstance->MemoryForImage = position;
 
-					 debugProcess->DebuggerInstance->LoadMemoryByThread();
+					 debugProcess->DebuggerInstance->UpdateDataFromMemory();
 					 debugProcess->DebuggerInstance->LoadMemoryImageToView(dataGridViewDebugMemory);
 
 					 if(debugProcess->DebuggerInstance->MemoryForImage < position) //failed resize
@@ -2375,7 +2413,7 @@ private: void dataGridViewDebugMemory_Scroll(System::Object^  sender, System::Wi
 				 if(old_mem_image_size != debugProcess->DebuggerInstance->MemoryForImage && 
 					Convert::ToInt32(comboBoxThreadMemSelect->SelectedValue) == debugProcess->DebuggerInstance->CurrentThreadId)
 				 {
-					debugProcess->DebuggerInstance->LoadMemoryByThread();
+					debugProcess->DebuggerInstance->UpdateDataFromMemory();
 					debugProcess->DebuggerInstance->LoadMemoryImageToView(dataGridViewMem);
 
 					dataGridViewMem->FirstDisplayedScrollingRowIndex = frow;
@@ -2534,7 +2572,7 @@ private: void interpreterProcess_Complete(System::Object^  sender, System::Event
 				 
 				InterpreterProcess ^ taskProcess = cli::safe_cast<InterpreterProcess^ >(sender);
 
-				mainForm_UpdateUI();
+				//mainForm_UpdateUI(); moved to end
 			    mainForm_UpdateUIForProcess(taskProcess, true);
 				mainForm_SetStatusBarInfo(taskProcess->ProcessWorkContext);
 
@@ -2546,40 +2584,59 @@ private: void interpreterProcess_Complete(System::Object^  sender, System::Event
 				delete taskProcess;
 				delete this->interpreterProcess;
 				this->interpreterProcess = nullptr;
+
+				//
+				mainForm_UpdateUI();
 		}
 private: void debugProcess_Start(System::Object^  sender, System::EventArgs^  e) {
-				//clear ui at debug end 
+				//prepare ui at debug start 
 				RichTextBox ^ richTextBox = cli::safe_cast<InterpreterProcess^ >(sender)->ProcessWorkContext->editorTextBox->richTextBox;
 
-				treeViewDebugThreadList->Nodes->Clear();
-				treeViewDebugThreadList->Nodes->Add("Program is before first instruction");
-
-				richTextBox->ReadOnly = true;
+				/*
+				if(e == EventArgs::Empty) {
+					
+				}
+				else { //handle 2nd Call if debuger started after analysis to update mem of 1 step
+					Thread::Sleep(1015);
+					mainForm_UpdateDebugTab();
+				}*/
 				comboBoxThreadMemSelect->Enabled = true;
 				comboBoxThreadMemSelect->DataSource = nullptr;
 
+				richTextBox->ReadOnly = true;
 				richTextBox->Cursor = System::Windows::Forms::Cursors::Hand;
+				
+				treeViewDebugThreadList->Nodes->Clear();
+				treeViewDebugThreadList->Nodes->Add("Ready to debug");
+				treeViewDebugThreadList->Nodes->Add("Program is before first instruction");		
 		}
 private: void debugProcess_Complete(System::Object^  sender, System::EventArgs^  e) {
 				//clear ui at debug end 
-				InterpreterProcess ^ currentProcess = cli::safe_cast<InterpreterProcess^ >(sender);
-				RichTextBox ^ richTextBox = currentProcess->ProcessWorkContext->editorTextBox->richTextBox;
+				DebugCodeProcess ^ currentDebugProcess = cli::safe_cast<DebugCodeProcess^ >(sender);
+				RichTextBox ^ richTextBox = currentDebugProcess->ProcessWorkContext->editorTextBox->richTextBox;
 
 				treeViewDebugThreadList->Nodes->Clear();
 
+				//print final status on tree as nodes
 				if(e == EventArgs::Empty)
-					treeViewDebugThreadList->Nodes->Add(String::Format("Program exited with code {0}", 
-														cli::safe_cast<DebugCodeProcess^ >(sender)->DebuggerInstance->DebugeeExitCode));
+					treeViewDebugThreadList->Nodes->Add(String::Format("Program exited with code {0} {1}", 
+														currentDebugProcess->DebuggerInstance->DebugeeExitCode,
+														currentDebugProcess->DebuggerInstance->DebugeeExitCode == 0 ? "[SUCCESS]" : "[FAIL]"));
+				else if(currentDebugProcess->DebuggerInstance) //dump debugger info
+					currentDebugProcess->DebuggerInstance->ExceptionDumpToThreadTree(treeViewDebugThreadList);
 
-				this->labelDebugStatus->Text = String::Format("Debug on {0} is finished.", currentProcess->ProcessWorkContext->fileContext->Title);
-				
+				this->labelDebugStatus->Text = String::Format("Debug on {0} is finished.", currentDebugProcess->ProcessWorkContext->fileContext->Title);
+				this->labelDebugStatus->Tag = nullptr;
+
 				richTextBox->ReadOnly = false;
 				comboBoxThreadMemSelect->Enabled = false;
+				
 
 				//disabler prevents to run debug right after its terination (for less than 1sec)
 				//this->buttonDebugStep->Enabled = false;
 				//uiControlDisabler ^ stepButtonDisabler = gcnew uiControlDisabler(this->buttonDebugStep, 2750);
 				
+				//mainForm_UpdateUI(); // no need to refresh UI here
 				richTextBox->Cursor = System::Windows::Forms::Cursors::IBeam;
 		}
 private: void initIDEProcess_Complete(System::Object^  sender, System::EventArgs^  e) {
@@ -2635,7 +2692,6 @@ private: void debugMainMenuItem_Click(System::Object^  sender, System::EventArgs
 				this->dataGridViewDebugMemory->DataSource = gcnew DataTable;
 
 				this->dbgMemRepGenerator->ResetSelection(0);
-			    
 		 }
 private: void newfileMainMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
 
@@ -2692,6 +2748,11 @@ private: void saveAsProjectMainMenuItem_Click(System::Object^  sender, System::E
 
 			   projectFileContext->settingsContent = currentWorkContext->settings;
 			   currentWorkContext->fileContext = projectFileContext;
+
+			   if(false == currentWorkContext->fileContext->HasPhysicalFile()) {
+				   saveAsMainMenuItem_Click(sender, e);
+				   mainForm_UpdateUI();
+			   }
 		 }
 
 private: void stopMainMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
@@ -2810,13 +2871,13 @@ private: System::Void buttonDebugStep_Click(System::Object^  sender, System::Eve
 			 if(mainForm_CanContinueDebugTask())
 			 {
 				 this->UseWaitCursor = true;
-				 cli::safe_cast<DebugCodeProcess^ >(interpreterProcess)->Step();
+				 cli::safe_cast<DebugCodeProcess^ >(this->interpreterProcess)->Step();
 				 this->UseWaitCursor = false;
 		 
-				 mainForm_AfterDebugTask();
+				 mainForm_UpdateDebugTab();
 			 }
 			 else
-				 this->debugMainMenuItem_Click(sender, e); //run debug
+				 this->debugMainMenuItem_Click(sender, e); //run debug when clicked on arrow
 
 		 }
 private: System::Void buttonDebugRunToCursor_Click(System::Object^  sender, System::EventArgs^  e) {
@@ -2824,10 +2885,10 @@ private: System::Void buttonDebugRunToCursor_Click(System::Object^  sender, Syst
 			 if(mainForm_CanContinueDebugTask())
 			 {
 				 this->UseWaitCursor = true;
-				 cli::safe_cast<DebugCodeProcess^ >(interpreterProcess)->RunToCursor();
+				 cli::safe_cast<DebugCodeProcess^ >(this->interpreterProcess)->RunToCursor();
 				 this->UseWaitCursor = false;
 
-				 mainForm_AfterDebugTask();
+				 mainForm_UpdateDebugTab();
 			 }
 
 		 }
@@ -2836,10 +2897,10 @@ private: System::Void buttonDebugStepOver_Click(System::Object^  sender, System:
 			 if(mainForm_CanContinueDebugTask())
 			 {
 				 this->UseWaitCursor = true;
-				 cli::safe_cast<DebugCodeProcess^ >(interpreterProcess)->StepOver();
+				 cli::safe_cast<DebugCodeProcess^ >(this->interpreterProcess)->StepOver();
 				 this->UseWaitCursor = false;
 
-				 mainForm_AfterDebugTask();
+				 mainForm_UpdateDebugTab();
 			 }
 		 }
 private: System::Void buttonDebugRunToTrap_Click(System::Object^  sender, System::EventArgs^  e) {
@@ -2866,7 +2927,7 @@ private: System::Void buttonDebugRunToTrap_Click(System::Object^  sender, System
 					 this->UseWaitCursor = false;
 
 					 if(this->interpreterProcess && this->interpreterProcess->Working)
-						mainForm_AfterDebugTask();
+						mainForm_UpdateDebugTab();
 
 					 uiGridCellBlinker ^ selectionBlinker = gcnew uiGridCellBlinker(dataGridViewDebugMemory, Color::Red);
 					 selectionBlinker->Blink(2400);
@@ -2880,7 +2941,7 @@ private: System::Void buttonDebugPlaceCursor_Click(System::Object^  sender, Syst
 				 DebugCodeProcess ^ debugProcess = cli::safe_cast<DebugCodeProcess^ >(interpreterProcess);
 				 CodeContextConverter ^ ccc = gcnew CodeContextConverter(debugProcess->ProcessWorkContext);
 
-				 debugProcess->MoveCarretToPosition( ccc->ToCursor( debugProcess->DebuggerInstance->CodePosition ));
+				 debugProcess->MoveCarretToPosition( ccc->ToCursor( debugProcess->DebuggerInstance->CodePosition[ Convert::ToInt32(comboBoxThreadMemSelect->SelectedValue) ] ));
 			 }
 		 }
 private: System::Void contextMenuButtonScrollToMemPos_Click(System::Object^  sender, System::EventArgs^  e) {
@@ -2920,6 +2981,8 @@ private: void contextMenuButtonMemoryRepresentation_Click(System::Object^  sende
 					debugProcess->DebuggerInstance->LoadMemoryImageToView(dataGridViewDebugMemory, gcnew MemoryCellPrinter());
 
 				 debugForm_MemoryScrollToPosition(debugProcess->DebuggerInstance->MemoryPosition[sel_threadId]);
+				 debugProcess->DebuggerInstance->UpdateDataFromMemory(); //reload thread tree
+				 debugProcess->DebuggerInstance->LoadThreadTree(treeViewDebugThreadList); 
 			 }
 		 }
 
@@ -2949,25 +3012,69 @@ private: System::Void treeViewDebugThreadList_AfterSelect(System::Object^  sende
 			 if(mainForm_IsDebugTask())
 			 {    
 				 debugProcess = cli::safe_cast<DebugCodeProcess^ >(interpreterProcess);
-				 if(e->Node->Text->Contains("Thread") && GlobalOptions::Instance->MemViewOnThreadCaptionClick)
-				 {
-					 debugProcess->DebuggerInstance->LoadMemoryImageToView(dataGridViewDebugMemory, cli::safe_cast<int>(e->Node->Tag));
+				 if(e->Node->Text->StartsWith("Thread") && GlobalOptions::Instance->MemViewOnThreadCaptionClick)
+				 { //refresh memory when clicked on thread node
+					 try {
+						 int selectedThreadId = cli::safe_cast<int>(e->Node->Tag);
+						 comboBoxThreadMemSelect->SelectedValue = selectedThreadId;
 
-					 debugForm_MemoryScrollToPosition(debugProcess->DebuggerInstance->MemoryPosition[ cli::safe_cast<int>(e->Node->Tag) ]);
-					 comboBoxThreadMemSelect->SelectedIndex = cli::safe_cast<TreeView ^>(sender)->Nodes->IndexOf(e->Node);
-				 } 
+						 debugProcess->DebuggerInstance->LoadMemoryImageToView(dataGridViewDebugMemory, selectedThreadId);
+						 debugForm_MemoryScrollToPosition(debugProcess->DebuggerInstance->MemoryPosition[ selectedThreadId ]);
+					 }
+					 catch(ArgumentException ^ ex) {
+						 debugProcess->ProcessWorkContext->outputLister->AddOutputWithTimestamp(ex->Message);
+						 MessageBox::Show(ex->Message, "Cannot load thread memory", MessageBoxButtons::OK, MessageBoxIcon::Exclamation);
+					 }
+					 catch(Exception ^ ex) {
+						 debugProcess->ProcessWorkContext->outputLister->AddOutputWithTimestamp(ex->Message);
+						 MessageBox::Show(ex->Message, "DebugThreadList exception", MessageBoxButtons::OK, MessageBoxIcon::Error);
+					 }
+				 }
 			 }
 			 
 		 }
 
-private: System::Void comboBoxThreadMemSelect_SelectionChangeCommitted(System::Object^  sender, System::EventArgs^  e) {
-			 //click on combobox to show memory
-			 int sel_threadId = Convert::ToInt32(comboBoxThreadMemSelect->SelectedValue);
-			 
-			 if(mainForm_IsDebugTask())
-			 {    
-				 cli::safe_cast<DebugCodeProcess^ >(interpreterProcess)->DebuggerInstance->LoadMemoryImageToView(dataGridViewDebugMemory, sel_threadId);
-			 }
+private: System::Void treeViewDebugThreadList_MouseUp(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e) {
+			 // Show menu only if the right mouse button is clicked.
+			 if (mainForm_IsDebugTask() && e->Button == System::Windows::Forms::MouseButtons::Right)
+			 {
+				 Point p = Point(e->X, e->Y);
+				 TreeNode ^ picked_node = treeViewDebugThreadList->GetNodeAt(p);
+				 DebugCodeProcess ^ debugProcess = cli::safe_cast<DebugCodeProcess^ >(interpreterProcess);
+
+				 contextMenuButtonTrackThread->Visible = false; 
+				 contextMenuButtonFindParent->Visible = false; 
+				 toolStripSeparator7->Visible = false; 
+
+				 if (picked_node && debugProcess)
+				 {
+					 treeViewDebugThreadList->SelectedNode = picked_node;
+
+					 if(picked_node->Text->StartsWith("Thread")) {
+						 contextMenuButtonTrackThread->Checked = debugProcess->DebuggerInstance->ThreadTracing[ cli::safe_cast<int>(picked_node->Tag) ];
+						 contextMenuButtonTrackThread->Visible = true; 
+						 contextMenuButtonFindParent->Visible = true;
+						 toolStripSeparator7->Visible = true; 
+					 }
+				 }
+			}
+		 }
+
+private: System::Void treeViewDebugThreadList_NodeMouseDoubleClick(System::Object^  sender, System::Windows::Forms::TreeNodeMouseClickEventArgs^  e) {
+			 //double click to children thread node select it on root list
+			TreeNode ^ picked_node = cli::safe_cast<TreeNode^ >(e->Node);
+
+			if (picked_node && picked_node->Text->StartsWith("Thread"))// && false == treeViewDebugThreadList->Nodes->Contains(picked_node))
+			{   //compare tags in root
+				for each(TreeNode ^ node in treeViewDebugThreadList->Nodes) 
+				{
+					if((int)node->Tag == (int)picked_node->Tag)
+					{
+						treeViewDebugThreadList->SelectedNode = node;
+						break;
+					}
+				}
+			}
 		 }
 
 private: System::Void contextMenuButtonExpandAll_Click(System::Object^  sender, System::EventArgs^  e) {
@@ -2987,36 +3094,31 @@ private: System::Void contextMenuButtonExpandAll_Click(System::Object^  sender, 
 private: System::Void contextMenuButtonTrackThread_Click(System::Object^  sender, System::EventArgs^  e) {
 			 //click on thread node to trace it
 			 
-			 if(mainForm_IsDebugTask() && treeViewDebugThreadList->SelectedNode->Text->Contains("Thread"))
+			 if(mainForm_IsDebugTask() && treeViewDebugThreadList->SelectedNode->Text->StartsWith("Thread"))
 			 {    
 				 cli::safe_cast<DebugCodeProcess^ >(interpreterProcess)->DebuggerInstance->ThreadTracing[ cli::safe_cast<int>(treeViewDebugThreadList->SelectedNode->Tag) ] = contextMenuButtonTrackThread->Checked;
 			 }
 		 }
-private: System::Void treeViewDebugThreadList_MouseUp(System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e) {
 
-			 // Show menu only if the right mouse button is clicked.
-			 if (mainForm_IsDebugTask() && e->Button == System::Windows::Forms::MouseButtons::Right)
-			 {
-				 Point p = Point(e->X, e->Y);
-				 TreeNode ^ picked_node = treeViewDebugThreadList->GetNodeAt(p);
+private: System::Void contextMenuButtonFindParent_Click(System::Object^  sender, System::EventArgs^  e) {
+			 //find and select parent thread node
+			 //TODO
+			 if(mainForm_IsDebugTask() && treeViewDebugThreadList->SelectedNode->Text->StartsWith("Thread"))
+			 {    
+				 //cli::safe_cast<DebugCodeProcess^ >(interpreterProcess)->DebuggerInstance->ThreadTracing[ cli::safe_cast<int>(treeViewDebugThreadList->SelectedNode->Tag) ] = contextMenuButtonTrackThread->Checked;
+			 }
+		 }
 
+private: System::Void comboBoxThreadMemSelect_SelectionChangeCommitted(System::Object^  sender, System::EventArgs^  e) {
+			 //click on combobox to show memory
+			 int sel_threadId = Convert::ToInt32(comboBoxThreadMemSelect->SelectedValue);
+			 
+			 if(mainForm_IsDebugTask())
+			 {    
 				 DebugCodeProcess ^ debugProcess = cli::safe_cast<DebugCodeProcess^ >(interpreterProcess);
-
-				 contextMenuButtonTrackThread->Visible = false; 
-				 toolStripSeparator7->Visible = false; 
-
-				 if (picked_node && debugProcess)
-				 {
-					 treeViewDebugThreadList->SelectedNode = picked_node;
-
-					 if(picked_node->Text->Contains("Thread") )
-					 {
-						 contextMenuButtonTrackThread->Checked = debugProcess->DebuggerInstance->ThreadTracing[ cli::safe_cast<int>(picked_node->Tag) ];
-						 contextMenuButtonTrackThread->Visible = true; 
-						 toolStripSeparator7->Visible = true; 
-					 }
-				 }
-			}
+				 debugProcess->DebuggerInstance->LoadMemoryImageToView(dataGridViewDebugMemory, sel_threadId);
+				 debugForm_MemoryScrollToPosition(debugProcess->DebuggerInstance->MemoryPosition[ sel_threadId ]);
+			 }
 		 }
 
 private: void pluginsMainMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
@@ -3181,6 +3283,7 @@ private: System::Void FormMain_FormClosing(System::Object^  sender, System::Wind
 				}
 				else {
 					this->interpreterProcess->Stop();
+					Thread::Sleep(115);
 				}
 			}
 			
@@ -3223,8 +3326,6 @@ private: System::Void aboutMainMenuItem_Click(System::Object^  sender, System::E
 			 //about msbox
 			 MessageBox::Show( String::Format("Brainthread IDE\nA brainfuck language family development environment\n\n(c) by onehundredfifteen 2018\n\nApplication version: {0} ({1})\nDebugger version: {2}", "0.9c (RC1)", __DATE__, Debugger::DebuggerVersion()), "About", MessageBoxButtons::OK, MessageBoxIcon::Information);
 		 }
-
-
 };
 }
 

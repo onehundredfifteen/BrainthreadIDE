@@ -3,7 +3,8 @@
 namespace BrainthreadIDE
 {
 	#define MEM_CHUNK_SIZE 1000
-	#define ARRAY_MEM_SIZE 100
+	#define ARRAY_MEM_SIZE 64
+	#define HALVE_INDEX 32 
 
 	struct BTProcessMemoryInfo
 	{
@@ -24,12 +25,22 @@ namespace BrainthreadIDE
 		int array_size;
 	} BTProcessStackInfo, BTProcessThreadInfo;
 
+	struct BTProcessFunctionInfo
+	{
+		int functions[ ARRAY_MEM_SIZE ];
+		int return_addresses[ ARRAY_MEM_SIZE ];
+
+		int callstack_size;
+		int loaded_functions;
+	};
+
 	struct BTProcessProperties
 	{
 		BTProcessMemoryInfo meminfo;
 		BTProcessStackInfo stackinfo;
 		BTProcessStackInfo shstackinfo;
 		BTProcessThreadInfo threadinfo;
+		BTProcessFunctionInfo funinfo;
 
 		unsigned int code_pointer_pos;
 		unsigned int steps_executed;
